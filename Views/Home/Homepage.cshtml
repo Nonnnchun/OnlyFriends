@@ -1,0 +1,70 @@
+﻿@using onlyfriends.Models
+@model List<EventItem>
+
+@{
+    ViewData["Title"] = "หน้าแรก";
+    string lastDate = "";
+}
+
+<div class="main-container">
+
+    <div class="page-header">
+        <div class="page-title">กิจกรรม</div>
+        <div class="header-actions">
+            <button><a asp-controller="Home" asp-action="Createactivity" class="btn-add">
+            Create Activity
+            </a></button>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        @foreach (var item in Model)
+        {
+            if (item.DateText != lastDate)
+            {
+                <div class="timeline-date">@item.DateText</div>
+                lastDate = item.DateText;
+            }
+
+            <div class="event-card">
+                <div class="event-info">
+                    <div class="event-time">@item.Time</div>
+                    <div class="event-title">@item.Title</div>
+                    <div class="event-organizer">
+                        👤 โดย @item.Organizer
+                    </div>
+                    <div class="event-location">📍 @item.Location</div>
+                    <div class="event-tags">
+                        @if (item.IsActive == true)
+                        {
+                            <span class="tag-status">เปิดรับสมัคร</span>
+                        }
+                        else
+                        {
+                            <span class="tag-status closed">ปิดรับสมัคร</span>
+                        }
+                        <span class="tag-count">
+                            <div class="tag-avatars">
+                                <div class="tag-avatar"></div>
+                                <div class="tag-avatar"></div>
+                                <div class="tag-avatar"></div>
+                            </div>
+                            +@item.ParticipantCount
+                        </span>
+                    </div>
+                </div>
+                <div class="event-image">
+                    <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "https://placehold.co/140x140?text=No+Image" : item.ImageUrl)" alt="@item.Title">
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div style="text-align:center; padding: 60px; color:#999;">
+            ไม่มีกิจกรรมในขณะนี้
+        </div>
+    }
+
+</div>

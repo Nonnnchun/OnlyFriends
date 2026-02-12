@@ -2166,19 +2166,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\super\\.nuget\\packages\\": {}
+    "/Users/skyyyy/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\super\\Desktop\\Projects\\OnlyFriends\\onlyfriends.csproj",
+      "projectUniqueName": "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj",
       "projectName": "onlyfriends",
-      "projectPath": "C:\\Users\\super\\Desktop\\Projects\\OnlyFriends\\onlyfriends.csproj",
-      "packagesPath": "C:\\Users\\super\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\super\\Desktop\\Projects\\OnlyFriends\\obj\\",
+      "projectPath": "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj",
+      "packagesPath": "/Users/skyyyy/.nuget/packages/",
+      "outputPath": "/Users/skyyyy/Desktop/web/OnlyFriends/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\super\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/skyyyy/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -2244,7 +2244,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.103/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
