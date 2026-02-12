@@ -19,41 +19,49 @@ build_property.TargetFrameworkIdentifier = .NETCoreApp
 build_property.TargetFrameworkVersion = v10.0
 build_property.RootNamespace = onlyfriends
 build_property.RootNamespace = onlyfriends
-build_property.ProjectDir = C:\Users\user\source\repos\onlyfriends\onlyfriends\
+build_property.ProjectDir = D:\Users\Chern\OneDrive\Desktop\gitWorkSpace\OnlyFriends\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\user\source\repos\onlyfriends\onlyfriends
+build_property.MSBuildProjectDirectory = D:\Users\Chern\OneDrive\Desktop\gitWorkSpace\OnlyFriends
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/user/source/repos/onlyfriends/onlyfriends/Views/Home/Index.cshtml]
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/user/source/repos/onlyfriends/onlyfriends/Views/Home/Privacy.cshtml]
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/user/source/repos/onlyfriends/onlyfriends/Views/Shared/Error.cshtml]
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/user/source/repos/onlyfriends/onlyfriends/Views/Shared/_ValidationScriptsPartial.cshtml]
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/user/source/repos/onlyfriends/onlyfriends/Views/_ViewImports.cshtml]
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Test/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVzdFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Test/usernumber.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVzdFx1c2VybnVtYmVyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/user/source/repos/onlyfriends/onlyfriends/Views/_ViewStart.cshtml]
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/user/source/repos/onlyfriends/onlyfriends/Views/Shared/_Layout.cshtml]
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-adpd4ftmgj
