@@ -1,31 +1,174 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --card-bg: #ffffff;
+    --card-border: #eaeaea;
+    --input-bg: #ffffff;
+    --input-border: #cccccc;
+    --primary-btn-bg: #333333;
+    --primary-btn-text: #ffffff;
+    --secondary-btn-bg: #f5f5f5;
+    --secondary-btn-text: #333333;
+    --link-color: #666666;
 }
 
 body {
-  margin-bottom: 60px;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.logo {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.main-header nav a {
+    text-decoration: none;
+    color: var(--text-color);
+    margin-left: 20px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.main-header nav a i {
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+/* Main Container */
+.login-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Login Card Style */
+.login-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.login-icon {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+h1 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.subtitle {
+    margin: 0 0 30px 0;
+    color: var(--link-color);
+    font-size: 14px;
+}
+
+/* Form Style */
+.input-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.toggle-link {
+    text-decoration: none;
+    color: var(--link-color);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-link i {
+    margin-right: 5px;
+}
+
+input[type="email"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+input[type="email"]::placeholder {
+    color: #999999;
+}
+
+/* Button Styles */
+.btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-primary {
+    background-color: var(--primary-btn-bg);
+    color: var(--primary-btn-text);
+    margin-bottom: 20px;
+}
+
+.btn-primary:hover {
+    background-color: #555555;
+}
+
+.social-login .btn {
+    margin-bottom: 10px;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-btn-bg);
+    color: var(--secondary-btn-text);
+    border: 1px solid var(--card-border);
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.btn-secondary i {
+    margin-right: 10px;
+    font-size: 18px;
 }

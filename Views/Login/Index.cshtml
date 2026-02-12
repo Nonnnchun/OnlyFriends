@@ -1,0 +1,53 @@
+   @{
+      Layout = null;
+   }
+
+<!DOCTYPE html>
+<html lang="th">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="~/css/site.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   </head>
+   <body>
+      <header class="main-header">
+         <div class="logo">luma</div>
+         <nav>
+               <a href="#">Explore Events <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+               <a href="#" class="sign-in-link">Sign In</a>
+         </nav>
+      </header>
+
+      <main class="login-container">
+         <div class="login-card">
+               <div class="login-icon">
+                  <i class="fa-solid fa-arrow-right-to-bracket"></i>
+               </div>
+               <h1>Welcome to Luma</h1>
+               <p class="subtitle">Please sign in or sign up below.</p>
+
+               <form>
+                  <div class="input-group">
+                     <div class="label-row">
+                           <label for="email">Email</label>
+                           <a href="#" class="toggle-link"><i class="fa-solid fa-mobile-screen"></i> Use Phone Number</a>
+                     </div>
+                     <input type="email" id="email" name="email" placeholder="you@email.com" required>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">Continue with Email</button>
+               </form>
+
+               <div class="social-login">
+                  <button class="btn btn-secondary">
+                     <i class="fa-brands fa-google"></i> Sign in with Google
+                  </button>
+                  <button class="btn btn-secondary">
+                     <i class="fa-solid fa-user-lock"></i> Sign in with Passkey
+                  </button>
+               </div>
+         </div>
+      </main>
+   </body>
+</html>
