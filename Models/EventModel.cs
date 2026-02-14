@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace onlyfriends.Models
 {
     public enum EnumEventStatus
@@ -14,7 +16,9 @@ namespace onlyfriends.Models
     public class Event
     {
         public int Id { get; set; }
+        [Required]
         public string Title { get; set; }
+        [Required]
         public string Info { get; set; }
 
         public EnumEventType EventType { get; set; }
