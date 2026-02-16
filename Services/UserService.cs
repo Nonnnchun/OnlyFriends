@@ -4,7 +4,7 @@ using onlyfriends.Data;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace DotnetApiPostgres.Api.Services;
+namespace onlyfriends.Services;
 
 public interface IUserService
 {

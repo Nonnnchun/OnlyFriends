@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 
-namespace onlyfriends.Models.DTO.UserDTOS
+namespace onlyfriends.Models.DTOS.UserDTOS
 {
     public class GetUserDTO
     {
