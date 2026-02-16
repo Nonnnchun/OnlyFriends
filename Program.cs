@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using onlyfriends.Data;
+using onlyfriends.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<IUserService, UserService>();
 
 // Register Postgresql
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("DefaultConnection not found in configuration");

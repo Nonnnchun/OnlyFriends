@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 using System.ComponentModel.DataAnnotations;
 
 
-namespace onlyfriends.Models.DTO
+namespace onlyfriends.Models.DTO.UserDTOS
 {
     public class CreateUserDTO
     {
@@ -16,15 +13,6 @@ namespace onlyfriends.Models.DTO
         [Required]
         public required string Password {get; set;}  
 
-        public static User ToUser(CreateUserDTO createUserDTO)
-        {
-            return new User
-            {
-                Username = createUserDTO.Username,
-                Email = createUserDTO.Email,
-                Password = createUserDTO.Password,
-            };
-        }
 
     }
 }
