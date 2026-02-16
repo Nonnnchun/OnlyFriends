@@ -16,10 +16,8 @@ namespace onlyfriends.Models
     public class Event
     {
         public int Id { get; set; }
-        [Required]
-        public string Title { get; set; }
-        [Required]
-        public string Info { get; set; }
+        public required string Title { get; set; }
+        public string? Info { get; set; }
 
         public EnumEventType EventType { get; set; }
         public EnumEventStatus EventStatus { get; set; }
