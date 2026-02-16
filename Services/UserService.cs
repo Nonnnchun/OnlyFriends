@@ -2,7 +2,7 @@ using onlyfriends.Models;
 using onlyfriends.Models.DTOS.UserDTOS;
 using onlyfriends.Data;
 using Microsoft.EntityFrameworkCore;
-
+using Mapster;
 
 namespace onlyfriends.Services;
 
@@ -25,10 +25,10 @@ public sealed class UserService : IUserService
 
     public async Task<GetUserDTO> AddUserAsync(CreateUserDTO UserToCreate)
     {
-        User User = CreateUserDTO.ToUser(UserToCreate);
+        User User = UserToCreate.Adapt<User>();
         _context.Users.Add(User);
         await _context.SaveChangesAsync();
-        return User.ToGetUserDTO(User);
+        return User.Adapt<GetUserDTO>();
     }
 
     public async Task DeleteUserAsync(User User)
@@ -44,7 +44,7 @@ public sealed class UserService : IUserService
         {
             return null;
         }
-        return User.ToGetUserDTO(User);
+        return User.Adapt<GetUserDTO>();
     }
 
     public async Task<IEnumerable<GetUserDTO>> GetUsersAsync()
