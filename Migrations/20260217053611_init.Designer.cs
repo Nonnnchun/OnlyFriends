@@ -11,8 +11,8 @@ using onlyfriends.Data;
 namespace onlyfriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260215074425_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260217053611_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,7 +62,6 @@ namespace onlyfriends.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Info")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("OwnerId")

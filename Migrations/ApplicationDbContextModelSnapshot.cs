@@ -59,7 +59,6 @@ namespace onlyfriends.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Info")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("OwnerId")
