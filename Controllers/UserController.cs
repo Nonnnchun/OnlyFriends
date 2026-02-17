@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using onlyfriends.Services;
 using onlyfriends.Models.DTOS.UserDTOS;
+using Mapster;
+using onlyfriends.Models;
 
 namespace OnlyFriends.Controllers
 {
@@ -83,12 +85,12 @@ namespace OnlyFriends.Controllers
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPeopleAsync()
+    public async Task<IActionResult> GetUsersAsync()
     {
         try
         {
-            IEnumerable<GetUserDTO> peoples = await _userService.GetUsersAsync();
-            return Ok(peoples);
+            IEnumerable<GetUserDTO> users = await _userService.GetUsersAsync();
+            return Ok(users);
         }
         catch (Exception ex)
         {
@@ -107,7 +109,7 @@ namespace OnlyFriends.Controllers
             {
                 return NotFound();
             }
-            await _userService.DeleteUserAsync(GetUserDTO.ToUser(user));
+            await _userService.DeleteUserAsync(user.Adapt<User>());
             return NoContent();
         }
         catch (Exception ex)

@@ -8,9 +8,9 @@ namespace onlyfriends.Services;
 
 public interface IUserService
 {
-    Task<GetUserDTO> AddUserAsync(CreateUserDTO UserToCreate);
-    Task UpdateUserAsync(UpdateUserDTO UserToUpdate);
-    Task DeleteUserAsync(User User);
+    Task<GetUserDTO> AddUserAsync(CreateUserDTO userToCreate);
+    Task UpdateUserAsync(UpdateUserDTO userToUpdate);
+    Task DeleteUserAsync(User user);
     Task<GetUserDTO?> FindUserByIdAsync(int id);
     Task<IEnumerable<GetUserDTO>> GetUsersAsync();
 }
@@ -23,40 +23,40 @@ public sealed class UserService : IUserService
         _context = context;
     }
 
-    public async Task<GetUserDTO> AddUserAsync(CreateUserDTO UserToCreate)
+    public async Task<GetUserDTO> AddUserAsync(CreateUserDTO userToCreate)
     {
-        User User = UserToCreate.Adapt<User>();
-        _context.Users.Add(User);
+        User user = userToCreate.Adapt<User>();
+        _context.Users.Add(user);
         await _context.SaveChangesAsync();
-        return User.Adapt<GetUserDTO>();
+        return user.Adapt<GetUserDTO>();
     }
 
-    public async Task DeleteUserAsync(User User)
+    public async Task DeleteUserAsync(User user)
     {
-        _context.Users.Remove(User);
+        _context.Users.Remove(user);
         await _context.SaveChangesAsync();
     }
 
     public async Task<GetUserDTO?> FindUserByIdAsync(int id)
     {
-        User? User = await _context.Users.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync();
-        if (User == null)
+        User? user = await _context.Users.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync();
+        if (user == null)
         {
             return null;
         }
-        return User.Adapt<GetUserDTO>();
+        return user.Adapt<GetUserDTO>();
     }
 
     public async Task<IEnumerable<GetUserDTO>> GetUsersAsync()
     {
-        IEnumerable<User> Users = await _context.Users.AsNoTracking().ToListAsync();
-        return Users.Select(User.ToGetUserDTO);
+        IEnumerable<GetUserDTO> users = await _context.Users.AsNoTracking().ProjectToType<GetUserDTO>().ToListAsync();
+        return users;
     }
 
-    public async Task UpdateUserAsync(UpdateUserDTO UserToUpdate)
+    public async Task UpdateUserAsync(UpdateUserDTO userToUpdate)
     {
-        User User = UpdateUserDTO.ToUser(UserToUpdate);
-        _context.Users.Update(User);
+        User user = userToUpdate.Adapt<User>();
+        _context.Users.Update(user);
         await _context.SaveChangesAsync();
     }
 }
