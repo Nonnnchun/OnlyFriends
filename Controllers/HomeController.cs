@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using onlyfriends.Models; // อย่าลืมบรรทัดนี้ เพื่อเรียกใช้ Model
+using onlyfriends.Models; // เรียกใช้ Model ของจริง
 
-namespace Homepage.Controllers;
+namespace onlyfriends.Controllers; // เช็ค Namespace ให้ตรงกับโปรเจกต์
 
 public class HomeController : Controller
 {
@@ -13,59 +13,66 @@ public class HomeController : Controller
         _logger = logger;
     }
 
-    public IActionResult Homepage()
+    public IActionResult Homepage() // หรือ Index()
     {
-        // 1. สร้างรายการข้อมูลจำลอง (ในอนาคตส่วนนี้จะดึงจาก Database)
-        var events = new List<EventItem>
+        // ✅ สร้าง Mock Data โดยใช้ Class 'Event' ของจริง
+        var events = new List<Event>
         {
-            new EventItem
+            new Event
             {
                 Id = 1,
                 Title = "Cursor from Zero Bangkok",
-                Time = "20:00",
-                DateText = "15 ก.พ. วันพุธ",
-                Organizer = "Luis Romero",
+                // 📅 รวมวันและเวลาไว้ใน EventDate
+                EventDate = new DateTime(2024, 2, 15, 20, 0, 0), 
                 Location = "Krung Thep Maha Nakhon",
-                ParticipantCount = 70,
                 ImageUrl = "https://placehold.co/120x120/111/FFF?text=Cursor",
-                SortData = new DateTime(2024,2,15,20,0,0),
-                IsActive = true
-
+                EventStatus = EnumEventStatus.Open, // แทน IsActive = true
+                
+                // 👤 Mock ข้อมูลคนสร้าง (Owner)
+                Owner = new User 
+                { 
+                    UserName = "Luis Romero" 
+                },
+                
+                // 👥 Mock จำนวนคนเข้าร่วม (ใส่ UserEvent ปลอมๆ เข้าไปใน List)
+                // ใส่ไป 20 อัน เพื่อจำลองว่ามีคนสมัคร 20 คน
+                // (วิธีลัด: ใช้ Enumerable.Range สร้าง List เปล่าๆ ขึ้นมา)
+                UserEvents = new List<UserEvent>(new UserEvent[70]) 
             },
-            new EventItem
+            new Event
             {
                 Id = 2,
                 Title = "Beach Tennis & Ice Bath",
-                Time = "19:00",
-                DateText = "11 ก.พ. วันพุธ",
-                Organizer = "Dylan Mouthaan",
+                EventDate = new DateTime(2024, 2, 11, 19, 0, 0),
                 Location = "Pura Vida Beach Club",
-                ParticipantCount = 18,
                 ImageUrl = "https://placehold.co/120x120/dcb161/FFF?text=Beach",
-                SortData = new DateTime(2024,2,11,19,0,0),
-                IsActive = false
+                EventStatus = EnumEventStatus.Closed, // แทน IsActive = false
+                
+                Owner = new User { UserName = "Dylan Mouthaan" },
+                UserEvents = new List<UserEvent>(new UserEvent[18]) // จำลอง 18 คน
             },
-             new EventItem
+             new Event
             {
                 Id = 3,
                 Title = "Mindful Leadership",
-                Time = "16:20",
-                DateText = "12 ก.พ. วันพฤหัสบดี",
-                Organizer = "Lead+D Lab",
+                EventDate = new DateTime(2024, 2, 12, 16, 20, 0),
                 Location = "อาคารไชยยศสมบัติ ๑",
-                ParticipantCount = 50,
                 ImageUrl = "https://placehold.co/120x120/004aad/FFF?text=Leader",
-                SortData = new DateTime(2024,2,12,16,20,0),
-                IsActive = true
+                EventStatus = EnumEventStatus.Open,
+                
+                Owner = new User { UserName = "Lead+D Lab" },
+                UserEvents = new List<UserEvent>(new UserEvent[50]) // จำลอง 50 คน
             }
         };
-        var sortedEvents = events.OrderBy(x => x.SortData).ToList();
 
-        // 2. ส่งข้อมูล events ไปที่ View
+        // ✅ สั่งเรียงลำดับตามวันที่ (น้อย -> มาก)
+        var sortedEvents = events.OrderBy(x => x.EventDate).ToList();
+
+        // ส่งข้อมูลไปที่ View
         return View(sortedEvents);
     }
 
-    public IActionResult Createactivity()
+    public IActionResult CreateActivity()
     {
         return View();
     }
@@ -76,4 +83,3 @@ public class HomeController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
-

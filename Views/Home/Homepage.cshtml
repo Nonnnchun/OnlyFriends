@@ -1,5 +1,5 @@
-﻿@using onlyfriends.Models
-@model List<EventItem>
+﻿@using OnlyFriends.Models
+@model List<Event>
 
 @{
     ViewData["Title"] = "หน้าแรก";
@@ -11,9 +11,9 @@
     <div class="page-header">
         <div class="page-title">กิจกรรม</div>
         <div class="header-actions">
-            <button><a asp-controller="Home" asp-action="Createactivity" class="btn-add">
-            Create Activity
-            </a></button>
+            <a asp-controller="Event" asp-action="CreateActivity" class="btn-add">
+                Create Activity
+            </a>
         </div>
     </div>
 
@@ -21,22 +21,32 @@
     {
         @foreach (var item in Model)
         {
-            if (item.DateText != lastDate)
+            // 1. จัดการวันที่ (เนื่องจาก StartAt เป็น DateTime? จึงต้องเช็ค null และใช้ .Value)
+            // ถ้า StartAt เป็น null ให้แสดงค่าว่าง หรือวันที่ปัจจุบันแทน
+            var eventDate = item.StartAt ?? DateTime.Now;
+            string currentDateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("th-TH"));
+            
+            if (currentDateText != lastDate)
             {
-                <div class="timeline-date">@item.DateText</div>
-                lastDate = item.DateText;
+                <div class="timeline-date">@currentDateText</div>
+                lastDate = currentDateText;
             }
 
             <div class="event-card">
                 <div class="event-info">
-                    <div class="event-time">@item.Time</div>
+                    @* 2. แสดงเวลาเริ่มกิจกรรม *@
+                    <div class="event-time">@eventDate.ToString("HH:mm")</div>
+                    
                     <div class="event-title">@item.Title</div>
+                    
                     <div class="event-organizer">
-                        👤 โดย @item.Organizer
+                         👤 โดย @(item.Owner?.Username ?? "ไม่ระบุ")
                     </div>
+                    
                     <div class="event-location">📍 @item.Location</div>
+                    
                     <div class="event-tags">
-                        @if (item.IsActive == true)
+                        @if (item.EventStatus == EnumEventStatus.Open)
                         {
                             <span class="tag-status">เปิดรับสมัคร</span>
                         }
@@ -44,18 +54,22 @@
                         {
                             <span class="tag-status closed">ปิดรับสมัคร</span>
                         }
+
                         <span class="tag-count">
                             <div class="tag-avatars">
                                 <div class="tag-avatar"></div>
                                 <div class="tag-avatar"></div>
                                 <div class="tag-avatar"></div>
                             </div>
-                            +@item.ParticipantCount
+                            @* 3. นับจำนวนคนจาก List UserEvents *@
+                            +@(item.UserEvents?.Count ?? 0)
                         </span>
                     </div>
                 </div>
+                
                 <div class="event-image">
-                    <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "https://placehold.co/140x140?text=No+Image" : item.ImageUrl)" alt="@item.Title">
+                    @* 4. เปลี่ยนจาก ImageUrl เป็น PosterUrl ตาม Model *@
+                    <img src="@(string.IsNullOrEmpty(item.PosterUrl) ? "https://placehold.co/140x140?text=No+Image" : item.PosterUrl)" alt="@item.Title">
                 </div>
             </div>
         }
