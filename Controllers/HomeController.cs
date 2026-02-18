@@ -21,5 +21,26 @@ namespace onlyfriends.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        public IActionResult Profile()
+        {
+            return View();
+        }
+
+        public IActionResult Setting()
+        {
+            // replace it with something use to find user logged in ID via database
+            var user = new User
+            {
+                Username = "DemonineZ",
+                FirstName = "John",
+                LastName = "Doe",
+                Bio = "Greeting everyone",
+                Email = "teepob.1569@gmail.com"
+            };
+
+            return View(user);
+        }
+        
     }
 }
