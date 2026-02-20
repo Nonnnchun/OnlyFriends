@@ -1,10 +1,10 @@
-using onlyfriends.Models;
-using onlyfriends.Models.DTOS.UserDTOS;
-using onlyfriends.Data;
+using OnlyFriends.Models;
+using OnlyFriends.Models.DTOS.UserDTOS;
+using OnlyFriends.Data;
 using Microsoft.EntityFrameworkCore;
 using Mapster;
 
-namespace onlyfriends.Services;
+namespace OnlyFriends.Services;
 
 public interface IUserService
 {

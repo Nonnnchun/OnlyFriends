@@ -1,22 +1,22 @@
 using Microsoft.EntityFrameworkCore;
-using onlyfriends.Models;
+using OnlyFriends.Models;
 
-namespace onlyfriends.Data
+namespace OnlyFriends.Data
 {
-    public class ApplicationDbContext : DbContext 
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options) 
-            {
+            : base(options)
+        {
 
-            }
-        
+        }
+
         // Add all tables here
-        public DbSet<User> Users {get; set;}
-        public DbSet<Event> Events {get; set;}
-        public DbSet<UserEvent> UserEvents {get; set;}
-        public DbSet<Category> Categories {get; set;}
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public DbSet<User> Users { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<UserEvent> UserEvents { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Event>()
                 .HasOne(e => e.Owner)

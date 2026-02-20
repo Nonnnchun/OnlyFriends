@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace onlyfriends.Migrations
+namespace OnlyFriends.Migrations
 {
     /// <inheritdoc />
     public partial class init : Migration

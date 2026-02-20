@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using onlyfriends.Data;
+using OnlyFriends.Data;
 
 #nullable disable
 
-namespace onlyfriends.Migrations
+namespace OnlyFriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -21,7 +21,7 @@ namespace onlyfriends.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("onlyfriends.Models.Category", b =>
+            modelBuilder.Entity("OnlyFriends.Models.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -38,7 +38,7 @@ namespace onlyfriends.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("onlyfriends.Models.Event", b =>
+            modelBuilder.Entity("OnlyFriends.Models.Event", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -77,7 +77,7 @@ namespace onlyfriends.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("onlyfriends.Models.User", b =>
+            modelBuilder.Entity("OnlyFriends.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -111,7 +111,7 @@ namespace onlyfriends.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("onlyfriends.Models.UserEvent", b =>
+            modelBuilder.Entity("OnlyFriends.Models.UserEvent", b =>
                 {
                     b.Property<int>("EventId")
                         .HasColumnType("integer");
@@ -129,15 +129,15 @@ namespace onlyfriends.Migrations
                     b.ToTable("UserEvents");
                 });
 
-            modelBuilder.Entity("onlyfriends.Models.Event", b =>
+            modelBuilder.Entity("OnlyFriends.Models.Event", b =>
                 {
-                    b.HasOne("onlyfriends.Models.Category", "Category")
+                    b.HasOne("OnlyFriends.Models.Category", "Category")
                         .WithMany("Events")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("onlyfriends.Models.User", "Owner")
+                    b.HasOne("OnlyFriends.Models.User", "Owner")
                         .WithMany("CreatedEvents")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -148,32 +148,32 @@ namespace onlyfriends.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("onlyfriends.Models.UserEvent", b =>
+            modelBuilder.Entity("OnlyFriends.Models.UserEvent", b =>
                 {
-                    b.HasOne("onlyfriends.Models.Event", null)
+                    b.HasOne("OnlyFriends.Models.Event", null)
                         .WithMany("UserEvents")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("onlyfriends.Models.User", null)
+                    b.HasOne("OnlyFriends.Models.User", null)
                         .WithMany("UserEvents")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("onlyfriends.Models.Category", b =>
+            modelBuilder.Entity("OnlyFriends.Models.Category", b =>
                 {
                     b.Navigation("Events");
                 });
 
-            modelBuilder.Entity("onlyfriends.Models.Event", b =>
+            modelBuilder.Entity("OnlyFriends.Models.Event", b =>
                 {
                     b.Navigation("UserEvents");
                 });
 
-            modelBuilder.Entity("onlyfriends.Models.User", b =>
+            modelBuilder.Entity("OnlyFriends.Models.User", b =>
                 {
                     b.Navigation("CreatedEvents");
 

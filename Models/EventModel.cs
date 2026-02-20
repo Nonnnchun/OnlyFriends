@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace onlyfriends.Models
+namespace OnlyFriends.Models
 {
     public enum EnumEventStatus
     {

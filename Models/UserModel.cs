@@ -1,4 +1,4 @@
-namespace onlyfriends.Models
+namespace OnlyFriends.Models
 {
     public class User
     {
