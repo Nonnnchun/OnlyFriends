@@ -7,32 +7,32 @@ using Microsoft.AspNetCore.Http.HttpResults;
 // using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using OnlyFriends.Services;
-using OnlyFriends.Models.DTOS.UserDTOS;
+using OnlyFriends.Models.DTOS.EventDTOS;
 using Mapster;
 using OnlyFriends.Models;
 
 namespace OnlyFriends.Controllers
 {
-    [Route("/api/user")]
+    [Route("/api/event")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class EventController : ControllerBase
     {
-        private readonly IUserService _userService;
-        private readonly ILogger<UserController> _logger;
+        private readonly IEventService _activityService;
+        private readonly ILogger<EventController> _logger;
 
-        public UserController(IUserService userService, ILogger<UserController> logger)
+        public EventController(IEventService activityService, ILogger<EventController> logger)
         {
-            _userService = userService;
+            _activityService = activityService;
             _logger = logger;
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddUserAsync(CreateUserDTO userToCreate)
+        public async Task<IActionResult> AddEventAsync(CreateEventDTO activityToCreate)
         {
             try
             {
-                var user = await _userService.AddUserAsync(userToCreate);
-                return Ok(user);
+                var activity = await _activityService.AddEventAsync(activityToCreate);
+                return Ok(activity);
             }
             catch (Exception ex)
             {
@@ -42,20 +42,20 @@ namespace OnlyFriends.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUserAsync(int id, UpdateUserDTO userToUpdate)
+        public async Task<IActionResult> UpdateEventAsync(int id, UpdateEventDTO activityToUpdate)
         {
-            if (id != userToUpdate.Id)
+            if (id != activityToUpdate.Id)
             {
-                return BadRequest($"id in parameter and id in body is different. id in parameter: {id}, id in body: {userToUpdate.Id}");
+                return BadRequest($"id in parameter and id in body is different. id in parameter: {id}, id in body: {activityToUpdate.Id}");
             }
             try
             {
-                GetUserDTO? user = await _userService.FindUserByIdAsync(id);
-                if (user == null)
+                GetEventDTO? activity = await _activityService.FindEventByIdAsync(id);
+                if (activity == null)
                 {
                     return NotFound();
                 }
-                await _userService.UpdateUserAsync(userToUpdate);
+                await _activityService.UpdateEventAsync(activityToUpdate);
                 return NoContent();
             }
             catch (Exception ex)
@@ -66,16 +66,16 @@ namespace OnlyFriends.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserByIdAsync(int id)
+        public async Task<IActionResult> GetEventByIdAsync(int id)
         {
             try
             {
-                GetUserDTO? user = await _userService.FindUserByIdAsync(id);
-                if (user == null)
+                GetEventDTO? activity = await _activityService.FindEventByIdAsync(id);
+                if (activity == null)
                 {
                     return NotFound();
                 }
-                return Ok(user);
+                return Ok(activity);
             }
             catch (Exception ex)
             {
@@ -85,12 +85,12 @@ namespace OnlyFriends.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsersAsync()
+        public async Task<IActionResult> GetEventsAsync()
         {
             try
             {
-                IEnumerable<GetUserDTO> users = await _userService.GetUsersAsync();
-                return Ok(users);
+                IEnumerable<GetEventDTO> activitys = await _activityService.GetEventsAsync();
+                return Ok(activitys);
             }
             catch (Exception ex)
             {
@@ -104,12 +104,12 @@ namespace OnlyFriends.Controllers
         {
             try
             {
-                GetUserDTO? user = await _userService.FindUserByIdAsync(id);
-                if (user == null)
+                GetEventDTO? activity = await _activityService.FindEventByIdAsync(id);
+                if (activity == null)
                 {
                     return NotFound();
                 }
-                await _userService.DeleteUserAsync(user.Adapt<User>());
+                await _activityService.DeleteEventAsync(activity.Adapt<Event>());
                 return NoContent();
             }
             catch (Exception ex)
