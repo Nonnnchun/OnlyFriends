@@ -1,9 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema; // เพิ่มบรรทัดนี้
+using OnlyFriends.Models;
 
-namespace onlyfriends.Models
+namespace OnlyFriends.Models
 {
+    public enum EnumJointType
+    {
+        Private,
+        Public,
+    }
     public enum EnumEventStatus
     {
         Open,
@@ -18,22 +21,26 @@ namespace onlyfriends.Models
     public class Event
     {
         public int Id { get; set; }
-        public string Title { get; set; }
-        public string Info { get; set; }
-
-        // ✅ 1. เพิ่มวันเวลา (แทน DateText และ Time เดิม)
-        public DateTime EventDate { get; set; } 
-
-        // ✅ 2. เพิ่มสถานที่ (แทน Location เดิม)
-        public string Location { get; set; }
-
-        // ✅ 3. เพิ่มรูปภาพ (แทน ImageUrl เดิม)
-        public string ImageUrl { get; set; }
-
+        public string Title { get; set; } = string.Empty;
+        public string Info { get; set; } = string.Empty;
+        public string Location { get; set; } = string.Empty;
         public EnumEventType EventType { get; set; }
         public EnumEventStatus EventStatus { get; set; }
+        public EnumJointType JointType { get; set; }
 
         public int Capacity { get; set; }
+
+        // Upload poster image and save the URL here
+        public string? PosterUrl { get; set; }
+
+        // Time
+        public DateTime? StartAt { get; set; }
+        public DateTime? EndAt { get; set; }
+        public string? TimeZone { get; set; } = "Asia/Bangkok";
+
+        // Map pin
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
 
         public int OwnerId { get; set; }
         public User Owner { get; set; } = null!;
@@ -43,11 +50,8 @@ namespace onlyfriends.Models
         public List<UserEvent> UserEvents { get; } = [];
 
         // Category
-        public int CategoryId { get; set; }
-        public Category Category { get; set; } = null!;
-        
-        // ✅ 4. (Option) สร้าง Helper ไว้นับคน (จะได้ไม่ต้องแก้ View เยอะ)
-        [NotMapped]
-        public int ParticipantCount => UserEvents?.Count ?? 0;
+        public int CategoryId { get; set; } // Required foreign key property
+        public Category Category { get; set; } = null!; // Required reference navigation to principal 
     }
+
 }

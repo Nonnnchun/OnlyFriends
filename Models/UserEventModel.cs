@@ -1,4 +1,6 @@
-namespace onlyfriends.Models
+using OnlyFriends.Models;
+
+namespace OnlyFriends.Models
 {
     public enum EnumRequestStatus
     {
@@ -10,7 +12,9 @@ namespace onlyfriends.Models
     public class UserEvent
     {
         public int UserId { get; set; }
+        public User User { get; set; } = null!;
         public int EventId { get; set; }
+        public Event Event { get; set; } = null!;
 
         public EnumRequestStatus RequestStatus { get; set; }
 

@@ -1,85 +1,55 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using onlyfriends.Models; // เรียกใช้ Model ของจริง
+using OnlyFriends.Models;
 
-namespace onlyfriends.Controllers; // เช็ค Namespace ให้ตรงกับโปรเจกต์
-
-public class HomeController : Controller
+namespace OnlyFriends.Controllers
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    public class HomeController : Controller
     {
-        _logger = logger;
-    }
-
-    public IActionResult Homepage() // หรือ Index()
-    {
-        // ✅ สร้าง Mock Data โดยใช้ Class 'Event' ของจริง
-        var events = new List<Event>
+        public IActionResult Homepage()
         {
-            new Event
+            // 1. สร้างข้อมูล Category และ Owner (ตามที่คุณให้มา)
+            var sportsCategory = new Category { Id = 1, CategoryName = "Sports & Fitness" };
+            var forceUser = new User
             {
-                Id = 1,
-                Title = "Cursor from Zero Bangkok",
-                // 📅 รวมวันและเวลาไว้ใน EventDate
-                EventDate = new DateTime(2024, 2, 15, 20, 0, 0), 
-                Location = "Krung Thep Maha Nakhon",
-                ImageUrl = "https://placehold.co/120x120/111/FFF?text=Cursor",
-                EventStatus = EnumEventStatus.Open, // แทน IsActive = true
-                
-                // 👤 Mock ข้อมูลคนสร้าง (Owner)
-                Owner = new User 
-                { 
-                    UserName = "Luis Romero" 
+                Id = 67010751,
+                Username = "Force 56",
+                ProfilePictureUrl = "https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg"
+            };
+
+            // 2. สร้างรายการ Event (List<Event>)
+            var events = new List<Event>
+            {
+                // ข้อมูลจากคุณ (WILDER x getfresh)
+                new Event
+                {
+                    Id = 1,
+                    Title = "WILDER x getfresh | Valentine’s Edition",
+                    Info = "THIS VALENTINE’S DAY — WILDER takes over...",
+                    Location = "Cloud 11, Sukhumvit Rd",
+                    Capacity = 400,
+                    EventType = EnumEventType.Offline,
+                    EventStatus = EnumEventStatus.Open,
+                    PosterUrl = "https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=280,height=280/event-covers/18/1e5461fc-3698-4132-a7b6-016e0fad7601.jpg",
+                    StartAt = new DateTime(2026, 2, 14, 6, 30, 0),
+                    Category = sportsCategory,
+                    Owner = forceUser,
                 },
-                
-                // 👥 Mock จำนวนคนเข้าร่วม (ใส่ UserEvent ปลอมๆ เข้าไปใน List)
-                // ใส่ไป 20 อัน เพื่อจำลองว่ามีคนสมัคร 20 คน
-                // (วิธีลัด: ใช้ Enumerable.Range สร้าง List เปล่าๆ ขึ้นมา)
-                UserEvents = new List<UserEvent>(new UserEvent[70]) 
-            },
-            new Event
-            {
-                Id = 2,
-                Title = "Beach Tennis & Ice Bath",
-                EventDate = new DateTime(2024, 2, 11, 19, 0, 0),
-                Location = "Pura Vida Beach Club",
-                ImageUrl = "https://placehold.co/120x120/dcb161/FFF?text=Beach",
-                EventStatus = EnumEventStatus.Closed, // แทน IsActive = false
-                
-                Owner = new User { UserName = "Dylan Mouthaan" },
-                UserEvents = new List<UserEvent>(new UserEvent[18]) // จำลอง 18 คน
-            },
-             new Event
-            {
-                Id = 3,
-                Title = "Mindful Leadership",
-                EventDate = new DateTime(2024, 2, 12, 16, 20, 0),
-                Location = "อาคารไชยยศสมบัติ ๑",
-                ImageUrl = "https://placehold.co/120x120/004aad/FFF?text=Leader",
-                EventStatus = EnumEventStatus.Open,
-                
-                Owner = new User { UserName = "Lead+D Lab" },
-                UserEvents = new List<UserEvent>(new UserEvent[50]) // จำลอง 50 คน
-            }
-        };
+                // เพิ่ม Event อื่นๆ เพื่อทดสอบ Timeline
+                new Event
+                {
+                    Id = 2,
+                    Title = "Beach Tennis & Ice Bath",
+                    Location = "Pura Vida Beach Club",
+                    StartAt = new DateTime(2026, 2, 11, 17, 0, 0),
+                    PosterUrl = "https://placehold.co/120x120/dcb161/FFF?text=Beach",
+                    EventStatus = EnumEventStatus.Closed,
+                    Owner = new User { Username = "Dylan" },
+                }
+            };
 
-        // ✅ สั่งเรียงลำดับตามวันที่ (น้อย -> มาก)
-        var sortedEvents = events.OrderBy(x => x.EventDate).ToList();
-
-        // ส่งข้อมูลไปที่ View
-        return View(sortedEvents);
-    }
-
-    public IActionResult CreateActivity()
-    {
-        return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            // 3. เรียงลำดับตามเวลาและส่งไปที่ View
+            var sortedEvents = events.OrderBy(x => x.StartAt).ToList();
+            return View(sortedEvents);
+        }
     }
 }
