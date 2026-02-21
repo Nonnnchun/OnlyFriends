@@ -11,7 +11,7 @@ using OnlyFriends.Models.DTOS.CategoryDTOS;
 using Mapster;
 using OnlyFriends.Models;
 
-namespace OnlyFriends.Controllers
+namespace OnlyFriends.ApiControllers
 {
     [Route("/api/category")]
     [ApiController]
