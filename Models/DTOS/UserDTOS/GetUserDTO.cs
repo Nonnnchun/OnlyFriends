@@ -9,7 +9,9 @@ namespace OnlyFriends.Models.DTOS.UserDTOS
         [Required]
         public required string Username { get; set; }
         public string LastName { get; set; } = string.Empty;
+        // [Required]
         public required string Email { get; set; }
+        // [Required]
         public required string Password { get; set; }
 
     }
