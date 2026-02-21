@@ -14,5 +14,7 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
         public EnumEventStatus EventStatus { get; set; }
 
         public int Capacity { get; set; }
+
+        public int OwnerId { get; set; }
     }
 }
