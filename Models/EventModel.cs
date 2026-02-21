@@ -1,4 +1,4 @@
-using onlyfriends.Models;
+using OnlyFriends.Models;
 
 namespace OnlyFriends.Models
 {
@@ -39,7 +39,7 @@ namespace OnlyFriends.Models
         public string? TimeZone { get; set; } = "Asia/Bangkok";
 
         // Map pin
-         public double? Latitude { get; set; }
+        public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
         public int OwnerId { get; set; }

@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\onlyfriends.csproj": {}
+    "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\OnlyFriends.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\onlyfriends.csproj": {
+    "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\OnlyFriends.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\onlyfriends.csproj",
-        "projectName": "onlyfriends",
-        "projectPath": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\onlyfriends.csproj",
+        "projectUniqueName": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\OnlyFriends.csproj",
+        "projectName": "OnlyFriends",
+        "projectPath": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\OnlyFriends.csproj",
         "packagesPath": "C:\\Users\\mrfor\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\obj\\",
         "projectStyle": "PackageReference",

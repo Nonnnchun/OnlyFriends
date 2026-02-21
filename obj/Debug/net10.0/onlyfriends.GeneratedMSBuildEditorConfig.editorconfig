@@ -17,8 +17,8 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.TargetFrameworkIdentifier = .NETCoreApp
 build_property.TargetFrameworkVersion = v10.0
-build_property.RootNamespace = onlyfriends
-build_property.RootNamespace = onlyfriends
+build_property.RootNamespace = OnlyFriends
+build_property.RootNamespace = OnlyFriends
 build_property.ProjectDir = C:\Users\mrfor\Documents\GitHub\OnlyFriends\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
@@ -60,4 +60,4 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/mrfor/Documents/GitHub/OnlyFriends/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = b-adpd4ftmgj
+build_metadata.AdditionalFiles.CssScope = b-1ym9vh0lxo

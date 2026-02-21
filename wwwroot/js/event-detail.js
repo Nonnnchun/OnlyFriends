@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Simulate join state (เพื่อลอง UI ก่อน ยังไม่ต่อ DB) ---
   // เก็บสถานะ join ไว้ใน localStorage
-  const joinedKey = "onlyfriends_joined_demo";
+  const joinedKey = "OnlyFriends_joined_demo";
   const status = (joinCard?.dataset.status || "").toLowerCase();
   const isClosed = status === "closed";
   const isJoined = localStorage.getItem(joinedKey) === "1";

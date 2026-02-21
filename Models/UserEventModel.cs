@@ -1,6 +1,6 @@
 using OnlyFriends.Models;
 
-namespace onlyfriends.Models
+namespace OnlyFriends.Models
 {
     public enum EnumRequestStatus
     {
