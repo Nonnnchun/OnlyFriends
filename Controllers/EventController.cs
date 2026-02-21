@@ -3,7 +3,6 @@ using OnlyFriends.Models;
 
 namespace OnlyFriends.Controllers
 {
-
     public class EventController : Controller
     {
         public IActionResult EventDetails()
@@ -46,6 +45,33 @@ namespace OnlyFriends.Controllers
                 JointType = OnlyFriends.Models.EnumJointType.Private
             };
             return View("Details", ev);
+        }
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+        
+        [HttpPost]
+        public IActionResult CreatePost([FromBody] EventCreateViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // TODO: นำข้อมูลไปประมวลผล เช่น บันทึกลง Database ของคุณ
+                // var newEvent = new Event { Title = model.Name, ... };
+                // _dbContext.Events.Add(newEvent);
+                // _dbContext.SaveChanges();
+
+                // ส่งผลลัพธ์แบบ JSON กลับไปให้ JavaScript อัปเดต UI
+                return Json(new { 
+                    success = true, 
+                    name = model.Name, 
+                    capacity = model.Capacity 
+                });
+            }
+
+    
+            return Json(new { success = false, message = "ข้อมูลไม่ถูกต้องตามรูปแบบที่กำหนด" });
         }
     }
 }

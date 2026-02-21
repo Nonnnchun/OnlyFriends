@@ -1,0 +1,141 @@
+@{
+    ViewData["Title"] = "สร้างกิจกรรม - Activity Partner";
+    // ถ้าใช้ _Layout.cshtml ส่วนของ <html>, <head>, <body> มักจะถูกกำหนดไว้ที่ Layout แล้ว
+}
+
+@section Styles {
+    <!-- นำเข้า Phosphor Icons และ Google Fonts ตามข้อกำหนด -->
+    <script src="[https://unpkg.com/@phosphor-icons/web](https://unpkg.com/@phosphor-icons/web)"></script>
+    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)" rel="stylesheet">
+    
+    <!-- นำเข้า CSS ที่เราแยกไว้ -->
+    <link rel="stylesheet" href="~/css/create-event.css" asp-append-version="true" />
+}
+
+<form class="container" id="createEventForm">
+    <!-- Left Panel: Image & Theme -->
+    <div class="left-panel">
+        <div class="image-upload-box">
+            <div class="image-upload-btn" onclick="document.getElementById('fileUpload').click()">
+                <i class="ph ph-image"></i>
+            </div>
+            <input type="file" id="fileUpload" style="display: none;" accept="image/*">
+        </div>
+
+        <div class="theme-selector">
+            <button type="button" class="theme-btn">
+                <div style="display: flex; align-items: center;">
+                    <span class="icon-bg"><i class="ph ph-browser"></i></span>
+                    <div style="text-align: left; line-height: 1.2;">
+                        <span style="font-size: 0.7em; color: var(--text-muted);">Theme</span><br>
+                        Minimal
+                    </div>
+                </div>
+                <i class="ph ph-caret-up-down"></i>
+            </button>
+            <button type="button" class="shuffle-btn">
+                <i class="ph ph-shuffle"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Right Panel: Form Details -->
+    <div class="right-panel">
+        <div class="top-controls">
+            <button type="button" class="dropdown-badge">
+                <i class="ph ph-flower-lotus"></i> Force <i class="ph ph-caret-down"></i>
+            </button>
+            <button type="button" class="dropdown-badge">
+                <i class="ph ph-globe"></i> Public <i class="ph ph-caret-down"></i>
+            </button>
+        </div>
+
+        <!-- Event Name -->
+        <input type="text" class="event-name-input" placeholder="Event Name" id="eventName" required>
+
+        <!-- Date & Time Section -->
+        <div class="form-section">
+            <div class="datetime-container">
+                <div class="datetime-inputs">
+                    <div class="datetime-row">
+                        <i class="ph ph-circle" style="color:#d1c4e9; font-size: 0.8em;"></i>
+                        <span>Start</span>
+                        <input type="date" class="input-box" id="startDate" required>
+                        <input type="time" class="input-box" id="startTime" required>
+                    </div>
+                    <div style="position: absolute; left: 6px; top: 15px; bottom: 15px; width: 1px; border-left: 1px dashed #d1c4e9;"></div>
+                    <div class="datetime-row">
+                        <i class="ph ph-circle" style="color:#d1c4e9; font-size: 0.8em;"></i>
+                        <span>End</span>
+                        <input type="date" class="input-box" id="endDate" required>
+                        <input type="time" class="input-box" id="endTime" required>
+                    </div>
+                </div>
+                
+                <div class="timezone-box">
+                    <i class="ph ph-globe-hemisphere-west"></i>
+                    <strong>GMT+07:00</strong>
+                    <span>Bangkok</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location -->
+        <div class="input-group">
+            <i class="ph ph-map-pin"></i>
+            <input type="text" placeholder="Add Event Location (Offline location or virtual link)" id="eventLocation">
+        </div>
+
+        <!-- Description -->
+        <div class="input-group">
+            <i class="ph ph-text-align-left"></i>
+            <textarea rows="2" placeholder="Add Description" id="eventDescription"></textarea>
+        </div>
+
+        <!-- Event Options -->
+        <div class="section-title">Event Options</div>
+        <div class="form-section options-list">
+            
+            <div class="option-item">
+                <div class="option-label">
+                    <i class="ph ph-ticket"></i> Ticket Price
+                </div>
+                <div class="option-value">
+                    <input type="text" value="Free" placeholder="Price" id="ticketPrice">
+                    <i class="ph ph-pencil-simple"></i>
+                </div>
+            </div>
+
+            <div class="option-item">
+                <div class="option-label">
+                    <i class="ph ph-user-check"></i> Require Approval
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="requireApproval">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Requirement ข้อ 3: ระบุจำนวนคน -->
+            <div class="option-item">
+                <div class="option-label">
+                    <i class="ph ph-users"></i> Capacity
+                </div>
+                <div class="option-value">
+                    <input type="number" placeholder="Unlimited" id="capacity" min="1">
+                    <i class="ph ph-pencil-simple"></i>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn" id="submitBtn">Create Event</button>
+        <div id="message-box"></div>
+    </div>
+</form>
+
+@section Scripts {
+    <!-- นำเข้า JS ที่เราแยกไว้ -->
+    <script src="~/js/create-event.js" asp-append-version="true"></script>
+}
