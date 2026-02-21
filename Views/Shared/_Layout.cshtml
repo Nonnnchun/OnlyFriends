@@ -12,23 +12,50 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Homepage">OnlyFriends</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Homepage">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Createactivity">Create Activity</a>
-                        </li>
-                    </ul>
+        <nav class="custom-navbar">
+            <div class="nav-left">
+                <a href="/Home/Homepage" class="brand">OnlyFriends</a>
+                <a href="/Home/Homepage" class="nav-link">Home</a>
+                <a href="/Home/CreateActivity" class="nav-link">Create Activity</a>
+            </div>
+
+            <div class="nav-right">
+                
+                <div class="dropdown" id="filterDropdown">
+                    <button class="nav-btn" onclick="toggleFilter()">
+                        กรองเนื้อหา
+                    </button>
+                    <div class="dropdown-content" id="filterMenu">
+                        <div class="filter-item">
+                            <input type="checkbox" id="catSports"> <label for="catSports">เกมส์</label>
+                        </div>
+                        <div class="filter-item">
+                            <input type="checkbox" id="catEdu"> <label for="catEdu">ท่องเที่ยว</label>
+                        </div>
+                        <hr>
+                        <div class="filter-item">
+                            <input type="checkbox" id="statusOpen" checked> <label for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
+                        </div>
+                        <div class="filter-item">
+                            <input type="checkbox" id="myJoinedEvents"> 
+                            <label for="myJoinedEvents">กิจกรรมที่เข้าร่วม</label>
+                        </div>
+                        <button class="btn-apply" onclick="applyFilter()">นำไปใช้</button>
+                    </div>
                 </div>
+
+                <div class="dropdown" id="profileDropdown">
+                    <button class="profile-btn" onclick="toggleProfile()">
+                        <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg" alt="Profile">
+                    </button>
+                    <div class="dropdown-content profile-menu" id="profileMenu">
+                        <a href="#">โปรไฟล์ของฉัน</a>
+                        <a href="#">กิจกรรมที่เข้าร่วม</a>
+                        <hr>
+                        <a href="#" style="color: red;">ออกจากระบบ</a>
+                    </div>
+                </div>
+
             </div>
         </nav>
     </header>
