@@ -9,10 +9,10 @@ using OnlyFriends.Data;
 
 #nullable disable
 
-namespace OnlyFriends.Migrations
+namespace onlyfriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260221071423_SiwakornMigration1")]
+    [Migration("20260221073527_SiwakornMigration1")]
     partial class SiwakornMigration1
     {
         /// <inheritdoc />

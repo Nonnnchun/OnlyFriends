@@ -8,7 +8,7 @@ using OnlyFriends.Data;
 
 #nullable disable
 
-namespace OnlyFriends.Migrations
+namespace onlyfriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
