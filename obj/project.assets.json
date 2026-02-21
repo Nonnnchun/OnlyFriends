@@ -6267,15 +6267,20 @@
   },
   "packageFolders": {
 <<<<<<< HEAD
+<<<<<<< HEAD
     "C:\\Users\\user\\.nuget\\packages\\": {},
 =======
     "C:\\Users\\mrfor\\.nuget\\packages\\": {},
 >>>>>>> 0aafc029e194eeca62a9dd9a0ba2c8754c63c2ad
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+=======
+    "/Users/skyyyy/.nuget/packages/": {}
+>>>>>>> 8f540135cd985b7bc22c41ea0f3c65d857bea1d5
   },
   "project": {
     "version": "1.0.0",
     "restore": {
+<<<<<<< HEAD
 <<<<<<< HEAD
       "projectUniqueName": "C:\\Users\\user\\Desktop\\Programming\\OnlyFriends\\OnlyFriends.csproj",
       "projectName": "OnlyFriends",
@@ -6289,11 +6294,16 @@
       "packagesPath": "C:\\Users\\mrfor\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\obj\\",
 >>>>>>> 0aafc029e194eeca62a9dd9a0ba2c8754c63c2ad
+=======
+      "projectUniqueName": "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj",
+      "projectName": "onlyfriends",
+      "projectPath": "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj",
+      "packagesPath": "/Users/skyyyy/.nuget/packages/",
+      "outputPath": "/Users/skyyyy/Desktop/web/OnlyFriends/obj/",
+>>>>>>> 8f540135cd985b7bc22c41ea0f3c65d857bea1d5
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
+<<<<<<< HEAD
 <<<<<<< HEAD
         "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
 =======
@@ -6301,12 +6311,14 @@
 >>>>>>> 0aafc029e194eeca62a9dd9a0ba2c8754c63c2ad
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+=======
+        "/Users/skyyyy/.nuget/NuGet/NuGet.Config"
+>>>>>>> 8f540135cd985b7bc22c41ea0f3c65d857bea1d5
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -6383,7 +6395,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.103/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

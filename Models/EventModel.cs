@@ -1,10 +1,14 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 using System.ComponentModel.DataAnnotations;
 
 namespace OnlyFriends.Models
 {
 =======
 using onlyfriends.Models;
+=======
+using OnlyFriends.Models;
+>>>>>>> 8f540135cd985b7bc22c41ea0f3c65d857bea1d5
 
 namespace OnlyFriends.Models
 {
@@ -13,7 +17,10 @@ namespace OnlyFriends.Models
         Private,
         Public,
     }
+<<<<<<< HEAD
 >>>>>>> 0aafc029e194eeca62a9dd9a0ba2c8754c63c2ad
+=======
+>>>>>>> 8f540135cd985b7bc22c41ea0f3c65d857bea1d5
     public enum EnumEventStatus
     {
         Open,
@@ -29,6 +36,7 @@ namespace OnlyFriends.Models
     {
         public int Id { get; set; }
 <<<<<<< HEAD
+<<<<<<< HEAD
         public required string Title { get; set; }
         public string? Info { get; set; }
 
@@ -38,6 +46,8 @@ namespace OnlyFriends.Models
         public int Capacity { get; set; }
 
 =======
+=======
+>>>>>>> 8f540135cd985b7bc22c41ea0f3c65d857bea1d5
         public string Title { get; set; } = string.Empty;
         public string Info { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
@@ -56,10 +66,13 @@ namespace OnlyFriends.Models
         public string? TimeZone { get; set; } = "Asia/Bangkok";
 
         // Map pin
-         public double? Latitude { get; set; }
+        public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
+<<<<<<< HEAD
 >>>>>>> 0aafc029e194eeca62a9dd9a0ba2c8754c63c2ad
+=======
+>>>>>>> 8f540135cd985b7bc22c41ea0f3c65d857bea1d5
         public int OwnerId { get; set; }
         public User Owner { get; set; } = null!;
 

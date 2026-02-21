@@ -14,11 +14,15 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 <<<<<<< HEAD
+<<<<<<< HEAD
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0192a2cd68e42f6f4318a3b2493f781d3928ee29")]
 [assembly: System.Reflection.AssemblyProductAttribute("OnlyFriends")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OnlyFriends")]
 =======
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b7b804fe821f1cfd6843996e5bbe553e7e5985a4")]
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+feb96b28831c4250d4c86063ea16b411ab3c2df0")]
+>>>>>>> 8f540135cd985b7bc22c41ea0f3c65d857bea1d5
 [assembly: System.Reflection.AssemblyProductAttribute("onlyfriends")]
 [assembly: System.Reflection.AssemblyTitleAttribute("onlyfriends")]
 >>>>>>> 0aafc029e194eeca62a9dd9a0ba2c8754c63c2ad

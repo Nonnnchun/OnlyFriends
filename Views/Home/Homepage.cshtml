@@ -1,0 +1,84 @@
+﻿@using OnlyFriends.Models
+@model List<Event>
+
+@{
+    ViewData["Title"] = "หน้าแรก";
+    string lastDate = "";
+}
+
+<div class="main-container">
+
+    <div class="page-header">
+        <div class="page-title">กิจกรรม</div>
+        <div class="header-actions">
+            <a asp-controller="Home" asp-action="CreateActivity" class="btn-add">
+                Create Activity
+            </a>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        @foreach (var item in Model)
+        {
+            // 1. จัดการวันที่ (เนื่องจาก StartAt เป็น DateTime? จึงต้องเช็ค null และใช้ .Value)
+            // ถ้า StartAt เป็น null ให้แสดงค่าว่าง หรือวันที่ปัจจุบันแทน
+            var eventDate = item.StartAt ?? DateTime.Now;
+            string currentDateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("th-TH"));
+            
+            if (currentDateText != lastDate)
+            {
+                <div class="timeline-date">@currentDateText</div>
+                lastDate = currentDateText;
+            }
+
+            <div class="event-card">
+                <div class="event-info">
+                    @* 2. แสดงเวลาเริ่มกิจกรรม *@
+                    <div class="event-time">@eventDate.ToString("HH:mm")</div>
+                    
+                    <div class="event-title">@item.Title</div>
+                    
+                    <div class="event-organizer">
+                         👤 โดย @(item.Owner?.Username ?? "ไม่ระบุ")
+                    </div>
+                    
+                    <div class="event-location">📍 @item.Location</div>
+                    
+                    <div class="event-tags">
+                        @if (item.EventStatus == EnumEventStatus.Open)
+                        {
+                            <span class="tag-status">เปิดรับสมัคร</span>
+                        }
+                        else
+                        {
+                            <span class="tag-status closed">ปิดรับสมัคร</span>
+                        }
+
+                        <span class="tag-count">
+                            <div class="tag-avatars">
+                                <div class="tag-avatar"></div>
+                                <div class="tag-avatar"></div>
+                                <div class="tag-avatar"></div>
+                            </div>
+                            @* 3. นับจำนวนคนจาก List UserEvents *@
+                            +@(item.UserEvents?.Count ?? 0)
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="event-image">
+                    @* 4. เปลี่ยนจาก ImageUrl เป็น PosterUrl ตาม Model *@
+                    <img src="@(string.IsNullOrEmpty(item.PosterUrl) ? "https://placehold.co/140x140?text=No+Image" : item.PosterUrl)" alt="@item.Title">
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div style="text-align:center; padding: 60px; color:#999;">
+            ไม่มีกิจกรรมในขณะนี้
+        </div>
+    }
+
+</div>
