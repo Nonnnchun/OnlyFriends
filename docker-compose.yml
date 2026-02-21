@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    environment:
+      - POSTGRES_USER=kaka
+      - POSTGRES_PASSWORD=kaka123
+      - POSTGRES_DB=OnlyFriendsDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_panel
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=kaka@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=kaka123
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
