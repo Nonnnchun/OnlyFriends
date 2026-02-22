@@ -1,5 +1,6 @@
 ﻿@using OnlyFriends.Models
-@model List<Event>
+@using OnlyFriends.Models.DTOS.EventDTOS
+@model IEnumerable<GetEventDTO>
 
 @{
     ViewData["Title"] = "หน้าแรก";
@@ -17,7 +18,7 @@
         </div>
     </div>
 
-    @if (Model != null && Model.Count > 0)
+    @if (Model != null)
     {
         @foreach (var item in Model)
         {
@@ -61,8 +62,8 @@
                                 <div class="tag-avatar"></div>
                                 <div class="tag-avatar"></div>
                             </div>
-                            @* 3. นับจำนวนคนจาก List UserEvents *@
-                            +@(item.UserEvents?.Count ?? 0)
+                            @* 3. นับจำนวนคนจาก List Users *@
+                            +@(item.Users?.Count ?? 0)
                         </span>
                     </div>
                 </div>

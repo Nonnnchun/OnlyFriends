@@ -89,8 +89,8 @@ namespace OnlyFriends.ApiControllers
         {
             try
             {
-                IEnumerable<GetEventDTO> activitys = await _activityService.GetEventsAsync();
-                return Ok(activitys);
+                IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
+                return Ok(activities);
             }
             catch (Exception ex)
             {
