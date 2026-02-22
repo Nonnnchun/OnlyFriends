@@ -1,0 +1,166 @@
+    body {
+        background-color: #f9f9f9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+    }
+
+    /* ✅ แก้ไข: ปรับให้เป็นคอลัมน์เดียวตรงกลาง */
+    .main-container {
+        max-width: 800px; /* กำหนดความกว้างให้พอดีสายตา (เหมือน Facebook Feed) */
+        margin: 0 auto;   /* จัดกึ่งกลางหน้าจอ */
+        padding: 40px 20px;
+    }
+
+    /* --- ส่วนหัวของหน้า --- */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    .page-title {
+        font-size: 28px; /* เพิ่มขนาดตัวอักษรหน่อยให้สมดุล */
+        font-weight: bold;
+    }
+    .header-actions .btn-add {
+        background-color: #eee;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-right: 10px;
+        transition: background 0.2s;
+    }
+    .header-actions .btn-add:hover {
+        background-color: #e0e0e0;
+    }
+    .header-icon {
+        padding: 8px;
+        cursor: pointer;
+        color: #666;
+        font-size: 18px;
+    }
+
+    /* --- Timeline --- */
+    .timeline-date {
+        display: flex;
+        align-items: center;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        color: #666;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    .timeline-date::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background-color: #ccc;
+        border-radius: 50%;
+        margin-right: 15px;
+    }
+
+    /* Card กิจกรรม */
+    .event-card {
+        background: white;
+        border-radius: 20px; /* เพิ่มความโค้งมน */
+        padding: 24px;       /* เพิ่ม Padding ให้ดูโปร่งขึ้น */
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* เงาชัดขึ้นนิดนึง */
+        display: flex;
+        justify-content: space-between;
+        border: 1px solid #f0f0f0;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        border-color: #ddd;
+    }
+
+    .event-info {
+        flex: 1;
+        padding-right: 30px;
+    }
+    .event-time {
+        color: #888;
+        font-size: 14px;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+    .event-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        line-height: 1.4;
+        color: #111;
+    }
+    .event-organizer {
+        display: flex;
+        align-items: center;
+        font-size: 15px;
+        color: #555;
+        margin-bottom: 8px;
+    }
+    .event-location {
+        font-size: 14px;
+        color: #888;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Tag */
+    .event-tags {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .tag-status {
+        background-color: #eef2ff;
+        color: #4f46e5;
+        font-size: 13px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    .tag-status.closed{
+        background-color: #eee; /* สีพื้นเทา */
+        color: #999;
+    }
+    .tag-count {
+        font-size: 14px;
+        color: #666;
+        display: flex;
+        align-items: center;
+    }
+    .tag-avatars {
+        display: flex;
+        margin-right: 8px;
+    }
+    .tag-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid white;
+        margin-left: -10px;
+        background-color: #ddd;
+    }
+    .tag-avatar:first-child { margin-left: 0; }
+
+    /* รูปภาพ */
+    .event-image {
+        width: 140px; /* ขยายรูปให้ใหญ่ขึ้นนิดนึง */
+        height: 140px;
+        border-radius: 16px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .event-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
