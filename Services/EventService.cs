@@ -27,6 +27,11 @@ public sealed class EventService : IEventService
     public async Task<GetEventDTO> AddEventAsync(CreateEventDTO activityToCreate)
     {
         Event activity = activityToCreate.Adapt<Event>();
+
+        // Get Category object
+        activity.Category = await _context.Categories.FindAsync(activity.CategoryId)
+        ?? throw new KeyNotFoundException($"Category with ID {activity.CategoryId} does not exist!");
+
         _context.Events.Add(activity);
         await _context.SaveChangesAsync();
         return activity.Adapt<GetEventDTO>();

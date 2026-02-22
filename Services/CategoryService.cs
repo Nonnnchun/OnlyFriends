@@ -27,6 +27,7 @@ public sealed class CategoryService : ICategoryService
     public async Task<GetCategoryDTO> AddCategoryAsync(CreateCategoryDTO categoryToCreate)
     {
         Category category = categoryToCreate.Adapt<Category>();
+        
         _context.Categories.Add(category);
         await _context.SaveChangesAsync();
         return category.Adapt<GetCategoryDTO>();

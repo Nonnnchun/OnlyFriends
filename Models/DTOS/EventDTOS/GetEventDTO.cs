@@ -9,5 +9,10 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
     {
         public int Id { get; set; }
         public required string Title { get; set; }
+        public required int OwnerId { get; set; }
+
+        public required User Owner { get; set; }
+        public required Category Category { get; set; }
+
     }
 }
