@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace onlyfriends.Migrations
 {
     /// <inheritdoc />
-    public partial class kaka : Migration
+    public partial class SiwakornMigration1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
