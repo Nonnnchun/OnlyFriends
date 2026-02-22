@@ -14,6 +14,7 @@ public interface IEventService
 
     Task<GetEventDTO?> FindEventByIdAsync(int id);
     Task<IEnumerable<GetEventDTO>> GetEventsAsync();
+    Task AddUserToEvent(AddUserToEventDTO userEventToAdd);
 }
 public sealed class EventService : IEventService
 {
@@ -55,7 +56,7 @@ public sealed class EventService : IEventService
 
     public async Task<IEnumerable<GetEventDTO>> GetEventsAsync()
     {
-        IEnumerable<GetEventDTO> activitys = await _context.Events.AsNoTracking().ProjectToType<GetEventDTO>().ToListAsync();
+        IEnumerable<GetEventDTO> activitys = await _context.Events.AsNoTracking().OrderByDescending(e => e.StartAt).ProjectToType<GetEventDTO>().ToListAsync();
         return activitys;
     }
 
@@ -64,5 +65,12 @@ public sealed class EventService : IEventService
         Event activity = activityToUpdate.Adapt<Event>();
         _context.Events.Update(activity);
         await _context.SaveChangesAsync();
+    }
+
+    // TODO:
+    public async Task AddUserToEvent(AddUserToEventDTO userEventToAdd)
+    {
+        // Event activity = _context.Events.Where(e => userEventToAdd.EventId == e.Id)
+
     }
 }
