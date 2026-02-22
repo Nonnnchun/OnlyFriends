@@ -1,4 +1,3 @@
-
 namespace OnlyFriends.Models
 {
     public enum EnumRequestStatus

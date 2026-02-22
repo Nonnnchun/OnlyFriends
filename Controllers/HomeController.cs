@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OnlyFriends.Models;
+using Microsoft.AspNetCore.Authorization;
 using OnlyFriends.Services;
 using OnlyFriends.Models.DTOS.EventDTOS;
+using System.Diagnostics;
 
 namespace OnlyFriends.Controllers
 {
@@ -17,6 +19,22 @@ namespace OnlyFriends.Controllers
         {
             IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
             return View(activities);
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

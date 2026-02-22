@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using Notifications.Models;
 using OnlyFriends.Models;
+
 
 namespace OnlyFriends.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
 
         }
@@ -16,6 +17,7 @@ namespace OnlyFriends.Data
         public DbSet<Event> Events { get; set; }
         public DbSet<UserEvent> UserEvents { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Event>()
@@ -29,5 +31,4 @@ namespace OnlyFriends.Data
                 .UsingEntity<UserEvent>();
         }
     }
-
 }

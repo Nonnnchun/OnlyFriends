@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -30,14 +30,53 @@
                         </li>
                     </ul>
                 </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+
+                <div class="nav-right">
+                    <div class="dropdown" id="filterDropdown">
+                        <button class="nav-btn" onclick="toggleFilter()">
+                            กรองเนื้อหา
+                        </button>
+                        <div class="dropdown-content" id="filterMenu">
+                            <div class="filter-item">
+                                <input type="checkbox" id="catSports"> <label for="catSports">เกมส์</label>
+                            </div>
+                            <div class="filter-item">
+                                <input type="checkbox" id="catEdu"> <label for="catEdu">ท่องเที่ยว</label>
+                            </div>
+                            <hr>
+                            <div class="filter-item">
+                                <input type="checkbox" id="statusOpen" checked> <label for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
+                            </div>
+                            <div class="filter-item">
+                                <input type="checkbox" id="myJoinedEvents"> 
+                                <label for="myJoinedEvents">กิจกรรมที่เข้าร่วม</label>
+                            </div>
+                            <button class="btn-apply" onclick="applyFilter()">นำไปใช้</button>
+                        </div>
+                    </div>
+
+                    @await Html.PartialAsync("_NotificationBell")
+
+                    <div class="dropdown" id="profileDropdown">
+                        <button class="profile-btn" onclick="toggleProfile()">
+                            <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg" alt="Profile">
+                        </button>
+                        <div class="dropdown-content profile-menu" id="profileMenu">
+                            <a href="#">โปรไฟล์ของฉัน</a>
+                            <a href="#">กิจกรรมที่เข้าร่วม</a>
+                            <hr>
+                            <a href="#" style="color: red;">ออกจากระบบ</a>
+                        </div>
+                    </div>
+
+                </div>
+            </nav>
+        </header>
+        <div class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
 
     <footer class="border-top footer text-muted">
         <div class="container">
