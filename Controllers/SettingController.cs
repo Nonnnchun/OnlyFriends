@@ -1,35 +1,60 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using onlyfriends.Models;
+using OnlyFriends.Data;
+using OnlyFriends.Models.DTOS.UserDTOS;
+using System.Linq;
 
-namespace onlyfriends.Controllers
+namespace OnlyFriends.Controllers
 {
     public class SettingController : Controller
     {
-        [HttpGet]
+        private readonly ApplicationDbContext _context;
+
+        public SettingController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
-            // Temporary mock user until database is added
-            var user = new User
+            // Fetch User ID 1 
+            var user = _context.Users.FirstOrDefault(u => u.Id == 1);
+
+            if (user == null)
             {
-                Username = "DemonineZ",
-                FirstName = "John",
-                LastName = "Doe",
-                Bio = "Greeting everyone",
-                Email = "teepob.1569@gmail.com"
+                return NotFound("User not found in database.");
+            }
+
+            // Map DB Model to UpdateUserDTO
+            var model = new UpdateUserDTO
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.Username,
+                Bio = user.Bio,
+                Email = user.Email
             };
 
-            return View("Setting", user); // Views/Setting/Setting.cshtml
+            return View("Setting", model);
         }
 
         [HttpPost]
-        public IActionResult SaveAccountSettings(User model)
+        public IActionResult UpdateProfile(UpdateUserDTO updatedData)
         {
-            // TODO: Replace with real database update later
 
-            TempData["SuccessMessage"] = "Changes saved successfully (temporary).";
+            var user = _context.Users.FirstOrDefault(u => u.Id == updatedData.Id);
 
-            return RedirectToAction("Index");
+            if (user != null)
+            {
+                user.FirstName = updatedData.FirstName;
+                user.LastName = updatedData.LastName;
+                user.Username = updatedData.Username;
+                user.Bio = updatedData.Bio;
+
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Index", "Profile");
         }
     }
 }

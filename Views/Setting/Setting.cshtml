@@ -1,12 +1,8 @@
-@model onlyfriends.Models.User
+@model OnlyFriends.Models.DTOS.UserDTOS.UpdateUserDTO
 
 @{
     ViewData["Title"] = "Settings";
-
-
 }
-
-
 
 <style>
     body {
@@ -29,40 +25,19 @@
         margin-bottom: 25px;
     }
 
-    /* Tabs */
-    .tabs {
-        display: flex;
-        border-bottom: 1px solid #ddd;
-        margin-bottom: 30px;
-    }
-    .tab {
-        margin-right: 25px;
-        padding-bottom: 10px;
-        cursor: pointer;
-        font-weight: 500;
-        color: #666;
-        transition: all 0.2s ease;
-    }
-    .tab:hover {
-        color: #333;
-    }
-    .tab.active {
-        border-bottom: 2px solid #000;
-        color: #000;
-    }
-
-    /* Section block */
     .section-title {
         font-size: 22px;
         font-weight: 600;
         margin-bottom: 5px;
         margin-top: 15px;
     }
+
     .section-sub {
         color: #777;
         font-size: 14px;
         margin-bottom: 20px;
     }
+
     .section-box {
         background: #fff;
         padding: 18px;
@@ -71,15 +46,9 @@
         margin-bottom: 40px;
     }
 
-    /* Form grid */
     .grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-    .grid-3 {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
         gap: 20px;
     }
 
@@ -88,6 +57,7 @@
         margin-bottom: 5px;
         display: block;
     }
+
     input, select, textarea {
         width: 100%;
         padding: 12px;
@@ -98,7 +68,7 @@
         font-family: "Inter", sans-serif;
     }
 
-    input:focus, select:focus, textarea:focus {
+    input:focus, textarea:focus {
         outline: none;
         border-color: #000;
     }
@@ -125,14 +95,6 @@
         background: #333;
     }
 
-    /* Social icons */
-    .social-list {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-    }
-
-    /* Email/phone list items */
     .item-box {
         background: #f9f9f9;
         border-radius: 10px;
@@ -155,227 +117,62 @@
     .danger-btn:hover {
         background: #c62828;
     }
-
-    /* Hidden tabs */
-    .tab-content {
-        display: none;
-    }
-    .tab-content.active {
-        display: block;
-    }
-
-    /* Phone input inline fix */
-    .phone-input-container {
-        display: flex;
-        gap: 10px;
-        align-items: flex-start;
-    }
-    .phone-input-container input {
-        flex: 1;
-    }
-    .phone-input-container button {
-        margin-top: 0;
-        white-space: nowrap;
-    }
-
-    /* Checkbox styling */
-    .checkbox-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-    .checkbox-item input[type="checkbox"] {
-        width: auto;
-        margin-right: 10px;
-        cursor: pointer;
-    }
 </style>
 
 <div class="settings-container">
     <div class="page-title">Settings</div>
 
-    <!-- tab list -->
-    <div class="tabs">
-        <div class="tab active" data-tab="account">Account</div>
-        <div class="tab" data-tab="preferences">Preferences</div>
-        <div class="tab" data-tab="payment">Payment</div>
-    </div>
+    @* The Form points to the UpdateProfile method in the Controller *@
+    <form asp-action="UpdateProfile" method="post">
+        @* Hidden ID field ensures we update the correct user *@
+        <input type="hidden" asp-for="Id" />
 
-    <!-- account -->
-    <div id="account" class="tab-content active">
-
-        <!-- Profile Section -->
         <div class="section-title">Your Profile</div>
         <div class="section-sub">Choose how you are displayed as a host or guest.</div>
-
+        
         <div class="section-box">
             <div class="grid-2">
                 <div>
                     <label class="form-label">First Name</label>
-                    <input type="text" value="@Model.FirstName" placeholder="John">
+                    <input type="text" asp-for="FirstName" placeholder="John">
                 </div>
                 <div>
                     <label class="form-label">Last Name</label>
-                    <input type="text" value="@Model.LastName" placeholder="Doe">
+                    <input type="text" asp-for="LastName" placeholder="Doe">
                 </div>
             </div>
 
             <div style="margin-top:20px;">
                 <label class="form-label">Username</label>
-                <input type="text" value="@Model.Username" placeholder="username">
+                <input type="text" asp-for="Username" placeholder="username">
             </div>
 
             <div style="margin-top:20px;">
                 <label class="form-label">Bio</label>
-                <textarea placeholder="Write something about yourself...">@Model.Bio</textarea>
+                <textarea asp-for="Bio" placeholder="Write something about yourself..."></textarea>
             </div>
 
-            <button class="save-btn">Save Changes</button>
+            <button type="submit" class="save-btn">Save Changes</button>
         </div>
+    </form>
 
-        <!-- Social Links -->
-        <div class="section-title">Social Links</div>
-        <div class="section-sub">Displayed publicly on your profile.</div>
-
-        <div class="section-box">
-            <div class="social-list">
-                <input type="text" placeholder="instagram.com/username">
-                <input type="text" placeholder="x.com/username">
-                <input type="text" placeholder="youtube.com/username">
-                <input type="text" placeholder="tiktok.com/username">
-                <input type="text" placeholder="linkedin.com/in/handle">
-                <input type="text" placeholder="yourwebsite.com">
-            </div>
-            <button class="save-btn">Save Social Links</button>
+    <div class="section-title">Emails</div>
+    <div class="section-sub">Receive notifications through emails.</div>
+    <div class="section-box">
+        <div class="item-box">
+            <strong>@Model.Email</strong> (Primary)
         </div>
-
-        <!-- Email Section -->
-        <div class="section-title">Emails</div>
-        <div class="section-sub">Receive notifications through emails.</div>
-        <div class="section-box">
-            <div class="item-box">
-                <strong>@Model.Email</strong> (Primary)
-            </div>
-            <button class="save-btn">Add Email</button>
-        </div>
-
-        <!-- Phone Section -->
-        <div class="section-title">Phone Number</div>
-        <div class="section-sub">Used for SMS verification.</div>
-        <div class="section-box">
-            <div class="phone-input-container">
-                <input type="tel" placeholder="+66 81 234 5678">
-                <button class="save-btn">Update</button>
-            </div>
-        </div>
-
-        <!-- Password Section -->
-        <div class="section-title">Password & Security</div>
-        <div class="section-box">
-            <button class="save-btn">Set / Change Password</button>
-        </div>
-
-        <!-- Devices -->
-        <div class="section-title">Active Devices</div>
-        <div class="section-sub">Devices currently logged in to your account.</div>
-
-        <div class="section-box">
-            <div class="item-box">
-                <strong>Chrome on Windows</strong><br>
-                Lat Krabang, TH • Last active: Today
-            </div>
-            <div class="item-box">
-                <strong>Mobile Chrome on Android</strong><br>
-                Bangkok, TH • Last active: 2 hours ago
-            </div>
-        </div>
-
-        <!-- Delete Account -->
-        <div class="section-title">Delete Account</div>
-        <div class="section-sub">This action cannot be undone.</div>
-        <div class="section-box">
-            <button class="danger-btn">Delete My Account</button>
-        </div>
+        <button class="save-btn">Add Email</button>
     </div>
 
-
-    <!-- PREFERENCES TAB -->
-    <div id="preferences" class="tab-content">
-
-        <div class="section-title">Display</div>
-        <div class="section-sub">Choose your theme.</div>
-
-        <div class="section-box">
-            <label class="form-label">Theme</label>
-            <select>
-                <option>System</option>
-                <option>Light</option>
-                <option>Dark</option>
-            </select>
-        </div>
-
-        <div class="section-title">Language</div>
-        <div class="section-sub">Select your preferred language.</div>
-        <div class="section-box">
-            <label class="form-label">Language</label>
-            <select>
-                <option>English</option>
-            </select>
-        </div>
-
-        <div class="section-title">Notifications</div>
-        <div class="section-sub">Choose how you want to be notified.</div>
-
-        <div class="section-box">
-            <div class="checkbox-item">
-                <input type="checkbox" id="event-invites" checked>
-                <label for="event-invites">Event Invites</label>
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="event-reminders" checked>
-                <label for="event-reminders">Event Reminders</label>
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="event-updates">
-                <label for="event-updates">Event Registration Updates</label>
-            </div>
-            <button class="save-btn">Save Preferences</button>
-        </div>
+    <div class="section-title">Password & Security</div>
+    <div class="section-box">
+        <button class="save-btn">Set / Change Password</button>
     </div>
 
-    <!-- PAYMENT TAB -->
-    <div id="payment" class="tab-content">
-
-        <div class="section-title">Payment Methods</div>
-        <div class="section-sub">Used for paid events.</div>
-
-        <div class="section-box">
-            <p style="color: #777; margin-bottom: 20px;">No payment methods added yet.</p>
-            <button class="save-btn">+ Add Card</button>
-        </div>
-
-        <div class="section-title">Billing History</div>
-        <div class="section-sub">View your past transactions.</div>
-        <div class="section-box">
-            <p style="color: #777;">No billing history available.</p>
-        </div>
-
+    <div class="section-title">Delete Account</div>
+    <div class="section-sub">This action cannot be undone.</div>
+    <div class="section-box">
+        <button class="danger-btn">Delete My Account</button>
     </div>
 </div>
-
-<script>
-    // java vibe =w=
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            const targetTab = this.getAttribute('data-tab');
-            
-            // Remove active class from all tabs and content
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            // Add active class to clicked tab and corresponding content
-            this.classList.add('active');
-            document.getElementById(targetTab).classList.add('active');
-        });
-    });
-</script>
