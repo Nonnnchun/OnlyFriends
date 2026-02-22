@@ -1,4 +1,3 @@
-using OnlyFriends.Models;
 
 namespace OnlyFriends.Models
 {
