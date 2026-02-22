@@ -27,7 +27,7 @@
                <h1>Welcome to OnlyFriends</h1>
                <p class="subtitle">Please sign in or sign up below.</p>
 
-               <form>
+               <form method="post" action="/Login/Index">
                   <div class="input-group">
                      <div class="label-row">
                            <label for="email">Email</label>
@@ -36,17 +36,15 @@
                      <input type="email" id="email" name="email" placeholder="you@email.com" required>
                   </div>
 
+                  <div class="input-group">
+                     <div class="label-row">
+                           <label for="password">Password</label>
+                     </div>
+                     <input type="password" id="password" name="password" placeholder="••••••••" required>
+                  </div>
+
                   <button type="submit" class="btn btn-primary">Continue with Email</button>
                </form>
-
-               <div class="social-login">
-                  <button class="btn btn-secondary">
-                     <i class="fa-brands fa-google"></i> Sign in with Google
-                  </button>
-                  <button class="btn btn-secondary">
-                     <i class="fa-solid fa-user-lock"></i> Sign in with Passkey
-                  </button>
-               </div>
          </div>
       </main>
    </body>
