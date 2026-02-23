@@ -43,19 +43,27 @@
                         </div>
                     </div>
 
-                    @await Html.PartialAsync("_NotificationBell")
-
-                    <div class="dropdown" id="profileDropdown">
-                        <button class="profile-btn" onclick="toggleProfile()">
-                            <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg" alt="Profile">
-                        </button>
-                        <div class="dropdown-content profile-menu" id="profileMenu">
-                            <a href="#">โปรไฟล์ของฉัน</a>
-                            <a href="#">กิจกรรมที่เข้าร่วม</a>
-                            <hr>
-                            <a href="#" style="color: red;">ออกจากระบบ</a>
+                    @if (User?.Identity?.IsAuthenticated ?? false)
+                    {
+                        @await Html.PartialAsync("_NotificationBell")
+                        <div class="dropdown" id="profileDropdown">
+                            <button class="profile-btn" onclick="toggleProfile()">
+                                <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg" alt="Profile">
+                            </button>
+                            <div class="dropdown-content profile-menu" id="profileMenu">
+                                <a href="#">โปรไฟล์ของฉัน</a>
+                                <a href="#">กิจกรรมที่เข้าร่วม</a>
+                                <hr>
+                                <form method="post" action="/Login/Logout">
+                                    <button type="submit" class="btn btn-link" style="color: red; padding:0;">ออกจากระบบ</button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-secondary" href="/Login">เข้าสู่ระบบ</a>
+                    }
 
                 </div>
             </nav>

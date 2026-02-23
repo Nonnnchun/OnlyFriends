@@ -11,8 +11,8 @@ using OnlyFriends.Data;
 namespace onlyfriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260219125313_Init")]
-    partial class Init
+    [Migration("20260223162003_InitChern")]
+    partial class InitChern
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
