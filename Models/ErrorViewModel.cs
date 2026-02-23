@@ -1,4 +1,4 @@
-namespace OnlyFriends.Models
+namespace onlyfriends.Models
 {
     public class ErrorViewModel
     {
