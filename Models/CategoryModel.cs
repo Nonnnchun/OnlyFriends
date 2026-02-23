@@ -2,7 +2,6 @@
 using OnlyFriends.Models;
 
 namespace OnlyFriends.Models
-
 {
 
     public class Category
