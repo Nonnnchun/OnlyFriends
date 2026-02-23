@@ -1,0 +1,226 @@
+/* ====================================================
+   1. ส่วนคลุมทั้งหน้า (บังคับกว้าง-สูงเต็มจอ พื้นขาวล้วน)
+   ==================================================== */
+.landing-wrapper {
+    font-family: 'Prompt', sans-serif;
+    background-color: #ffffff; 
+    
+    /* ทริคลอยตัวทับกรอบของระบบไปเลย (ลบขอบขาว/ขอบล่างกวนใจ) */
+    position: absolute; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    z-index: 999; /* บัง Footer และ Layout เดิมให้มิด */
+    
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* ====================================================
+   2. Navbar (ปรับให้ชิดขอบซ้าย-ขวามากขึ้น)
+   ==================================================== */
+.landing-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    /* 👇 ปรับให้กว้าง 92% และ max-width 1600px เท่ากับส่วน hero-section 👇 */
+    max-width: 1600px; 
+    width: 92%;        
+    margin: 0 auto;    
+    padding: 30px 20px; /* ลด padding ซ้ายขวาลง และเว้นขอบบนล่างให้ดูโปร่งขึ้น */
+    box-sizing: border-box; /* ป้องกันไม่ให้ขอบล้นจอ */
+}
+
+.icon-star {
+    font-size: 24px;
+    color: #a0a0a0;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+.nav-link {
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: #000;
+}
+
+.btn-login {
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    
+    /* 👇 ปรับ 2 ค่านี้เพื่อให้ปุ่มใหญ่ขึ้น 👇 */
+    padding: 10px 20px;  /* จากเดิม 8px 16px (12px คือความสูงบนล่าง, 24px คือความกว้างซ้ายขวา) */
+    font-size: 14px;     /* เพิ่มขนาดตัวอักษรให้พอดีกับปุ่ม */
+    
+    border-radius: 30px; /* ปรับความโค้งให้รับกับขนาดปุ่มที่ใหญ่ขึ้น (ถ้าชอบโค้งน้อยๆ ใช้ 20px เท่าเดิมได้ครับ) */
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* เพิ่มลูกเล่นตอนเอาเมาส์ชี้และตอนคลิกให้ดูมีมิติขึ้น */
+.btn-login:hover {
+    background-color: #e4e4e4;
+}
+
+
+/* ====================================================
+   3. เนื้อหาหลัก (ให้อยู่กึ่งกลางจอพอดี)
+   ==================================================== */
+.hero-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1600px; /* 👈 ขยายจากเดิม 1200px เป็น 1600px */
+    width: 92%;        /* 👈 บังคับให้กางออกไปใช้พื้นที่ 92% ของหน้าจอ */
+    margin: 0 auto;    
+    padding: 20px;
+    flex: 1;
+}
+
+/* ฝั่งซ้าย */
+/* ฝั่งซ้าย */
+.hero-content {
+    flex: 1;
+    max-width: 500px;
+    padding-right: 40px;
+    
+    /* 👇 เพิ่มบรรทัดนี้เพื่อดันข้อความไปทางขวา (ปรับตัวเลข 80px ได้ตามต้องการ) 👇 */
+    margin-left: 80px; 
+    margin-top: -60px;
+}
+
+.brand-logo {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.icon-star-small {
+    font-size: 16px;
+    margin-left: 5px;
+    color: #ccc;
+}
+
+.hero-title {
+    font-size: 3.5rem; 
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 24px;
+    color: #111;
+    letter-spacing: -1px;
+}
+
+/* ไฮไลท์: สี Gradient สำหรับตัวอักษรบรรทัดสุดท้าย */
+.text-gradient {
+    background: linear-gradient(90deg, #5b5bff, #ff5eb1, #ff9b5e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    padding-top: 8px; 
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 40px;
+}
+
+/* ปุ่ม "สร้างกิจกรรมแรกของคุณ" */
+.btn-primary {
+    background-color: #222222;
+    color: #ffffff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px; 
+    font-size: 16px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* ฝั่งขวา (รูปภาพ) */
+/* ฝั่งขวา (รูปภาพ) */
+.hero-image-container {
+    flex: 1.2; 
+    display: flex;
+    justify-content: center; /* 👈 (แก้เป็น center ตามขั้นตอนก่อนหน้า) */
+    align-items: center;
+    
+    /* 👇 เพิ่มบรรทัดนี้เพื่อดึงรูปขึ้นไปด้านบน (เลขติดลบยิ่งเยอะ ยิ่งขึ้นไปสูง) 👇 */
+    margin-top: -80px; 
+}
+
+.hero-image {
+    max-width: 80%;
+    height: auto;
+    border-radius: 50%; 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+/* รองรับมือถือ (Responsive) */
+@media (max-width: 900px) {
+    .hero-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .hero-content {
+        padding-right: 0;
+        margin-left: 0;
+        margin-top: 0;
+        margin-bottom: 40px;
+    }
+    
+    .brand-logo {
+        justify-content: center;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-image-container {
+        justify-content: center;
+        margin-top: 0;
+    }
+}
+
+.landing-brand {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111;
+    text-decoration: none; /* เอาขีดเส้นใต้ออก */
+}
+
+.landing-brand:hover {
+    color: #555; /* เปลี่ยนสีนิดหน่อยตอนเอาเมาส์ชี้ */
+}

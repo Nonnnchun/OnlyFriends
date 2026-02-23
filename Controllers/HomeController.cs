@@ -1,11 +1,26 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using onlyfriends.Models;
+using OnlyFriends.Models;
+using Microsoft.AspNetCore.Authorization;
+using OnlyFriends.Services;
+using OnlyFriends.Models.DTOS.EventDTOS;
+using System.Diagnostics;
 
-namespace onlyfriends.Controllers
+namespace OnlyFriends.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IEventService _activityService;
+        public HomeController(IEventService activityService)
+        {
+            _activityService = activityService;
+        }
+
+        public async Task<IActionResult> Homepage()
+        {
+            IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
+            return View(activities);
+        }
+
         public IActionResult Index()
         {
             return View();
