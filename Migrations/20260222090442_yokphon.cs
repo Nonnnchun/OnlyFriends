@@ -5,7 +5,7 @@
 namespace OnlyFriends.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class yokphon : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

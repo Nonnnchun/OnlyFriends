@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "YIfW9FpuwfM=",
+  "dgSpecHash": "IK3oeY5fNBg=",
   "success": true,
-  "projectFilePath": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\OnlyFriends.csproj",
+  "projectFilePath": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\onlyfriends.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mrfor\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\mrfor\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",
@@ -134,15 +134,5 @@
     "C:\\Users\\mrfor\\.nuget\\packages\\system.security.cryptography.pkcs\\9.0.4\\system.security.cryptography.pkcs.9.0.4.nupkg.sha512",
     "C:\\Users\\mrfor\\.nuget\\packages\\system.security.cryptography.protecteddata\\9.0.6\\system.security.cryptography.protecteddata.9.0.6.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "message": "Problem reading the cache file C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\obj\\project.nuget.cache : '<' is an invalid start of a property name. Expected a '\"'. Path: $ | LineNumber: 2 | BytePositionInLine: 0.",
-      "projectPath": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\OnlyFriends.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\mrfor\\Documents\\GitHub\\OnlyFriends\\OnlyFriends.csproj",
-      "targetGraphs": []
-    }
-  ]
+  "logs": []
 }

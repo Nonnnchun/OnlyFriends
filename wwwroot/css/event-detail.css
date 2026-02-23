@@ -420,26 +420,6 @@ body {
   opacity: 0.85;
 }
 
-.ev-btn-lite {
-  border: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-main);
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.ev-btn-lite:hover {
-  background: #f3f4f6;
-}
-
 .ev-muted { color: var(--text-muted); }
 .ev-small { font-size: 0.85rem; }
 .ev-strong { font-weight: 600; font-size: 1rem; margin-bottom: 2px; }
@@ -499,3 +479,11 @@ body {
   border: 0;
   display: block;
 }
+
+.ev-loc-name {
+    font-size: 1.75rem;       
+    font-weight: 700;    
+    color: #212529;           
+    margin-bottom: 8px;       
+    line-height: 1.2;
+}         

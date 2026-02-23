@@ -1,6 +1,6 @@
-@model OnlyFriends.Models.Event
+@model OnlyFriends.Models.DTOS.EventDTOS.GetEventDTO
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model?.Title?? "Event Details";
 
     // Poster
     var poster = string.IsNullOrWhiteSpace(Model.PosterUrl)
@@ -39,14 +39,14 @@
                       city.Contains("Krung Thep", StringComparison.OrdinalIgnoreCase));
 
     // Going count (ใช้ Users หรือ UserEvents)
-    var going = (Model.UserEvents?.Count > 0) ? Model.UserEvents.Count : (Model.Users?.Count ?? 0);
-    var capacity = Model.Capacity;
-    var spotsLeft = capacity > 0 ? Math.Max(0, capacity - going) : -1;
+    @* var capacity = Model?.Capacity ?? 0; *@
+    @* var going = Model?.UserEvents?.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted) ?? 0; *@
+    @* var spotsLeft = capacity > 0 ? Math.Max(0, capacity - going) : -1; *@
 
-    // Google maps embed (ใช้ Location เป็น query)
-    var mapQuery = Uri.EscapeDataString(Model.Location ?? "");
-    var mapSrc = $"https://www.google.com/maps?q={mapQuery}&output=embed";
-    var mapOpenUrl = $"https://www.google.com/maps/search/?api=1&query={mapQuery}";
+    @* // Google maps embed (ใช้ Location เป็น query) *@
+    @* var mapQuery = Uri.EscapeDataString(Model.Location ?? ""); *@
+    @* var mapSrc = $"https://www.google.com/maps?q={mapQuery}&output=embed"; *@
+    @* var mapOpenUrl = $"https://www.google.com/maps/search/?api=1&query={mapQuery}"; *@
 }
 
 @section Styles {
@@ -67,7 +67,7 @@
                         <button class="ev-btn-lite" type="button" id="btnSubscribe">Subscribe</button>
                     </div>
 
-                    <div class="ev-present-name">@Model.Owner.Username.ToString()</div>
+                    <div class="ev-present-name">@Model.Owner.FirstName @Model.Owner.LastName</div>
 
                     <div class="ev-divider"></div>
 
@@ -75,24 +75,23 @@
 
                     <ul class="ev-host-list">
                         <li class="ev-host-item"><img class="ev-host-avatar"
-                                                          src="@Model.Owner.ProfilePictureUrl"></img><span>@Model.Owner.FirstName
-                            @Model.Owner.LastName</span></li>
+                            src="@Model.Owner.ProfilePictureUrl"></img><span>@Model.Owner.FirstName @Model.Owner.LastName</span></li>
                         </ul>
 
-                        <div class="ev-going">
-                            <div class="ev-going-num">@going Went</div>
-                            <div class="ev-muted ev-small">
-                                @if (capacity > 0)
-                                {
-                                    <span>@spotsLeft spots left</span>
-                                }
-                                else
-                                {
-                                    <span>No capacity limit</span>
-                                }
-                            </div>
-                        </div>
-
+                        @* <div class="ev-going"> *@
+                            @* <div class="ev-going-num">@going Went</div> *@
+                            @* <div class="ev-muted ev-small"> *@
+                                @* @if (capacity > 0) *@
+                                @* { *@
+                                    @* <span>@spotsLeft spots left</span> *@
+                                @* } *@
+                                @* else *@
+                                @* { *@
+                                    @* <span>No capacity limit</span> *@
+                                @* } *@
+                            @* </div> *@
+                        @* </div> *@
+@*  *@
                         <div class="ev-tags">
                             @if (Model.Category != null)
                             {
@@ -197,7 +196,7 @@
 
                         <div class="ev-join-body">
                             <div class="ev-join-welcome">Welcome! To join the event, please register below.</div>
-
+ro
                             <div class="ev-user-row">
                                 <img class="ev-user-avatar" src="@Model.Owner.ProfilePictureUrl" alt="avatar" />
                                 <div class="ev-user-meta">
@@ -265,15 +264,15 @@
                     <div class="ev-loc-row">
                         <div class="ev-muted" id="locText">@Model.Location</div>
 
-                        <div class="ev-loc-actions">
-                            <button class="ev-btn-lite" type="button" id="btnCopyLocation">Copy</button>
-                            <a class="ev-btn-lite" href="@mapOpenUrl" target="_blank">Open Maps</a>
-                        </div>
+                        @* <div class="ev-loc-actions"> *@
+                            @* <button class="ev-btn-lite" type="button" id="btnCopyLocation">Copy</button> *@
+                            @* <a class="ev-btn-lite" href="@mapOpenUrl" target="_blank">Open Maps</a> *@
+                        @* </div> *@
                     </div>
 
-                    <div class="ev-map">
-                        <iframe src="@mapSrc" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    </div>
+                    @* <div class="ev-map"> *@
+                        @* <iframe src="@mapSrc" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> *@
+                    @* </div> *@
                 </section>
             </main>
 
@@ -283,3 +282,4 @@
     @section Scripts {
         <script src="~/js/event-detail.js" asp-append-version="true"></script>
     }
+เเก้ให้หน่อย

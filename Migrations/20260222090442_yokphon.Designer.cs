@@ -12,8 +12,8 @@ using OnlyFriends.Data;
 namespace OnlyFriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260221071423_SiwakornMigration1")]
-    partial class SiwakornMigration1
+    [Migration("20260222090442_yokphon")]
+    partial class yokphon
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
