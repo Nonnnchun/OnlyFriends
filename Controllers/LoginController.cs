@@ -70,7 +70,7 @@ namespace OnlyFriends.Controllers
                 Path = "/"
             };
             Response.Cookies.Append("AuthToken", tokenString, cookieOptions);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Homepage", "Home");
         }
 
         [HttpPost]

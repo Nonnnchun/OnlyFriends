@@ -20,7 +20,7 @@
             </div>
 
             <div class="nav-right">
-                
+
                 <div class="dropdown" id="filterDropdown">
                     <button class="nav-btn" onclick="toggleFilter()">
                         กรองเนื้อหา
@@ -34,19 +34,22 @@
                         </div>
                         <hr>
                         <div class="filter-item">
-                            <input type="checkbox" id="statusOpen" checked> <label for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
+                            <input type="checkbox" id="statusOpen" checked> <label
+                            for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
                         </div>
                         <div class="filter-item">
-                            <input type="checkbox" id="myJoinedEvents"> 
+                            <input type="checkbox" id="myJoinedEvents">
                             <label for="myJoinedEvents">กิจกรรมที่เข้าร่วม</label>
                         </div>
                         <button class="btn-apply" onclick="applyFilter()">นำไปใช้</button>
                     </div>
-        
+                </div>
 
+                @await Html.PartialAsync("_NotificationBell")
                 <div class="dropdown" id="profileDropdown">
                     <button class="profile-btn" onclick="toggleProfile()">
-                        <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg" alt="Profile">
+                        <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg"
+                             alt="Profile">
                     </button>
                     <div class="dropdown-content profile-menu" id="profileMenu">
                         <a href="#">โปรไฟล์ของฉัน</a>
@@ -55,25 +58,23 @@
                         <a href="#" style="color: red;">ออกจากระบบ</a>
                     </div>
                 </div>
-
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
+            </nav>
+        </header>
         <div class="container">
-            &copy; 2569 - OnlyFriends - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @RenderSection("Scripts", required: false)
-</body>
+
+        <footer class="border-top footer text-muted">
+            <div class="container">
+                &copy; 2569 - OnlyFriends - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        @RenderSection("Scripts", required: false)
+    </body>
 
 </html>
