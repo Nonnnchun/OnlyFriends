@@ -12,6 +12,7 @@
     }
 
     /* --- ส่วนหัวของหน้า --- */
+    /* --- ส่วนหัวของหน้า --- */
     .page-header {
         display: flex;
         justify-content: space-between;
@@ -19,22 +20,36 @@
         margin-bottom: 30px;
     }
     .page-title {
-        font-size: 28px; /* เพิ่มขนาดตัวอักษรหน่อยให้สมดุล */
+        font-size: 28px; 
         font-weight: bold;
     }
+
+    /* ตกแต่งปุ่ม (Button) เพียวๆ */
     .header-actions .btn-add {
-        background-color: #eee;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        margin-right: 10px;
-        transition: background 0.2s;
+        background-color: #ffffff;       /* พื้นหลังสีขาว */
+        color: #333333;                  /* ตัวอักษรสีดำ */
+        border: 1px solid #cccccc;       /* กรอบสีเทา */
+        border-radius: 20px;             /* ขอบโค้งมน */
+        padding: 8px 24px;               /* ขนาดพื้นที่ว่างในปุ่ม (บน-ล่าง 8px, ซ้าย-ขวา 24px) */
+        font-weight: 600;                /* ตัวหนา */
+        font-size: 15px;                 /* ขนาดตัวอักษร */
+        cursor: pointer;                 /* เมาส์รูปมือ */
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* เงาบางๆ */
+        transition: all 0.2s ease;       /* แอนิเมชันเวลากด */
+        font-family: inherit;            /* ใช้ฟอนต์เดียวกับเว็บ */
     }
+
+    /* เอฟเฟกต์ตอนชี้เมาส์ */
     .header-actions .btn-add:hover {
-        background-color: #e0e0e0;
+        background-color: #f5f5f5;       /* พื้นหลังเทาอ่อนๆ */
+        color: #000000;                  /* อักษรดำสนิท */
     }
+
+    /* เอฟเฟกต์ตอนกดปุ่ม */
+    .header-actions .btn-add:active {
+        transform: scale(0.95);          /* ปุ่มยุบลงนิดนึง */
+    }
+
     .header-icon {
         padding: 8px;
         cursor: pointer;
@@ -164,3 +179,5 @@
         height: 100%;
         object-fit: cover;
     }
+
+    

@@ -12,9 +12,9 @@
     <div class="page-header">
         <div class="page-title">กิจกรรม</div>
         <div class="header-actions">
-            <a asp-controller="Home" asp-action="CreateActivity" class="btn-add">
+            <button type="button" class="btn-add" onclick="window.location.href='@Url.Action("CreateActivity", "Home")'">
                 Create Activity
-            </a>
+            </button>
         </div>
     </div>
 
