@@ -10,6 +10,7 @@ using OnlyFriends.Services;
 using OnlyFriends.Models.DTOS.UserDTOS;
 using Mapster;
 using OnlyFriends.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OnlyFriends.ApiControllers
 {
@@ -26,6 +27,7 @@ namespace OnlyFriends.ApiControllers
             _logger = logger;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> AddUserAsync(CreateUserDTO userToCreate)
         {
