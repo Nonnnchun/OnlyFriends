@@ -50,10 +50,23 @@ namespace OnlyFriends.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateProfile(UpdateUserDTO updatedData)
         {
+            try
+            {
+                var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                if (userId != updatedData.Id)
+                {
+                    return Unauthorized("User trying to update another user's data");
+                }
 
-            await _userService.UpdateUserAsync(updatedData);
 
-            return RedirectToAction("Index", "Profile");
+                await _userService.UpdateUserAsync(updatedData);
+
+                return RedirectToAction("Index", "Profile");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
     }
 }
