@@ -75,10 +75,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(); // <--- Add this back!
 app.UseRouting();
 
+app.MapStaticAssets();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",

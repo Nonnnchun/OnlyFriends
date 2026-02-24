@@ -7,6 +7,7 @@ using OnlyFriends.Models;
 using OnlyFriends.ApiControllers;
 using OnlyFriends.Models.DTOS.EventDTOS;
 using OnlyFriends.Services;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace OnlyFriends.Controllers
@@ -19,6 +20,8 @@ namespace OnlyFriends.Controllers
                 _activityService = activityService;
             }
 
+
+            // [Authorize]
             [HttpGet("/event/view/{id:int}")]
             public async Task<IActionResult> EventDetails(int id)
             {
