@@ -1,58 +1,57 @@
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using OnlyFriends.Data;
 using OnlyFriends.Models.DTOS.UserDTOS;
 using System.Linq;
+using OnlyFriends.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
+using System.Security.Claims;
+
 
 namespace OnlyFriends.Controllers
 {
+    [Route("settings")]
     public class SettingController : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public SettingController(ApplicationDbContext context)
+        private readonly IUserService _userService;
+        public SettingController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
-        public IActionResult Index()
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            // Fetch User ID 1 
-            var user = _context.Users.FirstOrDefault(u => u.Id == 1);
-
-            if (user == null)
+            try
             {
-                return NotFound("User not found in database.");
+                var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                // Fetch User ID 1 
+                var user = await _userService.FindUserByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return NotFound("User not found in database.");
+                }
+
+                // Map DB Model to UpdateUserDTO
+                var model = user.Adapt<UpdateUserDTO>();
+
+                return View("Setting", model);
             }
-
-            // Map DB Model to UpdateUserDTO
-            var model = new UpdateUserDTO
+            catch (Exception ex)
             {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Username = user.Username,
-                Bio = user.Bio,
-                Email = user.Email
-            };
-
-            return View("Setting", model);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         [HttpPost]
-        public IActionResult UpdateProfile(UpdateUserDTO updatedData)
+        public async Task<IActionResult> UpdateProfile(UpdateUserDTO updatedData)
         {
 
-            var user = _context.Users.FirstOrDefault(u => u.Id == updatedData.Id);
-
-            if (user != null)
-            {
-                user.FirstName = updatedData.FirstName;
-                user.LastName = updatedData.LastName;
-                user.Username = updatedData.Username;
-                user.Bio = updatedData.Bio;
-
-                _context.SaveChanges();
-            }
+            await _userService.UpdateUserAsync(updatedData);
 
             return RedirectToAction("Index", "Profile");
         }

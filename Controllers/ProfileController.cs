@@ -3,36 +3,32 @@ using OnlyFriends.Data;
 using OnlyFriends.Models;
 using System.Linq;
 using OnlyFriends.Models.DTOS.UserDTOS;
+using OnlyFriends.Services;
 
 namespace OnlyFriends.Controllers
 {
+    [Route("user")]
     public class ProfileController : Controller
     {
-        private readonly ApplicationDbContext _context;
 
-        public ProfileController(ApplicationDbContext context)
+        private readonly IUserService _userService;
+        public ProfileController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
-        public IActionResult Index()
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Index(int id)
         {
-            // Fetch User Id 1
-            var user = _context.Users.FirstOrDefault(u => u.Id == 1);
+            var userDTO = await _userService.FindUserByIdAsync(id);
 
-            if (user == null) return NotFound();
-
-            var userDto = new GetUserDTO
+            if (userDTO == null)
             {
-                Id = user.Id,
-                Username = user.Username,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Bio = user.Bio,
-                ProfilePictureUrl = user.ProfilePictureUrl
-            };
+                return StatusCode(StatusCodes.Status404NotFound, "User not found");
+            }
 
-            return View("Profile", userDto);
+            return View("Profile", userDTO);
         }
     }
 }
