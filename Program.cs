@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Cryptography;
 using Mapster;
-using Mapster;
+using EntityFramework.Exceptions.PostgreSQL; // For the .UseExceptionProcessor() method
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +24,7 @@ builder.Services.AddTransient<ICategoryService, CategoryService>();
 // Register Postgresql
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("DefaultConnection not found in configuration");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString).UseExceptionProcessor());
 
 var issuer = builder.Configuration["Jwt:Issuer"] ?? "OnlyFriends";
 var audience = builder.Configuration["Jwt:Audience"] ?? "OnlyFriends";

@@ -17,8 +17,8 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.TargetFrameworkIdentifier = .NETCoreApp
 build_property.TargetFrameworkVersion = v10.0
-build_property.RootNamespace = OnlyFriends
-build_property.RootNamespace = OnlyFriends
+build_property.RootNamespace = onlyfriends
+build_property.RootNamespace = onlyfriends
 build_property.ProjectDir = C:\Users\user\Desktop\Programming\OnlyFriends\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
@@ -62,6 +62,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZmlsZVxQcm9maWxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/user/Desktop/Programming/OnlyFriends/Views/Register/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVnaXN0ZXJcUmVnaXN0ZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/user/Desktop/Programming/OnlyFriends/Views/Setting/Setting.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2V0dGluZ1xTZXR0aW5nLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -88,12 +92,12 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/user/Desktop/Programming/OnlyFriends/Views/Hero/Heropage.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVyb1xIZXJvcGFnZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = b-cjd59c8kwm
+build_metadata.AdditionalFiles.CssScope = b-uh5r4peili
 
 [C:/Users/user/Desktop/Programming/OnlyFriends/Views/Home/Homepage.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxIb21lcGFnZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = b-zk2d4vuvtn
+build_metadata.AdditionalFiles.CssScope = b-ik3v14voln
 
 [C:/Users/user/Desktop/Programming/OnlyFriends/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = b-1ym9vh0lxo
+build_metadata.AdditionalFiles.CssScope = b-adpd4ftmgj
