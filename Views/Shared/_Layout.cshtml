@@ -52,10 +52,18 @@
                              alt="Profile">
                     </button>
                     <div class="dropdown-content profile-menu" id="profileMenu">
-                        <a href="#">โปรไฟล์ของฉัน</a>
-                        <a href="#">กิจกรรมที่เข้าร่วม</a>
+                        <a asp-controller="Setting" asp-action="Index">โปรไฟล์ของฉัน</a>
+                        <a asp-controller="Profile" asp-action="Index">กิจกรรมที่เข้าร่วม</a>
                         <hr>
-                        <a href="#" style="color: red;">ออกจากระบบ</a>
+                        @if (User.Identity?.IsAuthenticated ?? false) {
+
+                        <form asp-controller="Login" asp-action="Logout" method="post"class="d-inline">
+                            <button type="submit" class="btn btn-link p-0 m-0 align-baseline" style="color:red">Log Out</button>
+                        </form>
+                        } 
+                        else {
+                            <a asp-controller="Login" asp-action="Index" class="sign-in-link">Log In</a>
+                        }
                     </div>
                 </div>
             </nav>

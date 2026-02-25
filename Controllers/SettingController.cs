@@ -61,7 +61,7 @@ namespace OnlyFriends.Controllers
 
                 await _userService.UpdateUserAsync(updatedData);
 
-                return RedirectToAction("Index", "Profile");
+                return RedirectToAction("Homepage", "Home");
             }
             catch (Exception ex)
             {
