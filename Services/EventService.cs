@@ -62,8 +62,12 @@ public sealed class EventService : IEventService
 
     public async Task UpdateEventAsync(UpdateEventDTO activityToUpdate)
     {
-        Event activity = activityToUpdate.Adapt<Event>();
-        _context.Events.Update(activity);
+        var activity = await _context.Events.FindAsync(activityToUpdate.Id);
+        if (activity == null)
+        {
+            return;
+        }
+        activityToUpdate.Adapt(activity);
         await _context.SaveChangesAsync();
     }
 

@@ -57,8 +57,12 @@ public sealed class CategoryService : ICategoryService
 
     public async Task UpdateCategoryAsync(UpdateCategoryDTO categoryToUpdate)
     {
-        Category category = categoryToUpdate.Adapt<Category>();
-        _context.Categories.Update(category);
+        var category = await _context.Categories.FindAsync(categoryToUpdate.Id);
+        if (category == null)
+        {
+            return;
+        }
+        categoryToUpdate.Adapt(category);
         await _context.SaveChangesAsync();
     }
 }
