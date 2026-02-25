@@ -19,10 +19,10 @@ namespace OnlyFriends.Controllers
         }
 
         [Route("/event/view/{id}")]
-        public async Task<IActionResult> EventDetails()
+        public async Task<IActionResult> EventDetails(int id)
         {
-            // IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
-            return View("Details");
+            IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
+            return View("Details",activities.FirstOrDefault(a => a.Id == id));
         }
     }
 }

@@ -65,6 +65,21 @@ namespace OnlyFriends.ApiControllers
             }
         }
 
+         [HttpPost("{eventId}/join")]
+         public async Task<IActionResult> JoinNow(int eventId, [FromBody] int userId)
+         {
+             try
+             {
+           await _activityService.AddParticipantManualAsync(new AddUserToEventDTO { EventId = eventId, UserId = userId }); 
+           return Ok(new { message = "Accepted immediately" });
+             }
+             catch (Exception ex)
+             {
+           _logger.LogError(ex, ex.Message);
+           return StatusCode(500, ex.Message);
+             }
+         }
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEventByIdAsync(int id)
         {

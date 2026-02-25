@@ -50,8 +50,8 @@ namespace OnlyFriends.Models
         public List<UserEvent> UserEvents { get; } = [];
 
         // Category
-        public int CategoryId { get; set; } // Required foreign key property
-        public Category Category { get; set; } = null!; // Required reference navigation to principal 
+        public required int CategoryId { get; set; } // Required foreign key property
+        public required Category Category { get; set; } // Required reference navigation to principal 
     }
 
 }

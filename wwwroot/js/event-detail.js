@@ -1,79 +1,54 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const joinCard = document.querySelector(".ev-join-card");
-  const btnJoin = document.getElementById("btnJoin");
-  const joinTitle = document.getElementById("joinTitle");
+document.addEventListener('DOMContentLoaded', function () {
+    const btnJoin = document.getElementById('btnRequestJoin');
+    
+    if (btnJoin) {
+        btnJoin.addEventListener('click', async function () {
+            // ป้องกันการกดซ้ำ
+            if (btnJoin.disabled) return;
 
-  const btnTicket = document.getElementById("btnMyTicket");
-  const btnInvite = document.getElementById("btnInvite");
-  const btnCopy = document.getElementById("btnCopyLocation");
-  const locText = document.getElementById("locText");
-  const btnSub = document.getElementById("btnSubscribe");
+            const originalText = btnJoin.innerText;
+            btnJoin.disabled = true;
+            btnJoin.innerText = 'Processing...';
 
-  // --- Simulate join state (เพื่อลอง UI ก่อน ยังไม่ต่อ DB) ---
-  // เก็บสถานะ join ไว้ใน localStorage
-  const joinedKey = "OnlyFriends_joined_demo";
-  const status = (joinCard?.dataset.status || "").toLowerCase();
-  const isClosed = status === "closed";
-  const isJoined = localStorage.getItem(joinedKey) === "1";
+            try {
+                // ตัวอย่างการส่ง Request ไปยัง Backend (เปลี่ยน URL ตามจริง)
+                // const response = await fetch('/Events/Join/' + eventId, { method: 'POST' });
+                
+                // จำลองการโหลด 1.5 วินาที
+                setTimeout(() => {
+                    btnJoin.innerText = 'Request Sent!';
+                    btnJoin.style.backgroundColor = '#10b981'; // Success Green
+                    
+                    // แสดง Notification (ควรทำ UI Modal เพิ่มเติม)
+                    console.log("Join request successful");
+                }, 1500);
 
-  function renderJoinState() {
-    if (!btnJoin || !joinTitle || !btnTicket || !btnInvite) return;
-
-    if (isClosed) {
-      btnJoin.disabled = true;
-      btnJoin.textContent = "Closed";
-      joinTitle.textContent = "Event Closed";
-      btnTicket.style.display = "none";
-      btnInvite.style.display = "none";
-      return;
+            } catch (error) {
+                console.error('Error joining event:', error);
+                btnJoin.disabled = false;
+                btnJoin.innerText = originalText;
+                alert('Something went wrong. Please try again.');
+            }
+        });
     }
 
-    const joined = localStorage.getItem(joinedKey) === "1";
-    if (joined) {
-      joinTitle.textContent = "Thank You for Joining";
-      btnJoin.textContent = "Joined";
-      btnJoin.disabled = true;
-      btnTicket.style.display = "inline-flex";
-      btnInvite.style.display = "inline-flex";
-    } else {
-      joinTitle.textContent = "Register Now";
-      btnJoin.textContent = "Join";
-      btnJoin.disabled = false;
-      btnTicket.style.display = "none";
-      btnInvite.style.display = "none";
+    // เปิดแผนที่เมื่อคลิกที่ชื่อสถานที่
+    const locBox = document.querySelector('.ev-meta-item:last-child');
+    if (locBox) {
+        locBox.style.cursor = 'pointer';
+        locBox.addEventListener('click', () => {
+            const locName = locBox.querySelector('.ev-strong').innerText.replace(' ↗', '');
+            if (locName && locName !== 'No Location') {
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locName)}`, '_blank');
+            }
+        });
     }
-  }
 
-  renderJoinState();
-
-  if (btnJoin && !isClosed) {
-    btnJoin.addEventListener("click", () => {
-      const ok = confirm("Join this event? (demo)");
-      if (!ok) return;
-      localStorage.setItem(joinedKey, "1");
-      renderJoinState();
-      alert("Joined! (demo)");
-    });
-  }
-
-  // Ticket / Invite (demo)
-  btnTicket?.addEventListener("click", () => alert("My Ticket (demo)"));
-  btnInvite?.addEventListener("click", () => alert("Invite a Friend (demo)"));
-
-  // Copy location
-  btnCopy?.addEventListener("click", async () => {
-    const text = (locText?.textContent || "").trim();
-    if (!text) return;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      btnCopy.textContent = "Copied!";
-      setTimeout(() => (btnCopy.textContent = "Copy"), 1200);
-    } catch {
-      prompt("Copy location:", text);
+    // ปรับความสูงของ Map iframe ให้เหมาะสมกับ Container (ถ้าต้องการ)
+    const mapFrame = document.querySelector('.ev-map iframe');
+    if (mapFrame) {
+        mapFrame.onload = function() {
+            console.log("Map loaded");
+        };
     }
-  });
-
-  // Subscribe (demo)
-  btnSub?.addEventListener("click", () => alert("Subscribed! (demo)"));
 });
