@@ -14,7 +14,6 @@ namespace OnlyFriends.Models
         public User User { get; set; } = null!;
         public int EventId { get; set; }
         public Event Event { get; set; } = null!;
-
         public EnumRequestStatus RequestStatus { get; set; }
 
     }

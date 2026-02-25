@@ -120,7 +120,9 @@ body {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
 }
 
 .ev-tags {
@@ -487,3 +489,42 @@ body {
     margin-bottom: 8px;       
     line-height: 1.2;
 }         
+
+.action-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.action-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.action-link:hover {
+  color: var(--text-dark);
+}
+
+.avatar-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-left: 2px; 
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+ .avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--avatar-border);
+  margin-left: -1px; 
+  position: relative;
+
+}

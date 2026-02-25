@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Cryptography;
 using Mapster;
+using Mapster;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,7 +79,6 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // <--- Add this back!
 app.UseRouting();

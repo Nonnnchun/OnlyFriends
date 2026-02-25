@@ -20,13 +20,11 @@ namespace OnlyFriends.Controllers
                 _activityService = activityService;
             }
 
-
-            // [Authorize]
-            [HttpGet("/event/view/{id:int}")]
-            public async Task<IActionResult> EventDetails(int id)
-            {
-                IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
-                return View("EventDetails", activities.FirstOrDefault(a => a.Id == id));
-            }
+        [Route("/event/view/{id}")]
+        public async Task<IActionResult> EventDetails(int id)
+        {
+            IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
+            return View("Details",activities.FirstOrDefault(a => a.Id == id));
         }
     }
+}
