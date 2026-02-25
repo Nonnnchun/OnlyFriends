@@ -5,8 +5,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Cryptography;
+using Mapster;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Ignore null values for mapster
+TypeAdapterConfig.GlobalSettings.Default
+    .IgnoreNullValues(true);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -63,6 +68,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(options =>
 {
 });
+
 // Create app
 var app = builder.Build();
 
