@@ -12,8 +12,8 @@ using OnlyFriends.Data;
 namespace onlyfriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260225042110_ForceNahee1")]
-    partial class ForceNahee1
+    [Migration("20260226142749_AddRegisteredAtToUserEvent")]
+    partial class AddRegisteredAtToUserEvent
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -171,6 +171,9 @@ namespace onlyfriends.Migrations
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RequestStatus")
                         .HasColumnType("integer");

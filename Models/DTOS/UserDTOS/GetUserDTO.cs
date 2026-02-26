@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
-
 namespace OnlyFriends.Models.DTOS.UserDTOS
 {
     public class GetUserDTO
@@ -13,7 +10,6 @@ namespace OnlyFriends.Models.DTOS.UserDTOS
         public string LastName { get; set; } = string.Empty;
         public required string Email { get; set; }
         public required string Password { get; set; }
-        public List<int> EventIds { get; set; } = [];
-
-    }
+        public List<Event> Events {get; set;} = [];
+        }
 }

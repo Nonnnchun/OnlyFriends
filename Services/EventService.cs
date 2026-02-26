@@ -63,8 +63,12 @@ public sealed class EventService : IEventService
 
     public async Task UpdateEventAsync(UpdateEventDTO activityToUpdate)
     {
-        Event activity = activityToUpdate.Adapt<Event>();
-        _context.Events.Update(activity);
+        var activity = await _context.Events.FindAsync(activityToUpdate.Id);
+        if (activity == null)
+        {
+            return;
+        }
+        activityToUpdate.Adapt(activity);
         await _context.SaveChangesAsync();
     }
 
@@ -85,12 +89,12 @@ public sealed class EventService : IEventService
      {
      EventId = userEventToAdd.EventId,
      UserId = userEventToAdd.UserId,
-     RequestStatus = EnumRequestStatus.Accepted
+     RequestStatus = EnumRequestStatus.Pending
      });
      }
      else
      {
-     ue.RequestStatus = EnumRequestStatus.Accepted;
+     ue.RequestStatus = EnumRequestStatus.Pending;
      }
      
      await _context.SaveChangesAsync();

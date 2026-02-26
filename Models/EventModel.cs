@@ -36,7 +36,7 @@ namespace OnlyFriends.Models
         // Time
         public DateTime? StartAt { get; set; }
         public DateTime? EndAt { get; set; }
-        public string? TimeZone { get; set; } = "Asia/Bangkok";
+        public string? TimeZone { get; set; } 
 
         // Map pin
         public double? Latitude { get; set; }

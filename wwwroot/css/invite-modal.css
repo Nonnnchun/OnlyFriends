@@ -1,0 +1,185 @@
+/* ── Overlay ── */
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+/* ── Modal Box ── */
+.invite-modal {
+    background: #fff; border-radius: 16px;
+    width: 860px; max-width: 95vw;
+    height: 580px; max-height: 90vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+    transform: translateY(16px);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+}
+.modal-overlay.open .invite-modal { transform: translateY(0); }
+
+/* ── Header ── */
+.invite-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.invite-title { font-size: 16px; font-weight: 700; }
+
+.slots-badge {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 10px;
+}
+.modal-close {
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer; color: var(--text-secondary);
+    transition: all 0.15s;
+}
+.modal-close:hover { background: var(--bg); color: var(--text-primary); }
+
+/* ── Body ── */
+.invite-body { display: flex; flex: 1; overflow: hidden; }
+
+#inviteStep1, #inviteStep2 {
+    display: flex; width: 100%; height: 100%;
+}
+
+/* ── Sidebar ── */
+.invite-sidebar {
+    width: 220px; flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    padding: 14px 0; overflow-y: auto;
+}
+.sidebar-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 18px; font-size: 13.5px; font-weight: 500;
+    color: var(--text-secondary); cursor: pointer;
+    transition: all 0.12s;
+}
+.sidebar-item:hover  { background: var(--bg); color: var(--text-primary); }
+.sidebar-item.active { background: var(--bg); color: var(--text-primary); font-weight: 600; }
+
+.sidebar-section-label {
+    font-size: 10.5px; font-weight: 700; color: var(--text-muted);
+    letter-spacing: 0.6px; padding: 12px 18px 4px; text-transform: uppercase;
+}
+.sidebar-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text-muted); flex-shrink: 0;
+}
+.sidebar-count {
+    margin-left: auto; font-size: 12px;
+    color: var(--text-muted); font-weight: 500;
+}
+
+/* ── Main Panel ── */
+.invite-main { flex: 1; overflow-y: auto; padding: 18px 20px; }
+
+/* ── Email Input ── */
+.email-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.btn-add {
+    padding: 8px 18px; font-size: 13.5px; font-weight: 600;
+    background: var(--text-primary); color: #fff;
+    border: none; border-radius: var(--radius-sm); cursor: pointer;
+    font-family: var(--font); white-space: nowrap; transition: background 0.15s;
+}
+.btn-add:hover { background: #333; }
+
+/* ── Guest List ── */
+.guest-list { display: flex; flex-direction: column; gap: 6px; }
+.guest-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 12px; border-radius: var(--radius-md);
+    border: 1px solid transparent; cursor: pointer; transition: all 0.12s;
+}
+.guest-item:hover    { background: var(--surface2); border-color: var(--border); }
+.guest-item.selected { background: var(--surface2); border-color: var(--border2); }
+
+.guest-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    object-fit: cover; flex-shrink: 0; background: var(--border);
+}
+.guest-info  { flex: 1; }
+.guest-name  { font-size: 13.5px; font-weight: 600; }
+.guest-email { font-size: 12px; color: var(--text-secondary); }
+
+.guest-check {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--text-primary); color: #fff;
+    display: none; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0;
+}
+.guest-item.selected .guest-check { display: flex; }
+
+/* ── Step 2: Message ── */
+.message-box {
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    overflow: hidden; margin-bottom: 10px;
+}
+.message-intro {
+    padding: 12px 14px; font-size: 13.5px; color: var(--text-primary);
+    border-bottom: 1px solid var(--border); background: #fff;
+}
+.message-custom {
+    width: 100%; padding: 12px 14px; min-height: 80px;
+    font-size: 13px; color: var(--text-secondary);
+    border: none; outline: none; resize: none;
+    font-family: var(--font); background: #fff;
+}
+.message-rsvp-box {
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 12px 14px; font-size: 13px; color: var(--text-secondary);
+    margin-bottom: 12px; background: var(--surface2);
+}
+
+/* ── Footer ── */
+.invite-footer {
+    display: flex; align-items: center;
+    padding: 14px 22px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.selected-count { font-size: 13.5px; font-weight: 500; color: var(--text-secondary); }
+
+.btn-next {
+    display: flex; align-items: center; gap: 6px;
+    padding: 9px 20px; font-size: 13.5px; font-weight: 700;
+    background: var(--text-primary); color: #fff;
+    border: none; border-radius: var(--radius-sm); cursor: pointer;
+    font-family: var(--font); transition: all 0.15s;
+}
+.btn-next:disabled { background: var(--border2); cursor: not-allowed; color: var(--text-muted); }
+.btn-next:not(:disabled):hover { background: #333; }
+
+.btn-back {
+    display: flex; align-items: center; gap: 6px;
+    padding: 9px 16px; font-size: 13px; font-weight: 600;
+    background: var(--surface2); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    cursor: pointer; font-family: var(--font); transition: all 0.15s;
+}
+.btn-back:hover { background: var(--bg); }
+
+.btn-send {
+    display: flex; align-items: center; gap: 6px;
+    padding: 9px 20px; font-size: 13.5px; font-weight: 700;
+    background: var(--text-primary); color: #fff;
+    border: none; border-radius: var(--radius-sm); cursor: pointer;
+    font-family: var(--font); transition: all 0.15s;
+}
+.btn-send:hover { background: #333; }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .invite-modal   { height: 90vh; }
+    .invite-sidebar { width: 130px; }
+    .sidebar-item   { padding: 8px 10px; font-size: 12px; }
+}

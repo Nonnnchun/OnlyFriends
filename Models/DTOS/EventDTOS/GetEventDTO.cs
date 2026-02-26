@@ -24,6 +24,7 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public List<User> Users { get; set; } = [];
+        public List<UserEvent> UserEvents { get; set; } = [];
         public required GetUserDTO Owner { get; set; }
         public required GetCategoryDTO Category { get; set; }
 
