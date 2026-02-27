@@ -1,46 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>@ViewData["Title"] - OnlyFriends</title>
-        <script type="importmap"></script>
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-        <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
-        @RenderSection("Styles", required: false)
-    </head>
-    <body>
-        <header>
-            <nav class="custom-navbar">
-                <div class="nav-left">
-                    <a href="/Home/Index" class="brand">OnlyFriends</a>
-                    <a href="/Home/Index" class="nav-link">Home</a>
-                    <a href="/Home/CreateActivity" class="nav-link">Create Activity</a>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - OnlyFriends</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <header>
+        <nav class="custom-navbar">
+            <div class="nav-left">
+                <a href="/Home/Homepage" class="brand">OnlyFriends</a>
+                <a href="/Home/Homepage" class="nav-link">Home</a>
+                <a href="/Home/CreateActivity" class="nav-link">Create Activity</a>
+            </div>
+
+            <div class="nav-right">
+
+                <div class="dropdown" id="filterDropdown">
+                    <button class="nav-btn" onclick="toggleFilter()">
+                        กรองเนื้อหา
+                    </button>
+                    <div class="dropdown-content" id="filterMenu">
+                        <div class="filter-item">
+                            <input type="checkbox" id="catSports"> <label for="catSports">เกมส์</label>
+                        </div>
+                        <div class="filter-item">
+                            <input type="checkbox" id="catEdu"> <label for="catEdu">ท่องเที่ยว</label>
+                        </div>
+                        <hr>
+                        <div class="filter-item">
+                            <input type="checkbox" id="statusOpen" checked> <label
+                            for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
+                        </div>
+                        <div class="filter-item">
+                            <input type="checkbox" id="myJoinedEvents">
+                            <label for="myJoinedEvents">กิจกรรมที่เข้าร่วม</label>
+                        </div>
+                        <button class="btn-apply" onclick="applyFilter()">นำไปใช้</button>
+                    </div>
                 </div>
 
-                <div class="nav-right">
-                    <div class="dropdown" id="filterDropdown">
-                        <button class="nav-btn" onclick="toggleFilter()">
-                            กรองเนื้อหา
-                        </button>
-                        <div class="dropdown-content" id="filterMenu">
-                            <div class="filter-item">
-                                <input type="checkbox" id="catSports"> <label for="catSports">เกมส์</label>
-                            </div>
-                            <div class="filter-item">
-                                <input type="checkbox" id="catEdu"> <label for="catEdu">ท่องเที่ยว</label>
-                            </div>
-                            <hr>
-                            <div class="filter-item">
-                                <input type="checkbox" id="statusOpen" checked> <label for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
-                            </div>
-                            <div class="filter-item">
-                                <input type="checkbox" id="myJoinedEvents"> 
-                                <label for="myJoinedEvents">กิจกรรมที่เข้าร่วม</label>
-                            </div>
-                            <button class="btn-apply" onclick="applyFilter()">นำไปใช้</button>
-                        </div>
+                @await Html.PartialAsync("_NotificationBell")
+                <div class="dropdown" id="profileDropdown">
+                    <button class="profile-btn" onclick="toggleProfile()">
+                        <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg"alt="Profile">
+                    </button>
+                    <div class="dropdown-content profile-menu" id="profileMenu">
+                        <a asp-controller="Setting" asp-action="Index">โปรไฟล์ของฉัน</a>
+                        <a asp-controller="Profile" asp-action="Index">กิจกรรมที่เข้าร่วม</a>
+                        <hr>
+                        @if (User.Identity?.IsAuthenticated ?? false) {
+
+                        <form asp-controller="Login" asp-action="Logout" method="post"class="d-inline">
+                            <button type="submit" class="btn btn-link p-0 m-0 align-baseline" style="color:red">Log Out</button>
+                        </form>
+                        } 
+                        else {
+                            <a asp-controller="Login" asp-action="Index" class="sign-in-link">Log In</a>
+                        }
                     </div>
 
                     @if (User?.Identity?.IsAuthenticated ?? false)
@@ -64,7 +86,6 @@
                     {
                         <a class="btn btn-outline-secondary" href="/Login">เข้าสู่ระบบ</a>
                     }
-
                 </div>
             </nav>
         </header>
@@ -82,6 +103,6 @@
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
-        @await RenderSectionAsync("Scripts", required: false)
+        @RenderSection("Scripts", required: false)
     </body>
 </html>

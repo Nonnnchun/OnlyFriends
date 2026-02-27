@@ -1,6 +1,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using OnlyFriends.Models;
+
+using OnlyFriends.Services;
+using OnlyFriends.Models.DTOS.EventDTOS;
 using Microsoft.AspNetCore.Authorization;
 
 namespace OnlyFriends.Controllers

@@ -30,7 +30,7 @@ namespace OnlyFriends.Services
 
          _context.Notifications.Add(notification);
          await _context.SaveChangesAsync();
-         
+
          // Entity → ViewModel
          return NotificationViewModel.FromEntity(notification);
       }
@@ -75,7 +75,7 @@ namespace OnlyFriends.Services
 
       public async Task<IEnumerable<NotificationViewModel>> GetNotificationAsync()
       {
-         var notifications = await _context  .Notifications
+         var notifications = await _context.Notifications
                                              .AsNoTracking()
                                              .ToListAsync();
 

@@ -1,0 +1,127 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
+
+// using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Mvc;
+using OnlyFriends.Services;
+using OnlyFriends.Models.DTOS.UserDTOS;
+using Mapster;
+using OnlyFriends.Models;
+using Microsoft.AspNetCore.Authorization;
+
+namespace OnlyFriends.ApiControllers
+{
+    [Route("/api/user")]
+    [ApiController]
+    public class UserController : ControllerBase
+    {
+        private readonly IUserService _userService;
+        private readonly ILogger<UserController> _logger;
+
+        public UserController(IUserService userService, ILogger<UserController> logger)
+        {
+            _userService = userService;
+            _logger = logger;
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> AddUserAsync(CreateUserDTO userToCreate)
+        {
+            try
+            {
+                var user = await _userService.AddUserAsync(userToCreate);
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUserAsync(int id, UpdateUserDTO userToUpdate)
+        {
+            if (id != userToUpdate.Id)
+            {
+                return BadRequest($"id in parameter and id in body is different. id in parameter: {id}, id in body: {userToUpdate.Id}");
+            }
+            try
+            {
+                GetUserDTO? user = await _userService.FindUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                await _userService.UpdateUserAsync(userToUpdate);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserByIdAsync(int id)
+        {
+            try
+            {
+                GetUserDTO? user = await _userService.FindUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUsersAsync()
+        {
+            try
+            {
+                IEnumerable<GetUserDTO> users = await _userService.GetUsersAsync();
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteByIdAsync(int id)
+        {
+            try
+            {
+                GetUserDTO? user = await _userService.FindUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                await _userService.DeleteUserAsync(user.Adapt<User>());
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+    }
+}

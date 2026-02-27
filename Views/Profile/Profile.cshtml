@@ -1,0 +1,317 @@
+@model OnlyFriends.Models.DTOS.UserDTOS.GetUserDTO
+@{
+    ViewData["Title"] = "Profile";
+    //now using User id 1 info and mock event
+    var username = Model.Username;
+    var firstName = Model.FirstName;
+    var lastName = Model.LastName;
+    var bio = Model.Bio;
+
+    var joinedDate = "February 2026";
+    var hosted = 0;
+    var attended = 3;
+    bool hasEvents = true;
+
+    var mockEvents = new[]
+    {
+        new {
+            Title = "Late Night Board Game Bash",
+            Description = "Bring your favorite board games! Snacks provided. All skill levels welcome.",
+            Date = "Saturday, March 8, 2026",
+            Time = "8:00 PM",
+            Location = "DemonineZ's Place, Bangkok",
+            Attendees = 5,
+            Tag = "Social",
+            Image = "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=800&q=80"
+        },
+        new {
+            Title = "Indie Film Night 🎬",
+            Description = "We're watching two indie films back-to-back. Discussion session after each one.",
+            Date = "Friday, March 14, 2026",
+            Time = "7:30 PM",
+            Location = "The Projector Lounge",
+            Attendees = 12,
+            Tag = "Culture",
+            Image = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80"
+        },
+        new {
+            Title = "Morning Hike at Khao Yai",
+            Description = "Easy 5km trail, great views. Carpool leaving from BTS Mo Chit at 6am.",
+            Date = "Sunday, March 22, 2026",
+            Time = "6:00 AM",
+            Location = "Khao Yai National Park",
+            Attendees = 8,
+            Tag = "Outdoor",
+            Image = "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&q=80"
+        }
+    };
+}
+
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        max-width: 700px;
+        margin: 20px auto 0;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background-color: #f5deb0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 50px;
+        flex-shrink: 0;
+    }
+
+    .profile-info {
+        text-align: left;
+    }
+
+    .profile-info h2 {
+        margin: 0 0 2px;
+        font-size: 1.5rem;
+        color: #1a1a1a;
+    }
+
+    .profile-handle {
+        color: #888;
+        font-size: 0.95rem;
+        margin: 0 0 6px;
+    }
+
+    .profile-bio {
+        color: #444;
+        font-size: 0.9rem;
+        margin: 0 0 6px;
+    }
+
+    .profile-joined {
+        color: #888;
+        font-size: 0.88rem;
+        margin: 0 0 8px;
+    }
+
+    .profile-stats {
+        color: #555;
+        font-size: 0.9rem;
+        display: flex;
+        gap: 20px;
+    }
+
+    .nothing-box {
+        margin-top: 40px;
+        opacity: .6;
+        text-align: center;
+    }
+
+    .nothing-box img {
+        width: 150px;
+        margin-bottom: 20px;
+    }
+
+    .event-list {
+        margin-top: 40px;
+        text-align: left;
+    }
+
+    .event-card {
+        border-radius: 12px;
+        border: 1px solid #eee;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .event-card:hover {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .event-card-image {
+        width: 220px;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .event-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .event-card-body {
+        padding: 20px 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 1;
+    }
+
+    .event-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+    }
+
+    .event-card h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #1a1a1a;
+    }
+
+    .event-card p {
+        color: #666;
+        margin: 0 0 14px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .event-meta {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 0.82rem;
+        color: #888;
+    }
+
+    .event-meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .event-tag {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background-color: #f0f4ff;
+        color: #4a6cf7;
+        white-space: nowrap;
+        align-self: flex-start;
+        margin-top: 2px;
+    }
+
+    @@media (max-width: 600px) {
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .profile-info {
+            text-align: center;
+        }
+
+        .profile-stats {
+            justify-content: center;
+        }
+
+        .event-card {
+            flex-direction: column;
+        }
+
+        .event-card-image {
+            width: 100%;
+            height: 180px;
+        }
+    }
+</style>
+
+<div class="profile-container">
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+
+        <!-- Avatar -->
+        <div class="profile-avatar">
+            @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+            {
+                <img src="@Model.ProfilePictureUrl" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
+            }
+            else
+            {
+                <span>😊</span>
+            }
+        </div>
+
+        <!-- Info -->
+        <div class="profile-info">
+            <h2>@(firstName + " " + lastName)</h2>
+            <p class="profile-handle">@@@username</p>
+
+            @if (!string.IsNullOrEmpty(bio))
+            {
+                <p class="profile-bio">@bio</p>
+            }
+
+            <p class="profile-joined">
+                <i class="bi bi-calendar"></i> Joined @joinedDate
+            </p>
+
+            <div class="profile-stats">
+                <span><strong>@hosted</strong> Hosted</span>
+                <span><strong>@attended</strong> Attended</span>
+            </div>
+        </div>
+
+    </div>
+
+    <hr style="margin: 40px auto; max-width: 700px;">
+
+    <!-- Events -->
+    @if (hasEvents)
+    {
+        <div class="event-list">
+            @foreach (var evt in mockEvents)
+            {
+                <div class="event-card">
+                    <div class="event-card-image">
+                        <img src="@evt.Image" alt="@evt.Title" />
+                    </div>
+                    <div class="event-card-body">
+                        <div>
+                            <div class="event-card-header">
+                                <h4>@evt.Title</h4>
+                                <span class="event-tag">@evt.Tag</span>
+                            </div>
+                            <p>@evt.Description</p>
+                        </div>
+                        <div class="event-meta">
+                            <span><i class="bi bi-calendar-event"></i> @evt.Date</span>
+                            <span><i class="bi bi-clock"></i> @evt.Time</span>
+                            <span><i class="bi bi-geo-alt"></i> @evt.Location</span>
+                            <span><i class="bi bi-people"></i> @evt.Attendees attending</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="nothing-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486830.png" />
+            <h4>Nothing Here, Yet</h4>
+            <p>@username has no public events at this time.</p>
+        </div>
+    }
+
+</div>

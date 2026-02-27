@@ -5,18 +5,26 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Cryptography;
+using Mapster;
+using EntityFramework.Exceptions.PostgreSQL; // For the .UseExceptionProcessor() method
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Ignore null values for mapster
+TypeAdapterConfig.GlobalSettings.Default
+    .IgnoreNullValues(true);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddTransient<IEventService, EventService>();
+builder.Services.AddTransient<ICategoryService, CategoryService>();
 
 // Register Postgresql
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("DefaultConnection not found in configuration");
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
-    options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString).UseExceptionProcessor());
 
 var issuer = builder.Configuration["Jwt:Issuer"] ?? "OnlyFriends";
 var audience = builder.Configuration["Jwt:Audience"] ?? "OnlyFriends";
@@ -58,7 +66,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+});
+
 // Create app
 var app = builder.Build();
 
@@ -68,18 +79,19 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // <--- Add this back!
 app.UseRouting();
+
+app.MapStaticAssets();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Hero}/{action=Heropage}/{id?}")
     .WithStaticAssets();
 
 app.Run();

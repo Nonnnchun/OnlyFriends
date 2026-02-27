@@ -13,6 +13,13 @@ namespace OnlyFriends.Models
         Offline
     }
 
+// เขียนกัน error เฉยๆ merge branch siwakorn
+    public enum EnumJointType
+    {
+        Invited,
+        Register,
+    }
+
     public class Event
     {
         public int Id { get; set; }
@@ -21,7 +28,7 @@ namespace OnlyFriends.Models
 
         public EnumEventType EventType { get; set; }
         public EnumEventStatus EventStatus { get; set; }
-
+        public EnumJointType JointType{get; set;}
         public int Capacity { get; set; }
 
         public int OwnerId { get; set; }
@@ -32,8 +39,8 @@ namespace OnlyFriends.Models
         public List<UserEvent> UserEvents { get; } = [];
 
         // Category
-        public int CategoryId { get; set; } // Required foreign key property
-        public Category Category { get; set; } = null!; // Required reference navigation to principal 
+        public required int CategoryId { get; set; } // Required foreign key property
+        public required Category Category { get; set; } // Required reference navigation to principal 
     }
 
 }
