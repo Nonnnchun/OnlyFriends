@@ -5,7 +5,7 @@ using EntityFramework.Exceptions.PostgreSQL; // For the .UseExceptionProcessor()
 
 namespace OnlyFriends.Data
 {
-    public class ApplicationDbContext : DbContext 
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

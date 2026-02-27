@@ -137,15 +137,5 @@
     "C:\\Users\\chun9\\.nuget\\packages\\system.security.cryptography.pkcs\\9.0.4\\system.security.cryptography.pkcs.9.0.4.nupkg.sha512",
     "C:\\Users\\chun9\\.nuget\\packages\\system.security.cryptography.protecteddata\\9.0.6\\system.security.cryptography.protecteddata.9.0.6.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "message": "Problem reading the cache file D:\\Users\\Chern\\OneDrive\\Desktop\\gitWorkSpace\\OnlyFriends\\obj\\project.nuget.cache : '<' is an invalid start of a property name. Expected a '\"'. Path: $ | LineNumber: 2 | BytePositionInLine: 0.",
-      "projectPath": "D:\\Users\\Chern\\OneDrive\\Desktop\\gitWorkSpace\\OnlyFriends\\onlyfriends.csproj",
-      "warningLevel": 1,
-      "filePath": "D:\\Users\\Chern\\OneDrive\\Desktop\\gitWorkSpace\\OnlyFriends\\onlyfriends.csproj",
-      "targetGraphs": []
-    }
-  ]
+  "logs": []
 }

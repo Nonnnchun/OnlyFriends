@@ -61,12 +61,12 @@ namespace OnlyFriends.Controllers
       [HttpDelete("{id}")]
       public async Task<IActionResult> DeleteByIdAsync(int id)
       {
-            try                                                      
+            try
             {
                   var noti = await _service.FindNotificationsByIdAsync(id);
                   if (noti == null)
                   {
-                  return NotFound();
+                        return NotFound();
                   }
                   await _service.DeleteNotificationAsync(id);
                   return NoContent();
@@ -110,6 +110,6 @@ namespace OnlyFriends.Controllers
                   _logger.LogError(ex.Message);
                   return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
-            }
+      }
       }
 }
