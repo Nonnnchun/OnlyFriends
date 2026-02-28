@@ -24,7 +24,7 @@
 
                         <div class="addhost-label">Enter Email or Search</div>
                         <input class="addhost-input" id="addHostInput"
-                               placeholder=""
+                               placeholder="Search by name or email"
                                oninput="filterHostResults(this.value)" />
 
                         <div class="addhost-results" id="addHostResults">
@@ -34,7 +34,8 @@
                                      data-id="@user.Id"
                                      data-name="@(user.FirstName + " " + user.LastName)"
                                      data-email="@user.Email"
-                                     onclick="goToStep2Host(@user.Id, '@user.FirstName @user.LastName', '@user.Email', '@(user.ProfilePictureUrl ?? "")')">
+                                     data-avatar="@(user.ProfilePictureUrl ?? "")"
+                                     onclick="goToStep2Host(this)">
 
                                     @if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
                                     {
@@ -61,7 +62,7 @@
 
                         <div class="addhost-empty" id="addHostEmpty" style="display:none">
                             <i class="fa-regular fa-user" style="font-size:20px;margin-bottom:6px;display:block"></i>
-                            ไม่พบผู้ใช้ที่ค้นหา
+                            No users found
                         </div>
                     </div>
                 </div>

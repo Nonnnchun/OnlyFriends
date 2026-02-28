@@ -41,7 +41,7 @@ namespace OnlyFriends.ApiControllers
             }
         }
         
-        // Kaka Please do it. f
+        // Kaka Please do it. fuck
         // [HttpPost]
         // [ValidateAntiForgeryToken]
         // public IActionResult SendInvites([FromBody] InviteRequest req)

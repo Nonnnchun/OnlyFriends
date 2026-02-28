@@ -25,7 +25,7 @@
       --radius-md: 12px;
       --radius-lg: 16px;
       --radius-xl: 20px;
-      --panel-width: 380px;
+      --panel-width: 450px;
       --font: 'DM Sans', sans-serif;
       --font-mono: 'DM Mono', monospace;
     }
@@ -84,16 +84,17 @@
       display: flex;
       flex: 1;
       position: relative;
+      justify-content: center;
     }
 
     /* ── MAIN CONTENT ── */
     .main {
-      flex: 1;
-      padding: 32px 40px;
+      flex: 0 1 820px;  
+      width: 100%;
       max-width: 820px;
-      transition: padding-right 0.3s ease;
+      margin: 0 auto;
     }
-    .main.panel-open { padding-right: 40px; }
+    .main.panel-open { padding-right: 0px; }
 
     /* breadcrumb */
     .breadcrumb {
@@ -432,7 +433,9 @@
       width: var(--panel-width);
       background: var(--surface);
       border-left: 1px solid var(--border);
-      position: sticky; top: 52px;
+      border-top: 1px solid var(--border);;
+      position: fixed; right: 0; 
+      top: 52px;
       height: calc(100vh - 52px);
       overflow-y: auto;
       display: flex; flex-direction: column;
@@ -518,10 +521,18 @@
 
     /* capacity */
     .capacity-row { display: flex; align-items: center; gap: 8px; }
-    .capacity-input {
-      width: 80px; text-align: center; font-family: var(--font-mono);
-      font-weight: 600;
-    }
+.capacity-input {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 300;        /* บาง = minimal */
+    letter-spacing: -1px;
+    border: none;
+    border-bottom: 1.5px solid var(--border2);
+    border-radius: 0;
+    width: 80px;
+    padding: 4px 0;
+    background: transparent;
+}
     .capacity-adj {
       width: 30px; height: 30px; border-radius: 8px;
       border: 1.5px solid var(--border); background: var(--surface2);
