@@ -186,3 +186,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+let currentStatus = '';
+
+function filterByStatus(el, status) {
+    currentStatus = status;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    applyFilters();
+}
+
+function filterParticipants(query) {
+    applyFilters();
+}
+
+function applyFilters() {
+    const q      = (document.getElementById('participantSearch')?.value || '').trim().toLowerCase();
+    const status = currentStatus.toLowerCase();
+    let count    = 0;
+
+    document.querySelectorAll('#participantList .registrant-item').forEach(item => {
+        const name       = (item.dataset.name   || '').toLowerCase();
+        const email      = (item.dataset.email  || '').toLowerCase();
+        const itemStatus = (item.dataset.status || '').toLowerCase();
+
+        const matchSearch = !q      || name.includes(q)       || email.includes(q);
+        const matchStatus = !status || itemStatus === status;
+
+        const show = matchSearch && matchStatus;
+        item.style.display = show ? 'flex' : 'none';
+        if (show) count++;
+    });
+
+    const empty = document.getElementById('participantEmpty');
+    if (empty) empty.style.display = count === 0 ? 'block' : 'none';
+}

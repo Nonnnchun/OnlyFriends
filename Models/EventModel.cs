@@ -42,8 +42,8 @@ namespace OnlyFriends.Models
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
-        public required int OwnerId { get; set; }
-        public required User Owner { get; set; }
+        public required int OwnerId { get; set; } 
+        public required User Owner { get; set; } 
 
         // Participants
         public List<User> Users { get; } = [];

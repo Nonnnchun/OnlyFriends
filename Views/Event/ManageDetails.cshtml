@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = Model.Title?? "Manage Details";
 }
-}
+
 
 @section Styles {
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,14 +12,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/manage-details.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/invite-modal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/add-host-modal.css" asp-append-version="true" />
 }
 
     @section Scripts {
       <script src="~/js/manage-details.js" asp-append-version="true"></script>
       <script src="~/js/invite-modal.js" asp-append-version="true"></script>
+      <script src="~/js/add-host-modal.js" asp-append-version="true"></script>
 }
   @Html.AntiForgeryToken()
   @await Html.PartialAsync("_InviteModal", Model)
+  @await Html.PartialAsync("_AddHostModal", Model)
   
   <div class="app-body">
   
@@ -35,7 +38,7 @@
           @* Page Title *@
           <div class="page-title-row">
               <h1 class="page-title" id="displayTitle">@Model.Title</h1>
-              <a asp-controller="Event" asp-action="Detail" asp-route-id="@Model.Id" class="btn-event-page" target="_blank">
+              <a asp-controller="Event" asp-action="View" asp-route-id="@Model.Id" class="btn-event-page" target="_blank">
                   <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:12px"></i> Event Page
               </a>
           </div>
@@ -45,8 +48,6 @@
               <div class="tab active" onclick="switchTab(this)">Overview</div>
               <div class="tab" onclick="switchTab(this)">Guests</div>
               <div class="tab" onclick="switchTab(this)">Registration</div>
-              <div class="tab" onclick="switchTab(this)">Insights</div>
-              <div class="tab" onclick="switchTab(this)">More</div>
           </div>
   
           @* ══ TAB: OVERVIEW ══ *@
@@ -196,7 +197,7 @@
                                 </div>
                             </div>
                             <div class="reg-time" style="margin-left:auto; white-space:nowrap;">
-                                 <span class="reg-status">@{var userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);}@userEvent?.RequestStatus</span>
+                                <span class="reg-status">@{UserEvent? userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);}@userEvent?.RequestStatus</span>
                                 @Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id)?.RegisteredAt.ToString("dd MMM yyyy ,HH:mm")
                             </div>
                         </div>
@@ -224,7 +225,7 @@
               <div class="section">
                   <div class="section-header">
                       <div class="section-title">Hosts</div>
-                      @* <button class="btn-plus"><i class="fa-solid fa-plus"></i> Add Host</button> *@
+                      <button class="btn-plus" onclick="openAddHostModal()"><i class="fa-solid fa-plus"></i> Add Host</button>
                   </div>
                   <div style="margin-top:8px">
                       <div class="host-row">
@@ -243,30 +244,52 @@
           <div id="tab-Guests" style="display:none">
               <div class="section">
                   <div class="section-header">
-                      <div class="section-title">รายชื่อผู้สมัคร</div>
+                      <div class="section-title">Participants List</div>
                       <div style="display:flex;gap:8px">
-                          <a asp-controller="Event" asp-action="ExportGuests" asp-route-id="@Model.Id" class="btn-outline sm">Export</a>
-                          <button class="btn-plus"><i class="fa-solid fa-plus"></i> Add Guest</button>
                       </div>
                   </div>
-                  <div class="search-input-wrap">
-                      <input class="form-input" placeholder="🔍  ค้นหาผู้สมัคร..." style="max-width:300px" />
-                  </div>
-                  <div class="registrant-list">
-                      @foreach (var reg in Model.Users)
-                      {
-                          <div class="registrant-item">
-                              <div class="reg-avatar" style="background:@reg.ProfilePictureUrl">
-                                  @reg.Username.Substring(0, 1).ToUpper()
-                              </div>
-                              <div>
-                                  <div class="reg-name">@reg.Username</div>
-                                  @* <div class="reg-time">@reg.Email · สมัครเมื่อ @reg.RegisteredAt.ToString("d MMM HH:mm")</div> *@
-                              </div>
-                              @* <span class="reg-status @reg.StatusClass">@reg.StatusLabel</span> *@
-                          </div>
-                      }
-                  </div>
+                    <div class="search-input-wrap">
+                      <input class="form-input" id="participantSearch" placeholder="Search...."oninput="filterParticipants(this.value)" />
+                  </div> 
+                        <div class="filter-tabs" style="display:flex;gap:8px;margin-bottom:16px">
+                            <button class="filter-btn active" onclick="filterByStatus(this, '')">All</button>
+                            <button class="filter-btn" onclick="filterByStatus(this, 'Accepted')">Accepted</button>
+                            <button class="filter-btn" onclick="filterByStatus(this, 'Pending')">Pending</button>
+                            <button class="filter-btn" onclick="filterByStatus(this, 'Rejected')">Rejected</button>
+                        </div>
+                        <div class="registrant-list" id="participantList">
+                            @foreach (var reg in Model.Users)
+                            {
+                                <div class="registrant-item"
+                                     data-name="@reg.FirstName @reg.LastName"
+                                     data-email="@reg.Email"
+                                     data-status="@{var userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);}@userEvent?.RequestStatus">
+                                    <img class="reg-avatar"
+                                         src="@reg.ProfilePictureUrl"
+                                         alt="@reg.Username.Substring(0,1).ToUpper()"
+                                         onerror="this.style.display='none'" />
+                                    <div style="flex:1;">
+                                        <div class="reg-name">
+                                            @reg.FirstName @reg.LastName
+                                            <span class="reg-Email">@reg.Email</span>
+                                        </div>
+                                    </div>
+                                    <div class="reg-time" style="margin-left:auto; white-space:nowrap;">
+                                        <span class="reg-status">@userEvent?.RequestStatus</span>
+                                        @userEvent?.RegisteredAt.ToString("dd MMM yyyy ,HH:mm")
+
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div id="participantEmpty" style="display:none" class="empty-state">
+                            <div class="empty-icon"><i class="fa-regular fa-user"></i></div>
+                            <div>
+                                <div class="empty-title">No participants found</div>
+                                <div class="empty-sub">Try searching with a different name or email</div>
+                            </div>
+                        </div>
               </div>
           </div>
   
@@ -294,56 +317,6 @@
                           <div class="toggle-sub">ระบบเลือกผู้ร่วมกิจกรรมอัตโนมัติตามเวลา</div>
                       </div>
                       @* <div class="toggle @(Model.AutoApprove ? "on" : "")" onclick="this.classList.toggle('on')"></div> *@
-                  </div>
-              </div>
-          </div>
-  
-          @* ══ TAB: INSIGHTS ══ *@
-          <div id="tab-Insights" style="display:none">
-              <div class="section">
-                  <div class="section-title" style="margin-bottom:16px">สถิติกิจกรรม</div>
-                  <div class="stats-row">
-                      <div class="stat-card highlight">
-                          @* <div class="stat-value">@Model.TotalRegistered</div> *@
-                          <div class="stat-label">ผู้สมัครทั้งหมด</div>
-                      </div>
-                      <div class="stat-card">
-                          @* <div class="stat-value">@Model.TotalApproved</div> *@
-                          <div class="stat-label">ได้รับเลือก</div>
-                      </div>
-                      <div class="stat-card">
-                          @* <div class="stat-value">@Model.TotalWaiting</div> *@
-                          <div class="stat-label">รอคิว</div>
-                      </div>
-                  </div>
-                  <div class="stat-card" style="margin-top:10px">
-                      <div class="stat-value">
-                          @* @(Model.Capacity > 0 ? $"{(int)((double)Model.TotalApproved / Model.Capacity * 100)}%": "0%") *@
-                      </div>
-                      <div class="stat-label">อัตราการรับเข้า</div>
-                  </div>
-              </div>
-          </div>
-  
-          @* ══ TAB: MORE ══ *@
-          <div id="tab-More" style="display:none">
-              <div class="section">
-                  <div class="section-title" style="margin-bottom:4px">Visibility &amp; Discovery</div>
-                  <p class="section-sub">Control how people can find your event.</p>
-                  <div class="visibility-card">
-                      <div class="visibility-icon">🗓</div>
-                      <div>
-                          <div class="visibility-cal-label">Managing Calendar</div>
-                          <div class="visibility-cal-name">Force</div>
-                          <div class="visibility-public">
-                              <i class="fa-solid fa-globe" style="font-size:11px"></i>
-                              Public — This event is listed on the calendar page.
-                          </div>
-                      </div>
-                  </div>
-                  <div class="visibility-btns">
-                      <button class="btn-outline sm"><i class="fa-solid fa-eye"></i> Change Visibility</button>
-                      <button class="btn-outline sm"><i class="fa-solid fa-calendar-days"></i> Transfer Calendar</button>
                   </div>
               </div>
           </div>
