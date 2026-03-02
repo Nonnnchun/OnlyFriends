@@ -57,7 +57,7 @@ namespace OnlyFriends.Controllers
             //     return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             // }
             var activity = await _activityService.FindEventByIdAsync(id);
-            if (activity == null) return NotFound();
+            if (activity == null) return View("Homepage", "Home");
             return View("ManageDetails", activity);
         }
 

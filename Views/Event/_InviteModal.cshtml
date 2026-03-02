@@ -12,191 +12,190 @@
                 @* แสดงจำนวน slot ที่เหลือ *@
                 <div class="slots-badge" id="slotsBadge">
                     <i class="fa-solid fa-rotate" style="font-size:11px"></i>
-                    <span id="slotsLeft">@(Model.Capacity - Model.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted))</span> LEFT
+                    <span id="slotsLeft">@(Model.Capacity - Model.UserEvents.Count(ue => ue.RequestStatus ==
+                                                EnumRequestStatus.Accepted))</span> LEFT
+                    </div>
+                    <button class="modal-close" onclick="closeInviteModal()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
-                <button class="modal-close" onclick="closeInviteModal()">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
             </div>
-        </div>
 
-        @* ── BODY ── *@
-        <div class="invite-body">
+            @* ── BODY ── *@
+            <div class="invite-body">
 
-            @* ════ STEP 1: เลือก Guest ════ *@
-            <div id="inviteStep1">
+                @* ════ STEP 1: เลือก Guest ════ *@
+                <div id="inviteStep1">
 
-                @* Sidebar *@
-                <div class="invite-sidebar">
-                    <div class="sidebar-item active" onclick="switchSideTab(this,'emails')">
-                        <i class="fa-solid fa-at"></i> Enter Emails
-                    </div>
-
-                    <div class="sidebar-section-label">CALENDAR CONTACTS</div>
-                    <div class="sidebar-item" onclick="switchSideTab(this,'everyone')">
-                        <span class="sidebar-dot"></span> Everyone
-                        <span class="sidebar-count">@Model.Users.Count</span>
-                    </div>
-
-                    <div class="sidebar-section-label">EVENTS</div>
-                    <div class="sidebar-item" onclick="switchSideTab(this,'past')">
-                        @Model.Title
-                        <div style="font-size:11px;color:var(--text-muted)">
-                            Today · @Model.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted) Guest
-                        </div>
-                    </div>
-                </div>
-
-                @* Main Panel *@
-                <div class="invite-main">
-
-                    @* TAB: Enter Emails *@
-                    <div id="tab-emails">
-                        <div class="invite-section-label">Add Emails</div>
-                        <div class="email-input-row">
-                            <input class="form-input" id="emailInput"
-                                   placeholder="Paste or enter emails here"
-                                   onkeydown="handleEmailKey(event)" />
-                            <button class="btn-add" onclick="addEmail()">Add</button>
+                    @* Sidebar *@
+                    <div class="invite-sidebar">
+                        <div class="sidebar-item active" onclick="switchSideTab(this,'emails')">
+                            <i class="fa-solid fa-at"></i> Enter Emails
                         </div>
 
-                        @* รายชื่อ user จาก server *@
-                        <div class="guest-list" id="guestList">
-                            @foreach (var user in Model.Users)
-                            {
-                                <div class="guest-item" data-id="@user.Id" onclick="toggleGuest(this)">
-                                    <img class="guest-avatar"
-                                         src="@(string.IsNullOrEmpty(user.ProfilePictureUrl) ? "/img/default-avatar.png" : user.ProfilePictureUrl)"
-                                         alt="@user.Username"
-                                         onerror="this.style.display='none'" />
-                                    <div class="guest-info">
-                                        <div class="guest-name">@user.FirstName @user.LastName</div>
-                                        <div class="guest-email">@user.Email</div>
-                                    </div>
-                                    <div class="guest-check">
-                                        <i class="fa-solid fa-check"></i>
-                                    </div>
-                                </div>
-                            }
+                        <div class="sidebar-section-label">CALENDAR CONTACTS</div>
+                        <div class="sidebar-item" onclick="switchSideTab(this,'everyone')">
+                            <span class="sidebar-dot"></span> Everyone
+                            <span class="sidebar-count">@Model.Users.Count</span>
                         </div>
-                    </div>
 
-                    @* TAB: Everyone *@
-                    <div id="tab-everyone" style="display:none">
-                        <div class="invite-section-label">Everyone in Calendar</div>
-                        <div class="guest-list">
-                            @foreach (var user in Model.Users)
-                            {
-                                <div class="guest-item" data-id="@user.Id" onclick="toggleGuest(this)">
-                                    <img class="guest-avatar"
-                                         src="@(string.IsNullOrEmpty(user.ProfilePictureUrl) ? "/img/default-avatar.png" : user.ProfilePictureUrl)"
-                                         alt="@user.Username"
-                                         onerror="this.style.display='none'" />
-                                    <div class="guest-info">
-                                        <div class="guest-name">@user.FirstName @user.LastName</div>
-                                        <div class="guest-email">@user.Email</div>
-                                    </div>
-                                    <div class="guest-check">
-                                        <i class="fa-solid fa-check"></i>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    @* TAB: Past Event *@
-                    <div id="tab-past" style="display:none">
-                        <div class="invite-section-label">From @Model.Title</div>
-
-                        @if (!Model.UserEvents.Any(ue => ue.RequestStatus == EnumRequestStatus.Accepted))
-                        {
-                            <div class="empty-state">
-                                <div class="empty-icon"><i class="fa-regular fa-calendar"></i></div>
-                                <div>
-                                    <div class="empty-title">No guests yet</div>
-                                    <div class="empty-sub">No one has joined this event yet.</div>
-                                </div>
+                        <div class="sidebar-section-label">EVENTS</div>
+                        <div class="sidebar-item" onclick="switchSideTab(this,'past')">
+                            @Model.Title
+                            <div style="font-size:11px;color:var(--text-muted)">
+                                Today · @Model.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted) Guest
                             </div>
-                        }
-                        else
-                        {
-                            <div class="guest-list">
-                                @foreach (var reg in Model.Users)
+                        </div>
+                    </div>
+
+                    @* Main Panel *@
+                    <div class="invite-main">
+
+                        @* TAB: Enter Emails *@
+                        <div id="tab-emails">
+                            <div class="invite-section-label">Add Emails</div>
+                            <div class="email-input-row">
+                                <input class="form-input" id="emailInput"                           placeholder="Paste or enter emails here"
+                                       onkeydown="handleEmailKey(event)" />
+                                <button class="btn-add" onclick="addEmail()">Add</button>
+                            </div>
+
+                            @* รายชื่อ user จาก server *@
+                            <div class="guest-list" id="guestList">
+                                @foreach (var user in Model.Users)
                                 {
-                                    UserEvent? userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);
-                                    @if (userEvent?.RequestStatus == EnumRequestStatus.Accepted)
-                                    {
-                                        <div class="guest-item" data-id="@reg.Id" onclick="toggleGuest(this)">
-                                            <img class="guest-avatar"
-                                                 src="@reg.ProfilePictureUrl"
-                                                 alt="@reg.Username.Substring(startIndex: 0, length: 1).ToUpper()" />
-                                            <div class="guest-info">
-                                                <div class="guest-name">@reg.FirstName @reg.LastName</div>
-                                                <div class="guest-email">@reg.Email</div>
-                                            </div>
-                                            <div class="guest-check">
-                                                <i class="fa-solid fa-check"></i>
-                                            </div>
+                                    <div class="guest-item" data-id="@user.Id" onclick="toggleGuest(this)">
+                                        <img class="guest-avatar"
+                                             src="@(string.IsNullOrEmpty(user.ProfilePictureUrl) ? "/img/default-avatar.png" : user.ProfilePictureUrl)"
+                                             alt="@user.Username"                      onerror="this.style.display='none'" />
+                                        <div class="guest-info">
+                                            <div class="guest-name">@user.FirstName @user.LastName</div>
+                                            <div class="guest-email">@user.Email</div>
                                         </div>
-                                    }
+                                        <div class="guest-check">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                    </div>
                                 }
                             </div>
-                        }
-                    </div>
-
-                </div>
-            </div>
-
-            @* ════ STEP 2: ส่งข้อความ ════ *@
-            <div id="inviteStep2" style="display:none">
-
-                @* Sidebar: รายชื่อที่เลือก *@
-                <div class="invite-sidebar">
-                    <div class="sidebar-section-label" id="invitingLabel">Inviting 1 Person</div>
-                    <div id="selectedList" class="guest-list" style="border:none;padding:0 0 0 8px"></div>
-                </div>
-
-                @* Main: Compose Message *@
-                <div class="invite-main" style="padding:20px">
-                    <div class="message-box">
-                        <div class="message-intro">
-                            Hi, @Model.Owner.FirstName @Model.Owner.LastName invites you to join @Model.Title.
                         </div>
-                        <textarea class="message-custom" id="customMessage"
-                                  placeholder="Add a custom message here..."></textarea>
+
+                        @* TAB: Everyone *@
+                        <div id="tab-everyone" style="display:none">
+                            <div class="invite-section-label">Everyone in Calendar</div>
+                            <div class="guest-list">
+                                @foreach (var user in Model.Users)
+                                {
+                                    <div class="guest-item" data-id="@user.Id" onclick="toggleGuest(this)">
+                                        <img class="guest-avatar"
+                                             src="@(string.IsNullOrEmpty(user.ProfilePictureUrl) ? "/img/default-avatar.png" : user.ProfilePictureUrl)"
+                                             alt="@user.Username"           onerror="this.style.display='none'" />
+                                        <div class="guest-info">
+                                            <div class="guest-name">@user.FirstName @user.LastName</div>
+                                            <div class="guest-email">@user.Email</div>
+                                        </div>
+                                        <div class="guest-check">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        @* TAB: Past Event *@
+                        <div id="tab-past" style="display:none">
+                            <div class="invite-section-label">From @Model.Title</div>
+
+                            @if (!Model.UserEvents.Any(ue => ue.RequestStatus == EnumRequestStatus.Accepted))
+                            {
+                                <div class="empty-state">
+                                    <div class="empty-icon"><i class="fa-regular fa-calendar"></i></div>
+                                    <div>
+                                        <div class="empty-title">No guests yet</div>
+                                        <div class="empty-sub">No one has joined this event yet.</div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="guest-list">
+                                    @foreach (var reg in Model.Users)
+                                    {
+                                        UserEvent? userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);
+                                        @if (userEvent?.RequestStatus == EnumRequestStatus.Accepted)
+                                        {
+                                            <div class="guest-item" data-id="@reg.Id" onclick="toggleGuest(this)">
+                                                <img class="guest-avatar"
+                                                     src="@(string.IsNullOrEmpty(reg.ProfilePictureUrl) ? "/img/default-avatar.png" : reg.ProfilePictureUrl)"
+                                                     alt="@(reg.Username?.Substring(0, 1).ToUpper() ?? "?")"
+                                                     onerror="this.style.display='none'" />
+                                                <div class="guest-info">
+                                                    <div class="guest-name">@reg.FirstName @reg.LastName</div>
+                                                    <div class="guest-email">@reg.Email</div>
+                                                </div>
+                                                <div class="guest-check">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+
+                @* ════ STEP 2: ส่งข้อความ ════ *@
+                <div id="inviteStep2" style="display:none">
+
+                    @* Sidebar: รายชื่อที่เลือก *@
+                    <div class="invite-sidebar">
+                        <div class="sidebar-section-label" id="invitingLabel">Inviting 1 Person</div>
+                        <div id="selectedList" class="guest-list" style="border:none;padding:0 0 0 8px"></div>
                     </div>
 
-                    <div class="message-rsvp-box">
-                        RSVP: @($"{Context.Request.Scheme}://{Context.Request.Host}/Event/View/{Model.Id}")
+                    @* Main: Compose Message *@
+                    <div class="invite-main" style="padding:20px">
+                        <div class="message-box">
+                            <div class="message-intro">
+                                Hi, @Model.Owner.FirstName @Model.Owner.LastName invites you to join @Model.Title.
+                            </div>
+                            <textarea class="message-custom" id="customMessage"
+                                      placeholder="Add a custom message here..."></textarea>
+                        </div>
+
+                        <div class="message-rsvp-box">
+                            RSVP: @($"{Context.Request.Scheme}://{Context.Request.Host}/Event/View/{Model.Id}")
+                        </div>
                     </div>
+
+                </div>
+
+            </div>
+
+            @* ── FOOTER ── *@
+            <div class="invite-footer">
+
+                @* Footer Step 1 *@
+                <div id="footerStep1" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+                    <div class="selected-count" id="selectedCount">0 Selected</div>
+                    <button class="btn-next" id="btnNext" onclick="goToStep2()" disabled>
+                        Next <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                @* Footer Step 2 *@
+                <div id="footerStep2" style="display:none;align-items:center;justify-content:space-between;width:100%">
+                    <button class="btn-back" onclick="goToStep1()">
+                        <i class="fa-solid fa-chevron-left"></i> Back
+                    </button>
+                    <button class="btn-send" onclick="sendInvites()">
+                        <i class="fa-solid fa-paper-plane"></i> Send Invites
+                    </button>
                 </div>
 
             </div>
 
         </div>
-
-        @* ── FOOTER ── *@
-        <div class="invite-footer">
-
-            @* Footer Step 1 *@
-            <div id="footerStep1" style="display:flex;align-items:center;justify-content:space-between;width:100%">
-                <div class="selected-count" id="selectedCount">0 Selected</div>
-                <button class="btn-next" id="btnNext" onclick="goToStep2()" disabled>
-                    Next <i class="fa-solid fa-chevron-right"></i>
-                </button>
-            </div>
-
-            @* Footer Step 2 *@
-            <div id="footerStep2" style="display:none;align-items:center;justify-content:space-between;width:100%">
-                <button class="btn-back" onclick="goToStep1()">
-                    <i class="fa-solid fa-chevron-left"></i> Back
-                </button>
-                <button class="btn-send" onclick="sendInvites()">
-                    <i class="fa-solid fa-paper-plane"></i> Send Invites
-                </button>
-            </div>
-
-        </div>
-
     </div>
-</div>

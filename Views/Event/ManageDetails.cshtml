@@ -21,7 +21,7 @@
       <script src="~/js/add-host-modal.js" asp-append-version="true"></script>
 }
   @Html.AntiForgeryToken()
-  @await Html.PartialAsync("_InviteModal", Model)
+  @* @await Html.PartialAsync("_InviteModal", Model) *@
   @await Html.PartialAsync("_AddHostModal", Model)
 
 @{
