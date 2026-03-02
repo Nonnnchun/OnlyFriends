@@ -38,27 +38,51 @@ namespace OnlyFriends.Controllers
         [Route("/event/manage/{id}")]
         public async Task<IActionResult> ManageDetails(int id)
         {
-            // try
-            // {
-            //     var activity = await _activityService.FindEventByIdAsync(id);
-            //     if (activity == null)
-            //     {
-            //         return NotFound("Event not found!");
-            //     }
-                // var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                // if (userId != activity.Owner.Id)
-                // {
-                //     return Unauthorized("Only owner can edit this event!");
-                // }
-            //     return View("ManageDetails", activity);
-            // }
-            // catch (Exception ex)
-            // {
-            //     return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            // }
+            try
+            {
+                var activity = await _activityService.FindEventByIdAsync(id);
+                if (activity == null)
+                {
+                    return NotFound("Event not found!");
+                }
+                var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                if (userId != activity.Owner.Id)
+                {
+                    return Unauthorized("Only owner can edit this event!");
+                }
+                return View("ManageDetails", activity);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("event/manage/{id}")]
+        public async Task<IActionResult> Update(int id,[FromBody] UpdateEventDTO activityToUpdate)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(activityToUpdate);
+            }
             var activity = await _activityService.FindEventByIdAsync(id);
-            if (activity == null) return View("Homepage", "Home");
-            return View("ManageDetails", activity);
+            if (activity == null)
+            {
+                return NotFound("Event not found!");
+            }
+            var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            if (userId != activity.Owner.Id)
+            {
+                return Unauthorized("Only owner can update this event!");
+            }
+
+            await _activityService.UpdateEventAsync(activityToUpdate);
+            // return NotFound(activityToUpdate);
+            // return RedirectToAction("Homepage", "Home");
+            return Ok();
+
+
         }
 
         [HttpGet]
@@ -67,15 +91,17 @@ namespace OnlyFriends.Controllers
             return View();
         }
 
-
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateEventDTO activityToCreate)
         {
             try
             {
+                var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 // Convert kind to UTC to fix database error (IDK)
                 activityToCreate.StartAt = DateTime.SpecifyKind(activityToCreate.StartAt, DateTimeKind.Utc);
                 activityToCreate.EndAt = DateTime.SpecifyKind(activityToCreate.EndAt, DateTimeKind.Utc);
+                activityToCreate.OwnerId = userId;
                 await _activityService.AddEventAsync(activityToCreate);
                 return RedirectToAction("Homepage", "Home");
             }
@@ -91,5 +117,6 @@ namespace OnlyFriends.Controllers
             //     return View("Login");
             // }
         }
+
     }
 }

@@ -47,12 +47,12 @@ public sealed class EventService : IEventService
 
     public async Task<GetEventDTO?> FindEventByIdAsync(int id)
     {
-        Event? activity = await _context.Events.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync();
-        if (activity == null)
-        {
-            return null;
-        }
-        return activity.Adapt<GetEventDTO>();
+        var result = await _context.Events
+                .Where(x => x.Id == id)
+                .AsNoTracking()
+                .ProjectToType<GetEventDTO>()
+                .FirstOrDefaultAsync();
+        return result;
     }
 
     public async Task<IEnumerable<GetEventDTO>> GetEventsAsync()
@@ -103,4 +103,5 @@ public sealed class EventService : IEventService
 
         await _context.SaveChangesAsync();
     }
+
 }

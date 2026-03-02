@@ -200,17 +200,18 @@ function updateEvent() {
     const payload = {
         id: eventId,
         title: document.getElementById('inputTitle')?.value,
-        description: document.getElementById('inputDesc')?.value,
-        date: document.getElementById('inputDate')?.value,
-        startTime: document.getElementById('inputStart')?.value,
-        endTime: document.getElementById('inputEnd')?.value,
-        deadline: document.getElementById('inputDeadline')?.value,
+        info: document.getElementById('inputDesc')?.value,
+        // startAt: document.getElementById('inputDate')?.value,
+        // endAt: document.getElementById('inputStart')?.value,
+        // endTime: document.getElementById('inputEnd')?.value,
+        // deadline: document.getElementById('inputDeadline')?.value,
         capacity: parseInt(document.getElementById('inputCapacity')?.value, 10),
-        selectionMethod: document.querySelector('.method-option.selected .method-name')?.textContent || ''
+        // selectionMethod: document.querySelector('.method-option.selected .method-name')?.textContent || '',
+        location: document.getElementById("inputLocation")?.value
     };
 
-    fetch('/Event/Update', {
-        method: 'POST',
+    fetch(`/event/manage/${eventId}`, {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             RequestVerificationToken: getAntiForgeryToken()
@@ -218,14 +219,14 @@ function updateEvent() {
         body: JSON.stringify(payload)
     })
         .then((r) => {
-            if (!r.ok) throw new Error('Server error');
-            return r.json();
+            if (!r.ok) throw new Error(r.response);
+            return r;
         })
         .then(() => {
             showToast('Event updated successfully.');
             closePanel();
         })
-        .catch(() => showToast('Something went wrong. Please try again.'));
+        .catch((e) => showToast('Something went wrong. Please try again.' + e));
 }
 
 // Copy event URL

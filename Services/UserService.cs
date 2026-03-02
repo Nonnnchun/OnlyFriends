@@ -39,12 +39,12 @@ public sealed class UserService : IUserService
 
     public async Task<GetUserDTO?> FindUserByIdAsync(int id)
     {
-        User? user = await _context.Users.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync();
-        if (user == null)
-        {
-            return null;
-        }
-        return user.Adapt<GetUserDTO>();
+        var result = await _context.Users
+                .Where(x => x.Id == id)
+                .AsNoTracking()
+                .ProjectToType<GetUserDTO>()
+                .FirstOrDefaultAsync();
+        return result;
     }
 
     public async Task<IEnumerable<GetUserDTO>> GetUsersAsync()
