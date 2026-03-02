@@ -1,11 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "YAaRLx9vbL4=",
+  "dgSpecHash": "73w614ph2v8=",
   "success": true,
   "projectFilePath": "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj",
   "expectedPackageFiles": [
     "/Users/skyyyy/.nuget/packages/azure.core/1.47.1/azure.core.1.47.1.nupkg.sha512",
     "/Users/skyyyy/.nuget/packages/azure.identity/1.14.2/azure.identity.1.14.2.nupkg.sha512",
+    "/Users/skyyyy/.nuget/packages/entityframeworkcore.exceptions.common/8.1.3/entityframeworkcore.exceptions.common.8.1.3.nupkg.sha512",
+    "/Users/skyyyy/.nuget/packages/entityframeworkcore.exceptions.postgresql/8.1.3/entityframeworkcore.exceptions.postgresql.8.1.3.nupkg.sha512",
     "/Users/skyyyy/.nuget/packages/humanizer/2.14.1/humanizer.2.14.1.nupkg.sha512",
     "/Users/skyyyy/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/Users/skyyyy/.nuget/packages/humanizer.core.af/2.14.1/humanizer.core.af.2.14.1.nupkg.sha512",

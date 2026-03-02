@@ -74,7 +74,28 @@
             <span>📝</span>
             <input type="text" id="eventInfo" placeholder="เพิ่มคำอธิบาย">
         </div>
+        <div class="input-group" style="flex-direction: column; align-items: stretch;">
+            <span style="margin-bottom:5px;">🏷️ หมวดหมู่กิจกรรม</span>
 
+            <div id="categoryContainer">
+                <div class="category-row" style="display:flex; gap:10px; margin-bottom:8px;">
+                    <select class="eventCategorySelect"
+                            style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px;">
+                        <option value="">เลือกหมวดหมู่</option>
+                        <option value="1">สัมมนา</option>
+                        <option value="2">เวิร์กช็อป</option>
+                        <option value="3">แข่งขัน</option>
+                        <option value="4">พบปะสังสรรค์</option>
+                    </select>
+
+                    <button type="button"
+                            onclick="addCategoryRow(this)"
+                            style="border:none; background:#e9ecef; border-radius:6px; padding:6px 10px; cursor:pointer;">
+                        ➕
+                    </button>
+                </div>
+            </div>
+        </div>
         <div class="section-title">ตัวเลือกกิจกรรม</div>
         <div class="form-section">
             <div class="option-row">
@@ -248,6 +269,48 @@
             }
         }
 
+        function addCategoryRow(button) {
+
+            const container = document.getElementById("categoryContainer");
+
+            // 🔥 เปลี่ยนปุ่มที่ถูกกดจาก ➕ เป็น ❌
+            button.innerHTML = "❌";
+            button.style.background = "#f8d7da";
+            button.onclick = function () {
+                removeCategoryRow(this);
+            };
+
+            // 🔥 สร้างแถวใหม่ (ที่ยังเป็น ➕)
+            const newRow = document.createElement("div");
+            newRow.className = "category-row";
+            newRow.style.display = "flex";
+            newRow.style.gap = "10px";
+            newRow.style.marginBottom = "8px";
+
+            newRow.innerHTML = `
+                <select class="eventCategorySelect"
+                        style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px;">
+                    <option value="">เลือกหมวดหมู่</option>
+                    <option value="1">สัมมนา</option>
+                    <option value="2">เวิร์กช็อป</option>
+                    <option value="3">แข่งขัน</option>
+                    <option value="4">พบปะสังสรรค์</option>
+                </select>
+
+                <button type="button"
+                        onclick="addCategoryRow(this)"
+                        style="border:none; background:#e9ecef; border-radius:6px; padding:6px 10px; cursor:pointer;">
+                    ➕
+                </button>
+            `;
+
+            container.appendChild(newRow);
+        }
+
+        function removeCategoryRow(button) {
+            button.parentElement.remove();
+        }
+
         function submitEvent() {
             const title = document.getElementById('eventTitle').value;
             const info = document.getElementById('eventInfo').value;
@@ -274,7 +337,20 @@
 
             const isFree = document.getElementById('ticketType').value === 'free';
             const ticketPrice = isFree ? 0 : (parseFloat(document.getElementById('ticketPrice').value) || 0);
+            // ===== ดึงค่า Category หลายค่า =====
+            const categorySelects = document.querySelectorAll(".eventCategorySelect");
+            const selectedCategories = [];
 
+            categorySelects.forEach(select => {
+                if (select.value) {
+                    selectedCategories.push(parseInt(select.value));
+                }
+            });
+
+            if (selectedCategories.length === 0) {
+                alert("❌ กรุณาเลือกอย่างน้อย 1 หมวดหมู่");
+                return;
+            }
             const createEventDTO = {
                 Title: title,
                 Info: combinedInfo,
@@ -286,7 +362,7 @@
                 JointType: EnumJointType.Public,
                 Capacity: capacity,
                 OwnerId: 1,
-                CategoryId: 1,
+                CategoryIds: selectedCategories,
                 PosterUrl: null,
                 StartAt: startAtStr,
                 EndAt: endAtStr
@@ -299,6 +375,9 @@
 
             console.log("🚀 ข้อมูลที่จะส่ง:", createEventDTO);
             alert("✅ ตรวจสอบข้อมูลสำเร็จ! ดู Payload ได้ใน Console");
+
+
+            
         }
     </script>
 }

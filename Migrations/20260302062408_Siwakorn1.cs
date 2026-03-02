@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace onlyfriends.Migrations
 {
     /// <inheritdoc />
-    public partial class SiwakornMigration1 : Migration
+    public partial class Siwakorn1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -46,9 +46,9 @@ namespace onlyfriends.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Username = table.Column<string>(type: "text", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
+                    LastName = table.Column<string>(type: "text", nullable: false),
                     ProfilePictureUrl = table.Column<string>(type: "text", nullable: true),
                     Bio = table.Column<string>(type: "text", nullable: false),
-                    LastName = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false)
                 },
@@ -102,7 +102,8 @@ namespace onlyfriends.Migrations
                 {
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     EventId = table.Column<int>(type: "integer", nullable: false),
-                    RequestStatus = table.Column<int>(type: "integer", nullable: false)
+                    RequestStatus = table.Column<int>(type: "integer", nullable: false),
+                    RegisteredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -135,6 +136,18 @@ namespace onlyfriends.Migrations
                 name: "IX_UserEvents_UserId",
                 table: "UserEvents",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
+                table: "Users",
+                column: "Username",
+                unique: true);
         }
 
         /// <inheritdoc />

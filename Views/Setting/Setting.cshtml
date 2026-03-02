@@ -1,0 +1,178 @@
+@model OnlyFriends.Models.DTOS.UserDTOS.UpdateUserDTO
+
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<style>
+    body {
+        font-family: "Inter", sans-serif;
+        background-color: #fafafa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .settings-container {
+        width: 90%;
+        max-width: 900px;
+        margin: 40px auto;
+        padding-bottom: 40px;
+    }
+
+    .page-title {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        margin-top: 15px;
+    }
+
+    .section-sub {
+        color: #777;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .section-box {
+        background: #fff;
+        padding: 18px;
+        border-radius: 10px;
+        border: 1px solid #eee;
+        margin-bottom: 40px;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+    }
+
+    input:focus, textarea:focus {
+        outline: none;
+        border-color: #000;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .save-btn {
+        margin-top: 20px;
+        padding: 12px 25px;
+        border-radius: 10px;
+        border: none;
+        background: black;
+        color: white;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 500;
+        transition: background 0.2s ease;
+    }
+
+    .save-btn:hover {
+        background: #333;
+    }
+
+    .item-box {
+        background: #f9f9f9;
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #eee;
+        margin-bottom: 15px;
+    }
+
+    .danger-btn {
+        background: #e53935;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s ease;
+    }
+
+    .danger-btn:hover {
+        background: #c62828;
+    }
+</style>
+
+<div class="settings-container">
+    <div class="page-title">Settings</div>
+
+    @* The Form points to the UpdateProfile method in the Controller *@
+    <form asp-action="UpdateProfile" method="post">
+        @* Hidden ID field ensures we update the correct user *@
+        <input type="hidden" asp-for="Id" />
+
+        <div class="section-title">Your Profile</div>
+        <div class="section-sub">Choose how you are displayed as a host or guest.</div>
+        
+        <div class="section-box">
+            <div class="grid-2">
+                <div>
+                    <label class="form-label">First Name</label>
+                    <input type="text" asp-for="FirstName" placeholder="John">
+                </div>
+                <div>
+                    <label class="form-label">Last Name</label>
+                    <input type="text" asp-for="LastName" placeholder="Doe">
+                </div>
+            </div>
+
+            <div style="margin-top:20px;">
+                <label class="form-label">Username</label>
+                <input type="text" asp-for="Username" placeholder="username">
+            </div>
+
+            <div style="margin-top:20px;">
+                <label class="form-label">Bio</label>
+                <textarea asp-for="Bio" placeholder="Write something about yourself..."></textarea>
+            </div>
+
+            <button type="submit" class="save-btn">Save Changes</button>
+        </div>
+    </form>
+
+    <div class="section-title">Emails</div>
+    <div class="section-sub">Receive notifications through emails.</div>
+    <div class="section-box">
+        <div class="item-box">
+            <strong>@Model.Email</strong> (Primary)
+        </div>
+        <button class="save-btn">Add Email</button>
+    </div>
+
+    <div class="section-title">Password & Security</div>
+    <div class="section-box">
+        <button class="save-btn">Set / Change Password</button>
+    </div>
+
+    <div class="section-title">Delete Account</div>
+    <div class="section-sub">This action cannot be undone.</div>
+    <div class="section-box">
+        <button class="danger-btn">Delete My Account</button>
+    </div>
+</div>

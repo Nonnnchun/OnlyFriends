@@ -38,6 +38,39 @@
           }
         }
       },
+      "EntityFrameworkCore.Exceptions.Common/8.1.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "8.0.0"
+        },
+        "compile": {
+          "lib/net8.0/EntityFramework.Exceptions.Common.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/EntityFramework.Exceptions.Common.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "EntityFrameworkCore.Exceptions.PostgreSQL/8.1.3": {
+        "type": "package",
+        "dependencies": {
+          "EntityFrameworkCore.Exceptions.Common": "8.1.3",
+          "Npgsql": "8.0.3"
+        },
+        "compile": {
+          "lib/net8.0/EntityFramework.Exceptions.PostgreSQL.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/EntityFramework.Exceptions.PostgreSQL.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
       "Humanizer/2.14.1": {
         "type": "package",
         "dependencies": {
@@ -2445,6 +2478,42 @@
         "lib/net8.0/Azure.Identity.xml",
         "lib/netstandard2.0/Azure.Identity.dll",
         "lib/netstandard2.0/Azure.Identity.xml"
+      ]
+    },
+    "EntityFrameworkCore.Exceptions.Common/8.1.3": {
+      "sha512": "nweeiVHx4HbDi6+TqendOe0QmN0a9v0AB5FaL83eToqFFztwGIhOqLfveKqJDYSCU51CJShW8kbU1onZLdZZSg==",
+      "type": "package",
+      "path": "entityframeworkcore.exceptions.common/8.1.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "License.md",
+        "README.md",
+        "entityframeworkcore.exceptions.common.8.1.3.nupkg.sha512",
+        "entityframeworkcore.exceptions.common.nuspec",
+        "lib/net6.0/EntityFramework.Exceptions.Common.dll",
+        "lib/net6.0/EntityFramework.Exceptions.Common.pdb",
+        "lib/net8.0/EntityFramework.Exceptions.Common.dll",
+        "lib/net8.0/EntityFramework.Exceptions.Common.pdb"
+      ]
+    },
+    "EntityFrameworkCore.Exceptions.PostgreSQL/8.1.3": {
+      "sha512": "hqTsPy2SeupzawK/AeH5/8/K7+KEdZjQbyKVlxBX45ei86eU8D14X9E06uS6MX+J5TdSKY6o+WXGS7G2k8Xvyw==",
+      "type": "package",
+      "path": "entityframeworkcore.exceptions.postgresql/8.1.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "License.md",
+        "README.md",
+        "entityframeworkcore.exceptions.postgresql.8.1.3.nupkg.sha512",
+        "entityframeworkcore.exceptions.postgresql.nuspec",
+        "lib/net6.0/EntityFramework.Exceptions.PostgreSQL.dll",
+        "lib/net6.0/EntityFramework.Exceptions.PostgreSQL.pdb",
+        "lib/net8.0/EntityFramework.Exceptions.PostgreSQL.dll",
+        "lib/net8.0/EntityFramework.Exceptions.PostgreSQL.pdb"
       ]
     },
     "Humanizer/2.14.1": {
@@ -6290,6 +6359,7 @@
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "EntityFrameworkCore.Exceptions.PostgreSQL >= 8.1.3",
       "Mapster >= 7.4.0",
       "Mapster.DependencyInjection >= 1.0.1",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.12",
@@ -6343,6 +6413,10 @@
       "net10.0": {
         "targetAlias": "net10.0",
         "dependencies": {
+          "EntityFrameworkCore.Exceptions.PostgreSQL": {
+            "target": "Package",
+            "version": "[8.1.3, )"
+          },
           "Mapster": {
             "target": "Package",
             "version": "[7.4.0, )"

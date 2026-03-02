@@ -158,6 +158,12 @@ namespace onlyfriends.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 
@@ -168,6 +174,9 @@ namespace onlyfriends.Migrations
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RequestStatus")
                         .HasColumnType("integer");

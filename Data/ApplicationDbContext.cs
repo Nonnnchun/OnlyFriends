@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Notifications.Models;
 using OnlyFriends.Models;
 
-
 namespace OnlyFriends.Data
 {
     public class ApplicationDbContext : DbContext
@@ -29,6 +28,15 @@ namespace OnlyFriends.Data
                 .HasMany(u => u.Events)
                 .WithMany(e => e.Users)
                 .UsingEntity<UserEvent>();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username)
+                .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
+
     }
 }

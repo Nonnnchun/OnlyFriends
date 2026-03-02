@@ -7,7 +7,6 @@
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
     <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
     @RenderSection("Styles", required: false)
 </head>
@@ -21,7 +20,7 @@
             </div>
 
             <div class="nav-right">
-                
+
                 <div class="dropdown" id="filterDropdown">
                     <button class="nav-btn" onclick="toggleFilter()">
                         กรองเนื้อหา
@@ -35,46 +34,55 @@
                         </div>
                         <hr>
                         <div class="filter-item">
-                            <input type="checkbox" id="statusOpen" checked> <label for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
+                            <input type="checkbox" id="statusOpen" checked> <label
+                            for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
                         </div>
                         <div class="filter-item">
-                            <input type="checkbox" id="myJoinedEvents"> 
+                            <input type="checkbox" id="myJoinedEvents">
                             <label for="myJoinedEvents">กิจกรรมที่เข้าร่วม</label>
                         </div>
                         <button class="btn-apply" onclick="applyFilter()">นำไปใช้</button>
                     </div>
                 </div>
 
+                @await Html.PartialAsync("_NotificationBell")
                 <div class="dropdown" id="profileDropdown">
                     <button class="profile-btn" onclick="toggleProfile()">
-                        <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg" alt="Profile">
+                        <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg"
+                             alt="Profile">
                     </button>
                     <div class="dropdown-content profile-menu" id="profileMenu">
-                        <a href="#">โปรไฟล์ของฉัน</a>
-                        <a href="#">กิจกรรมที่เข้าร่วม</a>
+                        <a asp-controller="Setting" asp-action="Index">โปรไฟล์ของฉัน</a>
+                        <a asp-controller="Profile" asp-action="Index">กิจกรรมที่เข้าร่วม</a>
                         <hr>
-                        <a href="#" style="color: red;">ออกจากระบบ</a>
+                        @if (User.Identity?.IsAuthenticated ?? false) {
+
+                        <form asp-controller="Login" asp-action="Logout" method="post"class="d-inline">
+                            <button type="submit" class="btn btn-link p-0 m-0 align-baseline" style="color:red">Log Out</button>
+                        </form>
+                        } 
+                        else {
+                            <a asp-controller="Login" asp-action="Index" class="sign-in-link">Log In</a>
+                        }
                     </div>
                 </div>
-
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
+            </nav>
+        </header>
         <div class="container">
-            &copy; 2569 - OnlyFriends - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @RenderSection("Scripts", required: false)
-</body>
+
+        <footer class="border-top footer text-muted">
+            <div class="container">
+                &copy; 2569 - OnlyFriends - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        @RenderSection("Scripts", required: false)
+    </body>
 
 </html>

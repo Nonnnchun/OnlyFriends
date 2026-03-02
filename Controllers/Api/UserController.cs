@@ -43,6 +43,7 @@ namespace OnlyFriends.ApiControllers
             }
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUserAsync(int id, UpdateUserDTO userToUpdate)
         {
@@ -101,6 +102,7 @@ namespace OnlyFriends.ApiControllers
             }
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {

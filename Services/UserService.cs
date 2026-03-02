@@ -25,7 +25,6 @@ public sealed class UserService : IUserService
 
     public async Task<GetUserDTO> AddUserAsync(CreateUserDTO userToCreate)
     {
-        
         User user = userToCreate.Adapt<User>();
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
@@ -56,8 +55,12 @@ public sealed class UserService : IUserService
 
     public async Task UpdateUserAsync(UpdateUserDTO userToUpdate)
     {
-        User user = userToUpdate.Adapt<User>();
-        _context.Users.Update(user);
+        var user = await _context.Users.FindAsync(userToUpdate.Id);
+        if (user == null)
+        {
+            return;
+        }
+        userToUpdate.Adapt(user);
         await _context.SaveChangesAsync();
     }
 }
