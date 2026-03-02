@@ -1,3 +1,5 @@
+@using OnlyFriends.Models.DTOS.EventDTOS
+@model CreateEventDTO
 @{
     ViewData["Title"] = "สร้างกิจกรรม";
 }
@@ -6,114 +8,115 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 }
 
-<div class="create-container">
-    <div class="left-col">
-        <div class="poster-preview">
-            <button class="upload-btn" title="อัปโหลดรูปภาพ">📷</button>
-            <input type="file" id="posterInput" style="display: none;" accept="image/*">
-        </div>
-    </div>
-
-    <div class="right-col">
-        <div class="top-actions" style="text-align: right; margin-bottom: 10px;">
-            <select class="dropdown-badge custom-select" id="eventVisibility">
-                <option value="Public">Public</option>
-                <option value="Private">Private</option>
-            </select>
-        </div>
-
-        <input type="text" id="eventTitle" class="title-input" placeholder="ชื่อกิจกรรม">
-
-        <div class="schedule-wrapper">
-            <div class="datetime-block">
-                <div class="timeline-line"></div>
-
-                <div class="dt-row">
-                    <div class="dt-label">
-                        <div class="dot-solid"></div>
-                        เริ่ม
-                    </div>
-                    <div class="dt-input-group">
-                        <input type="date" id="startDate">
-                        <input type="time" id="startTime" value="16:30">
-                    </div>
-                </div>
-
-                <div class="dt-row">
-                    <div class="dt-label">
-                        <div class="dot-outline"></div>
-                        จบ
-                    </div>
-                    <div class="dt-input-group">
-                        <input type="date" id="endDate">
-                        <input type="time" id="endTime" value="17:30">
-                    </div>
-                </div>
-            </div>
-
-            <div class="timezone-block">
-                <div style="color: #9aa0a6; font-size: 1.2rem; margin-bottom: 5px;">🌐</div>
-                <div class="timezone-text">GMT+07:00</div>
-                <div class="timezone-subtext">กรุงเทพมหานคร</div>
+<form asp-action="CreateEvent" asp-controller="Event" method="post" enctype="multipart/form-data">
+    <div class="create-container">
+        <div class="left-col">
+            <div class="poster-preview">
+                <button type="button" class="upload-btn" title="อัปโหลดรูปภาพ" onclick="document.getElementById('posterInput').click()">📷</button>
+                <input asp-for="PosterUrl" type="file" id="posterInput" style="display: none;" accept="image/*">
             </div>
         </div>
 
-        <div class="input-group" style="display: flex; gap: 10px; align-items: center;">
-            <span>📍</span>
-            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่..." style="flex: 1; border: none; outline: none; background: transparent;">
-            <button type="button" id="btnSearchLocation" class="btn-search-loc" onclick="searchOSMLocation()">ค้นหา</button>
-        </div>
-
-        <input type="hidden" id="Latitude" name="Latitude">
-        <input type="hidden" id="Longitude" name="Longitude">
-
-        <div id="mapContainer" style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block;">
-            <div id="map" style="width: 100%; height: 100%;"></div>
-        </div>
-        <div class="input-group">
-            <span>📝</span>
-            <input type="text" id="eventInfo" placeholder="เพิ่มคำอธิบาย">
-        </div>
-
-        <div class="section-title">ตัวเลือกกิจกรรม</div>
-        <div class="form-section">
-            <div class="option-row">
-                <span>💻 รูปแบบการจัดงาน</span>
-                <select id="eventType" onchange="updateLocationPlaceholder()" style="border: none; background: transparent; color: var(--primary-color); font-weight: bold; cursor: pointer; outline: none; text-align: right;">
-                    <option value="offline">ออฟไลน์ (สถานที่จริง)</option>
-                    <option value="online">ออนไลน์ (Virtual)</option>
+        <div class="right-col">
+            <div class="top-actions" style="text-align: right; margin-bottom: 10px;">
+                <select asp-for="JointType" class="dropdown-badge custom-select" id="eventVisibility">
+                    <option value="Public">Public</option>
+                    <option value="Private">Private</option>
                 </select>
             </div>
-            <div class="option-row">
-                <span>🎟️ ค่าใช้จ่าย</span>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <select id="ticketType" onchange="togglePriceInput()"
-                            style="border: none; background: transparent; color: var(--primary-color); font-weight: bold; cursor: pointer; outline: none; text-align: right;">
-                        <option value="free">ฟรี</option>
-                        <option value="paid">มีค่าใช้จ่าย</option>
-                    </select>
 
-                    <div id="priceInputContainer" style="display: none; align-items: center; gap: 5px;">
-                        <input type="number" id="ticketPrice" placeholder="0" min="0"
-                               style="width: 70px; border: 1px solid #ced4da; border-radius: 4px; padding: 4px 8px; text-align: right; background: white;">
-                        <span style="color: #5f6368;">บาท</span>
+            <input asp-for="Title" type="text" id="eventTitle" class="title-input" placeholder="ชื่อกิจกรรม">
+
+            <div class="schedule-wrapper">
+                <div class="datetime-block">
+                    <div class="timeline-line"></div>
+
+                    <div class="dt-row">
+                        <div class="dt-label">
+                            <div class="dot-solid"></div>
+                            เริ่ม
+                        </div>
+                        <div class="dt-input-group">
+                            <input asp-for="StartAt" type="date" id="startDate">
+                            <input asp-for="StartAt" type="time" id="startTime">
+                        </div>
+                    </div>
+
+                    <div class="dt-row">
+                        <div class="dt-label">
+                            <div class="dot-outline"></div>
+                            จบ
+                        </div>
+                        <div class="dt-input-group">
+                            <input asp-for="EndAt" type="date" id="endDate">
+                            <input asp-for="EndAt" type="time" id="endTime">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timezone-block">
+                    <div style="color: #9aa0a6; font-size: 1.2rem; margin-bottom: 5px;">🌐</div>
+                    <div class="timezone-text">GMT+07:00</div>
+                    <div class="timezone-subtext">กรุงเทพมหานคร</div>
+                </div>
+            </div>
+
+            <div class="input-group" style="display: flex; gap: 10px; align-items: center;">
+                <span>📍</span>
+                <input asp-for="Location" type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่..." style="flex: 1; border: none; outline: none; background: transparent;">
+                <button type="button" id="btnSearchLocation" class="btn-search-loc" onclick="searchOSMLocation()">ค้นหา</button>
+            </div>
+
+            <input asp-for="Latitude" type="hidden" id="Latitude">
+            <input asp-for="Longitude" type="hidden" id="Longitude">
+
+            <div id="mapContainer" style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block;">
+                <div id="map" style="width: 100%; height: 100%;"></div>
+            </div>
+            
+            <div class="input-group">
+                <span>📝</span>
+                <input asp-for="Info" type="text" id="eventInfo" placeholder="เพิ่มคำอธิบาย">
+            </div>
+
+            <div class="section-title">ตัวเลือกกิจกรรม</div>
+            <div class="form-section">
+                <div class="option-row">
+                    <span>💻 รูปแบบการจัดงาน</span>
+                    <select asp-for="EventType" id="eventType" onchange="updateLocationPlaceholder()" style="border: none; background: transparent; color: var(--primary-color); font-weight: bold; cursor: pointer; outline: none; text-align: right;">
+                        <option value="offline">ออฟไลน์ (สถานที่จริง)</option>
+                        <option value="online">ออนไลน์ (Virtual)</option>
+                    </select>
+                </div>
+                <div class="option-row">
+                    <span>🎟️ ค่าใช้จ่าย</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <select id="ticketType" onchange="togglePriceInput()" style="border: none; background: transparent; color: var(--primary-color); font-weight: bold; cursor: pointer; outline: none; text-align: right;">
+                            <option value="free">ฟรี</option>
+                            <option value="paid">มีค่าใช้จ่าย</option>
+                        </select>
+
+                        <div id="priceInputContainer" style="display: none; align-items: center; gap: 5px;">
+                            <input type="number" id="ticketPrice" placeholder="0" min="0" style="width: 70px; border: 1px solid #ced4da; border-radius: 4px; padding: 4px 8px; text-align: right; background: white;">
+                            <span style="color: #5f6368;">บาท</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="option-row">
+                    <span>👥 จำนวนผู้เข้าร่วม</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input asp-for="Capacity" type="number" id="eventCapacity" placeholder="ไม่จำกัด" min="0" style="width: 100px;">
+                        <span style="color: var(--text-muted); cursor: pointer;">✎</span>
                     </div>
                 </div>
             </div>
-            <div class="option-row">
-                <span>👥 จำนวนผู้เข้าร่วม</span>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="number" id="eventCapacity" placeholder="ไม่จำกัด" min="0" style="width: 100px;">
-                    <span style="color: var(--text-muted); cursor: pointer;">✎</span>
-                </div>
-            </div>
-        </div>
 
-        <button class="submit-btn" onclick="submitEvent()">
-            สร้างกิจกรรม
-        </button>
+            <button type="submit" class="submit-btn">
+                สร้างกิจกรรม
+            </button>
+        </div>
     </div>
-</div>
+</form>
 
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
