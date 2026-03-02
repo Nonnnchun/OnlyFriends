@@ -12,7 +12,7 @@ using OnlyFriends.Data;
 namespace onlyfriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260227072300_Initchern")]
+    [Migration("20260302065925_Initchern")]
     partial class Initchern
     {
         /// <inheritdoc />

@@ -11,6 +11,7 @@ using OnlyFriends.Data;
 namespace OnlyFriends.Controllers
 {
     [AllowAnonymous]
+    [Route("login")]
     public class LoginController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -24,17 +25,18 @@ namespace OnlyFriends.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet("")]
         public IActionResult Index()
         {
             ViewData["HideNavbar"] = true;
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Index(string email, string password)
+        [HttpPost("")]
+        public async Task<IActionResult> Index(string identifier, string password)
         {
-            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
+            var id = identifier;
+            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => (u.Email == id || u.Username == id) && u.Password == password);
             if (user == null)
             {
                 ViewData["HideNavbar"] = true;
@@ -73,11 +75,11 @@ namespace OnlyFriends.Controllers
             return RedirectToAction("Homepage", "Home");
         }
 
-        [HttpPost]
+        [HttpPost("logout")]
         public IActionResult Logout()
         {
             Response.Cookies.Delete("AuthToken", new CookieOptions { Path = "/" });
-            return RedirectToAction("Index", "Login");
+            return Redirect("/login");
         }
     }
 }

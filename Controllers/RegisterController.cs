@@ -14,12 +14,11 @@ namespace OnlyFriends.Controllers.Api
         public RegisterController(IUserService userService, ILogger<RegisterController> logger)
         {
             _userService = userService;
-
         }
 
         [AllowAnonymous]
         [HttpGet("")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Register()
         {
             return View("Register");
         }
@@ -31,17 +30,13 @@ namespace OnlyFriends.Controllers.Api
             try
             {
                 await _userService.AddUserAsync(userToCreate);
-                return RedirectToAction("Index", "Login");
+                return Redirect("/login");
             } 
             catch (UniqueConstraintException  ex)
             {
                 ModelState.AddModelError(ex.ConstraintName, ex.ConstraintProperties[0]);
-                
                 return View("Register");
             }
-
-        
         }
-
     }
 }

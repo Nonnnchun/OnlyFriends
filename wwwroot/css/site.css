@@ -129,6 +129,51 @@ input[type="email"]::placeholder {
     color: #999999;
 }
 
+/* Inputs for register */
+input[type="text"],
+input[type="password"]{
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 16px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+}
+
+.two-cols{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 640px){
+  .two-cols{ grid-template-columns: 1fr; }
+}
+
+.small-text{
+  font-size: 14px;
+}
+
+.input-wrap{
+  position: relative;
+}
+.input-wrap input{
+  padding-right: 44px;
+}
+.toggle-eye{
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--link-color);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+}
 /* Button Styles */
 .btn {
     width: 100%;
@@ -254,55 +299,109 @@ input[type="email"]::placeholder {
 }
 
 /* OF Navbar */
-.of-nav {
-  background: linear-gradient(180deg, #eaf4ff 0%, rgba(234,244,255,0) 100%);
-  border-bottom: 1px solid var(--card-border);
-  margin-bottom: 16px;
-}
-.of-nav-inner {
+/* Header (light theme, clean) */
+.custom-navbar{
+  position: sticky;
+  top: 0;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
-}
-.of-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.of-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.of-logo {
-  text-decoration: none;
-  font-weight: 700;
-  color: var(--text-color);
-}
-.of-links {
-  display: flex;
-  gap: 8px;
-}
-.of-link {
-  text-decoration: none;
-  color: var(--text-color);
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-.of-link:hover {
-  background: var(--secondary-btn-bg);
-}
-.of-create {
-  border: 1px solid var(--card-border);
-}
-.of-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--card-border);
+  padding: 12px 24px;
   background: #fff;
+  border-bottom: 1px solid var(--card-border);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+}
+.nav-left,.nav-right{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.brand{
+  font-weight: 800;
+  color: var(--text-color);
+  text-decoration:none;
+  margin-right: 8px;
+}
+.nav-link{
+  color:#4a4a4a;
+  text-decoration:none;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+.nav-link:hover{
+  background:#f5f6f7;
+}
+.nav-btn{
+  border: 1px solid var(--card-border);
+  background: #f7f8fa;
+  border-radius: 12px;
+  padding: 8px 12px;
+  color:#333;
+  cursor:pointer;
+}
+.nav-btn:hover{ background:#eef1f4; }
+.profile-btn{
+  width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--card-border);
+  background:#fff; cursor:pointer; padding:0;
+  overflow:hidden;
+}
+.profile-btn img{ width:100%; height:100%; object-fit:cover; }
+
+/* Generic dropdown (filter, profile) */
+.dropdown{ position: relative; }
+.dropdown-content{
+  position:absolute;
+  right:0; top:calc(100% + 10px);
+  min-width: 240px;
+  background:#fff;
+  border:1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+  padding: 8px;
+  display:none;
+}
+.dropdown-content.show{ display:block; }
+.dropdown-content a{
+  display:block;
+  padding:10px 12px;
+  color:#2d2d2d;
+  text-decoration:none;
+  border-radius:8px;
+}
+.dropdown-content a:hover{
+  background:#f6f7f9;
+}
+.filter-item{
+  display:flex; align-items:center; gap:8px;
+  padding: 8px 6px;
+}
+.btn-apply{
+  width:100%;
+  border:1px solid var(--card-border);
+  background:#f7f8fa;
+  padding:10px 12px;
+  border-radius:10px;
+  cursor:pointer;
+}
+.btn-apply:hover{ background:#eef1f4; }
+
+/* Bell in header */
+.notif-bell .btn{
+  width:auto;
+  background:#f7f8fa;
+  border:1px solid var(--card-border);
+  color:#333;
+  padding:8px 10px;
+  border-radius:12px;
+}
+#notifCount{
+  background:#111; color:#fff; font-size:11px;
+  padding: 2px 6px;
+}
+.notif-dropdown{
+  border-radius:12px;
+  border:1px solid var(--card-border);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.08);
 }

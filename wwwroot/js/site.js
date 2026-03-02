@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const li = document.createElement('li');
       li.className = 'p-3';
       const a = document.createElement('a');
-      a.href = '/Login';
+      a.href = '/login';
       a.textContent = 'กรุณาเข้าสู่ระบบเพื่อดูการแจ้งเตือน';
       li.appendChild(a);
       list.appendChild(li);
@@ -83,15 +83,40 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteNotification,
     refreshBell: loadBellNotifications
   };
+
+  async function isAuthenticated() {
+    try {
+      const res = await fetch('/api/auth/me', { cache: 'no-store' });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async function handleRequireAuthClick(e) {
+    const authed = await isAuthenticated();
+    if (!authed) {
+      e.preventDefault();
+      window.location.href = '/login';
+      return false;
+    }
+    return true;
+  }
+
+  document.querySelectorAll('[data-require-auth="true"]').forEach(el => {
+    el.addEventListener('click', handleRequireAuthClick);
+  });
 });
 
-//-------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 
 // เปิด-ปิด เมนูตัวกรอง
 function toggleFilter() {
     document.getElementById("filterMenu").classList.toggle("show");
     // ปิดเมนูโปรไฟล์ถ้าเปิดอยู่
     document.getElementById("profileMenu").classList.remove("show"); 
+    var bell = document.getElementById("notifMenu");
+    if (bell) bell.classList.remove("show");
 }
 
 // เปิด-ปิด เมนูโปรไฟล์
@@ -99,6 +124,8 @@ function toggleProfile() {
     document.getElementById("profileMenu").classList.toggle("show");
     // ปิดเมนูตัวกรองถ้าเปิดอยู่
     document.getElementById("filterMenu").classList.remove("show");
+    var bell = document.getElementById("notifMenu");
+    if (bell) bell.classList.remove("show");
 }
 
 function applyFilter() {
@@ -111,6 +138,8 @@ window.onclick = function(event) {
     if (!event.target.closest('.dropdown')) {
         document.getElementById("filterMenu").classList.remove("show");
         document.getElementById("profileMenu").classList.remove("show");
+        var bell = document.getElementById("notifMenu");
+        if (bell) bell.classList.remove("show");
     }
 }
 
@@ -119,6 +148,8 @@ function toggleFilter() {
     document.getElementById("filterMenu").classList.toggle("show");
     // ปิดเมนูโปรไฟล์ถ้าเปิดอยู่
     document.getElementById("profileMenu").classList.remove("show"); 
+    var bell = document.getElementById("notifMenu");
+    if (bell) bell.classList.remove("show");
 }
 
 // เปิด-ปิด เมนูโปรไฟล์
@@ -126,6 +157,8 @@ function toggleProfile() {
     document.getElementById("profileMenu").classList.toggle("show");
     // ปิดเมนูตัวกรองถ้าเปิดอยู่
     document.getElementById("filterMenu").classList.remove("show");
+    var bell = document.getElementById("notifMenu");
+    if (bell) bell.classList.remove("show");
 }
 
 function applyFilter() {
@@ -138,5 +171,16 @@ window.onclick = function(event) {
     if (!event.target.closest('.dropdown')) {
         document.getElementById("filterMenu").classList.remove("show");
         document.getElementById("profileMenu").classList.remove("show");
+        var bell = document.getElementById("notifMenu");
+        if (bell) bell.classList.remove("show");
     }
+}
+
+// เปิด-ปิด กระดิ่งแจ้งเตือน
+function toggleBell() {
+    var menu = document.getElementById("notifMenu");
+    if (!menu) return;
+    menu.classList.toggle("show");
+    document.getElementById("filterMenu").classList.remove("show");
+    document.getElementById("profileMenu").classList.remove("show");
 }

@@ -28,7 +28,9 @@ namespace OnlyFriends.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDTO request)
         {
-            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == request.Email && u.Password == request.Password);
+            var identifier = request.Identifier ?? request.Email ?? string.Empty;
+            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u =>
+                (u.Email == identifier || u.Username == identifier) && u.Password == request.Password);
             if (user == null)
             {
                 return Unauthorized();
@@ -67,6 +69,18 @@ namespace OnlyFriends.Controllers
             var handler = new JwtSecurityTokenHandler();
             var tokenString = handler.WriteToken(token);
             return Ok(new TokenResponseDTO { Token = tokenString, ExpiresAt = expires });
+        }
+
+        [HttpGet("me")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> Me()
+        {
+            var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (string.IsNullOrEmpty(sub)) return Unauthorized();
+            if (!int.TryParse(sub, out var userId)) return Unauthorized();
+            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return Unauthorized();
+            return Ok(new { id = user.Id, username = user.Username, email = user.Email });
         }
     }
 }
