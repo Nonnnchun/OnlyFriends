@@ -14,19 +14,19 @@
 
     .settings-container {
         width: 90%;
-        max-width: 900px;
+        max-width: 800px;
         margin: 40px auto;
         padding-bottom: 40px;
     }
 
     .page-title {
-        font-size: 36px;
+        font-size: 32px;
         font-weight: 700;
         margin-bottom: 25px;
     }
 
     .section-title {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 600;
         margin-bottom: 5px;
         margin-top: 15px;
@@ -40,32 +40,89 @@
 
     .section-box {
         background: #fff;
-        padding: 18px;
-        border-radius: 10px;
+        padding: 20px;
+        border-radius: 12px;
         border: 1px solid #eee;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
     }
 
+    /* Minimal Profile Picture Styles */
+    .pfp-upload-container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .pfp-preview-circle {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        border: 1px solid #ddd;
+        overflow: hidden;
+        background: #f9f9f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pfp-preview-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .pfp-controls label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .custom-file-upload {
+        display: inline-block;
+        padding: 8px 16px;
+        cursor: pointer;
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: 0.2s;
+    }
+
+    .custom-file-upload:hover {
+        background: #e5e5e5;
+    }
+
+    /* Form Grid */
     .grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 20px;
     }
 
+    .form-group {
+        margin-top: 20px;
+    }
+
     .form-label {
+        font-size: 14px;
         font-weight: 500;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
         display: block;
     }
 
-    input, select, textarea {
+    input, textarea {
         width: 100%;
         padding: 12px;
         border: 1px solid #ddd;
         border-radius: 8px;
         font-size: 14px;
         box-sizing: border-box;
-        font-family: "Inter", sans-serif;
+        font-family: inherit;
     }
 
     input:focus, textarea:focus {
@@ -75,79 +132,88 @@
 
     textarea {
         resize: vertical;
-        min-height: 80px;
+        min-height: 100px;
     }
 
     .save-btn {
-        margin-top: 20px;
-        padding: 12px 25px;
-        border-radius: 10px;
+        margin-top: 25px;
+        padding: 12px 30px;
+        border-radius: 8px;
         border: none;
         background: black;
         color: white;
         cursor: pointer;
-        font-size: 15px;
-        font-weight: 500;
-        transition: background 0.2s ease;
+        font-size: 14px;
+        font-weight: 600;
     }
 
     .save-btn:hover {
         background: #333;
     }
 
-    .item-box {
-        background: #f9f9f9;
-        border-radius: 10px;
-        padding: 15px;
-        border: 1px solid #eee;
-        margin-bottom: 15px;
-    }
-
     .danger-btn {
-        background: #e53935;
-        color: #fff;
-        padding: 12px 20px;
-        border-radius: 10px;
-        border: none;
+        background: #fff;
+        color: #e53935;
+        border: 1px solid #e53935;
+        padding: 10px 20px;
+        border-radius: 8px;
         cursor: pointer;
-        font-weight: 500;
-        transition: background 0.2s ease;
+        font-weight: 600;
     }
 
     .danger-btn:hover {
-        background: #c62828;
+        background: #fff5f5;
     }
 </style>
 
 <div class="settings-container">
     <div class="page-title">Settings</div>
 
-    @* The Form points to the UpdateProfile method in the Controller *@
-    <form asp-action="UpdateProfile" method="post">
-        @* Hidden ID field ensures we update the correct user *@
+    @* Use multipart/form-data for image uploads *@
+    <form asp-action="UpdateProfile" asp-controller="Setting" method="post" enctype="multipart/form-data">
         <input type="hidden" asp-for="Id" />
 
         <div class="section-title">Your Profile</div>
         <div class="section-sub">Choose how you are displayed as a host or guest.</div>
         
         <div class="section-box">
-            <div class="grid-2">
-                <div>
-                    <label class="form-label">First Name</label>
-                    <input type="text" asp-for="FirstName" placeholder="John">
+            <div class="pfp-upload-container">
+                <div class="pfp-preview-circle">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                    {
+                        <img id="pfp-preview" src="@Model.ProfilePictureUrl" alt="Profile" />
+                    }
+                    else
+                    {
+                        <img id="pfp-preview" src="/images/default-avatar.png" alt="Default Profile" />
+                    }
                 </div>
-                <div>
-                    <label class="form-label">Last Name</label>
-                    <input type="text" asp-for="LastName" placeholder="Doe">
+                <div class="pfp-controls">
+                    <label>Profile Picture</label>
+                    <label for="pfp-input" class="custom-file-upload">
+                        Change Photo
+                    </label>
+                    <input type="file" id="pfp-input" asp-for="ProfilePicture" accept="image/*" style="display: none;" />
                 </div>
             </div>
 
-            <div style="margin-top:20px;">
+            <div class="grid-2">
+                <div>
+                    <label class="form-label">First Name</label>
+                    <input type="text" asp-for="FirstName" placeholder="Enter first name">
+                </div>
+                <div>
+                    <label class="form-label">Last Name</label>
+                    <input type="text" asp-for="LastName" placeholder="Enter last name">
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">Username</label>
                 <input type="text" asp-for="Username" placeholder="username">
             </div>
 
-            <div style="margin-top:20px;">
+            <div class="form-group">
                 <label class="form-label">Bio</label>
                 <textarea asp-for="Bio" placeholder="Write something about yourself..."></textarea>
             </div>
@@ -156,23 +222,38 @@
         </div>
     </form>
 
-    <div class="section-title">Emails</div>
-    <div class="section-sub">Receive notifications through emails.</div>
+    <div class="section-title">Account Security</div>
     <div class="section-box">
-        <div class="item-box">
-            <strong>@Model.Email</strong> (Primary)
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="font-weight: 600;">Password</div>
+                <div style="font-size: 13px; color: #777;">Last changed 3 months ago</div>
+            </div>
+            <button class="custom-file-upload">Update</button>
         </div>
-        <button class="save-btn">Add Email</button>
     </div>
 
-    <div class="section-title">Password & Security</div>
-    <div class="section-box">
-        <button class="save-btn">Set / Change Password</button>
-    </div>
-
-    <div class="section-title">Delete Account</div>
-    <div class="section-sub">This action cannot be undone.</div>
-    <div class="section-box">
-        <button class="danger-btn">Delete My Account</button>
+    <div class="section-title" style="color: #e53935;">Danger Zone</div>
+    <div class="section-box" style="border-color: #ffcdd2;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; color: #777;">Permanently delete your account and all data.</div>
+            <button class="danger-btn">Delete Account</button>
+        </div>
     </div>
 </div>
+
+<script>
+    // Preview the image immediately after choosing a file
+    document.getElementById('pfp-input').onchange = function (evt) {
+        var tgt = evt.target || window.event.srcElement,
+            files = tgt.files;
+
+        if (FileReader && files && files.length) {
+            var fr = new FileReader();
+            fr.onload = function () {
+                document.getElementById('pfp-preview').src = fr.result;
+            }
+            fr.readAsDataURL(files[0]);
+        }
+    }
+</script>
