@@ -24,5 +24,9 @@ namespace OnlyFriends.Controllers
             // IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
             return View("Details");
         }
+        public IActionResult Create()
+        {
+            return View();
+        }
     }
 }
