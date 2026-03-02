@@ -15,6 +15,7 @@
             <input type="file" id="posterInput" style="display: none;" accept="image/*">
         </div>
     </div>
+
     <div class="right-col">
         <div class="top-actions" style="text-align: right; margin-bottom: 10px;">
             <select class="dropdown-badge custom-select" id="eventVisibility">
@@ -22,10 +23,13 @@
                 <option value="Private">Private</option>
             </select>
         </div>
+
         <input type="text" id="eventTitle" class="title-input" placeholder="ชื่อกิจกรรม">
+
         <div class="schedule-wrapper">
             <div class="datetime-block">
                 <div class="timeline-line"></div>
+
                 <div class="dt-row">
                     <div class="dt-label">
                         <div class="dot-solid"></div>
@@ -36,6 +40,7 @@
                         <input type="time" id="startTime" value="16:30">
                     </div>
                 </div>
+
                 <div class="dt-row">
                     <div class="dt-label">
                         <div class="dot-outline"></div>
@@ -47,31 +52,30 @@
                     </div>
                 </div>
             </div>
+
             <div class="timezone-block">
                 <div style="color: #9aa0a6; font-size: 1.2rem; margin-bottom: 5px;">🌐</div>
                 <div class="timezone-text">GMT+07:00</div>
                 <div class="timezone-subtext">กรุงเทพมหานคร</div>
             </div>
         </div>
+
         <div class="input-group" style="display: flex; gap: 10px; align-items: center;">
             <span>📍</span>
-            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่..."
-                   style="flex: 1; border: none; outline: none; background: transparent;">
-            <button type="button" id="btnSearchLocation" class="btn-search-loc"
-                    onclick="searchOSMLocation()">ค้นหา</button>
+            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่..." style="flex: 1; border: none; outline: none; background: transparent;">
+            <button type="button" id="btnSearchLocation" class="btn-search-loc" onclick="searchOSMLocation()">ค้นหา</button>
         </div>
+
         <input type="hidden" id="Latitude" name="Latitude">
         <input type="hidden" id="Longitude" name="Longitude">
-        <div id="mapContainer"
-             style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block;">
+
+        <div id="mapContainer" style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block;">
             <div id="map" style="width: 100%; height: 100%;"></div>
         </div>
         <div class="input-group">
             <span>📝</span>
             <input type="text" id="eventInfo" placeholder="เพิ่มคำอธิบาย">
         </div>
-<<<<<<< HEAD
-=======
         <div class="input-group" style="flex-direction: column; align-items: stretch;">
             <span style="margin-bottom:5px;">🏷️ หมวดหมู่กิจกรรม</span>
 
@@ -94,28 +98,25 @@
                 </div>
             </div>
         </div>
->>>>>>> fd163dbd151e1090c288e527619996954e3b6583
         <div class="section-title">ตัวเลือกกิจกรรม</div>
         <div class="form-section">
             <div class="option-row">
                 <span>💻 รูปแบบการจัดงาน</span>
-                <select id="eventType" onchange="updateLocationPlaceholder()"
-                        style="border: none; background: transparent; color: var(--primary-color); font-weight: bold; cursor: pointer; outline: none; text-align: right;">
+                <select id="eventType" onchange="updateLocationPlaceholder()" style="border: none; background: transparent; color: var(--primary-color); font-weight: bold; cursor: pointer; outline: none; text-align: right;">
                     <option value="offline">ออฟไลน์ (สถานที่จริง)</option>
                     <option value="online">ออนไลน์ (Virtual)</option>
                 </select>
             </div>
             <div class="option-row">
                 <span>🎟️ ค่าใช้จ่าย</span>
-
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <select id="ticketType" onchange="togglePriceInput()"
                             style="border: none; background: transparent; color: var(--primary-color); font-weight: bold; cursor: pointer; outline: none; text-align: right;">
                         <option value="free">ฟรี</option>
                         <option value="paid">มีค่าใช้จ่าย</option>
                     </select>
-                    <div id="priceInputContainer" style="display: none; align-items: center; gap: 5px;">
 
+                    <div id="priceInputContainer" style="display: none; align-items: center; gap: 5px;">
                         <input type="number" id="ticketPrice" placeholder="0" min="0"
                                style="width: 70px; border: 1px solid #ced4da; border-radius: 4px; padding: 4px 8px; text-align: right; background: white;">
                         <span style="color: #5f6368;">บาท</span>
@@ -123,17 +124,14 @@
                 </div>
             </div>
             <div class="option-row">
-
                 <span>👥 จำนวนผู้เข้าร่วม</span>
-
                 <div style="display: flex; align-items: center; gap: 10px;">
-
                     <input type="number" id="eventCapacity" placeholder="ไม่จำกัด" min="0" style="width: 100px;">
-
                     <span style="color: var(--text-muted); cursor: pointer;">✎</span>
                 </div>
             </div>
         </div>
+
         <button class="submit-btn" onclick="submitEvent()">
             สร้างกิจกรรม
         </button>
@@ -175,61 +173,9 @@
                 }
             }
 
-<<<<<<< HEAD
             // ================= JS สำหรับแผนที่ OpenStreetMap (ฟรี 100%) =================
             let map;
             let marker;
-=======
-        function addCategoryRow(button) {
-
-            const container = document.getElementById("categoryContainer");
-
-            // 🔥 เปลี่ยนปุ่มที่ถูกกดจาก ➕ เป็น ❌
-            button.innerHTML = "❌";
-            button.style.background = "#f8d7da";
-            button.onclick = function () {
-                removeCategoryRow(this);
-            };
-
-            // 🔥 สร้างแถวใหม่ (ที่ยังเป็น ➕)
-            const newRow = document.createElement("div");
-            newRow.className = "category-row";
-            newRow.style.display = "flex";
-            newRow.style.gap = "10px";
-            newRow.style.marginBottom = "8px";
-
-            newRow.innerHTML = `
-                <select class="eventCategorySelect"
-                        style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px;">
-                    <option value="">เลือกหมวดหมู่</option>
-                    <option value="1">สัมมนา</option>
-                    <option value="2">เวิร์กช็อป</option>
-                    <option value="3">แข่งขัน</option>
-                    <option value="4">พบปะสังสรรค์</option>
-                </select>
-
-                <button type="button"
-                        onclick="addCategoryRow(this)"
-                        style="border:none; background:#e9ecef; border-radius:6px; padding:6px 10px; cursor:pointer;">
-                    ➕
-                </button>
-            `;
-
-            container.appendChild(newRow);
-        }
-
-        function removeCategoryRow(button) {
-            button.parentElement.remove();
-        }
-
-        function submitEvent() {
-            const title = document.getElementById('eventTitle').value;
-            const info = document.getElementById('eventInfo').value;
-            const location = document.getElementById('eventLocation').value;
-            
-            const lat = document.getElementById('Latitude').value;
-            const lng = document.getElementById('Longitude').value;
->>>>>>> fd163dbd151e1090c288e527619996954e3b6583
 
             function initMap() {
                 // ค่าเริ่มต้นพิกัด (กรุงเทพมหานคร)
@@ -253,7 +199,6 @@
                     updateLatLngFields(position.lat, position.lng);
                 });
 
-<<<<<<< HEAD
                 // อีเวนต์เมื่อผู้ใช้คลิกบนแผนที่ (ให้หมุดย้ายตามไปเลย)
                 map.on('click', function (e) {
                     marker.setLatLng(e.latlng);
@@ -356,9 +301,9 @@
                 const eventToCreate = {
                     title: title,
                     info: combinedInfo,
+                    location: "Thailand",
                     latitude: lat ? parseFloat(lat) : null,
                     longitude: lng ? parseFloat(lng) : null,
-                    price: ticketPrice,
                     eventType: eventTypeEnum,
                     eventStatus: EnumEventStatus.Published,
                     jointType: EnumJointType.Public,
@@ -370,6 +315,8 @@
                     endAt: endAtStr
                 };
 
+                // 
+
                 if (!eventToCreate.title) {
                     alert("❌ กรุณากรอกชื่อกิจกรรม");
                     return;
@@ -379,6 +326,7 @@
                     url: '/Event/Create',
                     type: 'POST',
                     contentType: 'application/json',
+                    dataType: "json",
                     data: JSON.stringify(eventToCreate),
                     headers: {
                         // Reads token from a hidden input usually generated by @Html.AntiForgeryToken()
@@ -396,51 +344,5 @@
                 console.log("🚀 ข้อมูลที่จะส่ง:", eventToCreate);
                 alert("✅ ตรวจสอบข้อมูลสำเร็จ! ดู Payload ได้ใน Console");
             }
-=======
-            const isFree = document.getElementById('ticketType').value === 'free';
-            const ticketPrice = isFree ? 0 : (parseFloat(document.getElementById('ticketPrice').value) || 0);
-            // ===== ดึงค่า Category หลายค่า =====
-            const categorySelects = document.querySelectorAll(".eventCategorySelect");
-            const selectedCategories = [];
-
-            categorySelects.forEach(select => {
-                if (select.value) {
-                    selectedCategories.push(parseInt(select.value));
-                }
-            });
-
-            if (selectedCategories.length === 0) {
-                alert("❌ กรุณาเลือกอย่างน้อย 1 หมวดหมู่");
-                return;
-            }
-            const createEventDTO = {
-                Title: title,
-                Info: combinedInfo,
-                Latitude: lat ? parseFloat(lat) : null,
-                Longitude: lng ? parseFloat(lng) : null,
-                Price: ticketPrice,
-                EventType: eventTypeEnum,
-                EventStatus: EnumEventStatus.Published,
-                JointType: EnumJointType.Public,
-                Capacity: capacity,
-                OwnerId: 1,
-                CategoryIds: selectedCategories,
-                PosterUrl: null,
-                StartAt: startAtStr,
-                EndAt: endAtStr
-            };
-
-            if (!createEventDTO.Title) {
-                alert("❌ กรุณากรอกชื่อกิจกรรม");
-                return;
-            }
-
-            console.log("🚀 ข้อมูลที่จะส่ง:", createEventDTO);
-            alert("✅ ตรวจสอบข้อมูลสำเร็จ! ดู Payload ได้ใน Console");
-
-
-            
-        }
->>>>>>> fd163dbd151e1090c288e527619996954e3b6583
     </script>
 }

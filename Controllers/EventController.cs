@@ -4,36 +4,33 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using OnlyFriends.Models;
-using OnlyFriends.ApiApiControllers;
+using OnlyFriends.ApiControllers;
 using OnlyFriends.Models.DTOS.EventDTOS;
 using OnlyFriends.Services;
 using Microsoft.AspNetCore.Authorization;
 using EntityFramework.Exceptions.Common;
 
-using Microsoft.AspNetCore.Authorization;
 
 
 namespace OnlyFriends.Controllers
 {
     public class EventController : Controller
+    {
+        private readonly IEventService _activityService;
+        private readonly ILogger<EventController> _logger;
+
+        public EventController(IEventService activityService, ILogger<EventController> logger)
         {
-            private readonly IEventService _activityService;
-            public EventController(IEventService activityService)
-            {
-                _activityService = activityService;
-            }
-        {
-            private readonly IEventService _activityService;
-            public EventController(IEventService activityService)
-            {
-                _activityService = activityService;
-            }
+            _activityService = activityService;
+            _logger = logger;
+        }
+
 
         [Route("/event/view/{id}")]
         public async Task<IActionResult> EventDetails(int id)
         {
             IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
-            return View("Details",activities.FirstOrDefault(a => a.Id == id));
+            return View("Details", activities.FirstOrDefault(a => a.Id == id));
         }
 
         [Route("/event/manage/{id}")]
@@ -41,7 +38,7 @@ namespace OnlyFriends.Controllers
         {
             var activity = await _activityService.FindEventByIdAsync(id);
             if (activity == null) return NotFound();
-            return View("ManageDetails",activity);
+            return View("ManageDetails", activity);
         }
 
         [HttpGet]
@@ -56,18 +53,21 @@ namespace OnlyFriends.Controllers
         {
             try
             {
+                // Convert kind to UTC to fix database error (IDK)
+                activityToCreate.StartAt = DateTime.SpecifyKind(activityToCreate.StartAt, DateTimeKind.Utc);
+                activityToCreate.EndAt = DateTime.SpecifyKind(activityToCreate.EndAt, DateTimeKind.Utc);
                 await _activityService.AddEventAsync(activityToCreate);
                 return RedirectToAction("Homepage", "Home");
             }
-            catch (UniqueConstraintException  ex)
+            catch (UniqueConstraintException ex)
             {
-               ModelState.AddModelError(ex.ConstraintName, ex.ConstraintProperties[0]);
-                
+                ModelState.AddModelError(ex.ConstraintName, ex.ConstraintProperties[0]);
+
                 return View("Homepage", "Home");
             }
             // catch (KeyNotFoundException ex)
             // {
-                
+
             //     return View("Login");
             // }
         }
