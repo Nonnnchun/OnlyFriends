@@ -57,6 +57,76 @@
         font-size: 18px;
     }
 
+    .event-tabs {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 6px;
+        border-radius: 18px;
+        margin-bottom: 24px;
+        background: #ebebeb;
+        border: 0;
+    }
+
+    .event-tab {
+        text-decoration: none !important;
+        color: #aaaaaa !important;
+        font-size: 20px;
+        font-weight: 700;
+        min-width: 170px;
+        text-align: center;
+        padding: 14px 20px;
+        border-radius: 14px;
+        border: 0;
+        letter-spacing: 0;
+        transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+        line-height: 1.2;
+    }
+
+    .event-tab:hover {
+        text-decoration: none !important;
+        color: #9d9d9d !important;
+    }
+
+    .event-tab:focus,
+    .event-tab:visited,
+    .event-tab:active {
+        text-decoration: none !important;
+        color: #aaaaaa !important;
+    }
+
+    .event-tab:focus-visible {
+        outline: 2px solid #d2d2d2;
+        outline-offset: 2px;
+    }
+
+    .event-tab.active {
+        background: #ffffff;
+        color: #2f2f2f !important;
+        box-shadow: 0 2px 7px rgba(0, 0, 0, 0.14);
+    }
+
+    .event-tab.active:focus,
+    .event-tab.active:visited,
+    .event-tab.active:active,
+    .event-tab.active:hover {
+        color: #2f2f2f !important;
+    }
+
+    @media (max-width: 576px) {
+        .event-tabs {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .event-tab {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 8px;
+            font-size: 16px;
+        }
+    }
+
     /* --- Timeline --- */
     .timeline-date {
         display: flex;
@@ -180,8 +250,26 @@
         object-fit: cover;
     }
 
-    .card-link {
-    text-decoration: none; /* Removes underline from text */
+.card-link {
+    text-decoration: none !important; /* Removes underline from text */
     color: inherit; /* Inherits text color */
     display: block; /* Makes the anchor fill the container */
+}
+
+.card-link:hover,
+.card-link:focus,
+.card-link:active,
+.card-link:visited {
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.card-link * {
+    text-decoration: none !important;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px;
+    color: #999;
 }
