@@ -34,5 +34,9 @@ namespace OnlyFriends.Controllers
             if (activity == null) return NotFound();
             return View("ManageDetails",activity);
         }
+        public IActionResult Create()
+        {
+            return View();
+        }
     }
 }
