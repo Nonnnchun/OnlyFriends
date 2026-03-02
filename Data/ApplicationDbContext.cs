@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Notifications.Models;
 using OnlyFriends.Models;
-using EntityFramework.Exceptions.PostgreSQL; // For the .UseExceptionProcessor() method
 
 namespace OnlyFriends.Data
 {
@@ -39,9 +38,5 @@ namespace OnlyFriends.Data
                 .IsUnique();
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseExceptionProcessor();
-        }
     }
 }

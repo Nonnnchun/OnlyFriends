@@ -1,85 +1,105 @@
-
-
 @model OnlyFriends.Models.DTOS.UserDTOS.CreateUserDTO;
 
-@section Scripts {
-    <script src="~/js/hide-password.js" asp-append-version="true"></script>
-}
+<div class="registration-wrapper">
+    <div class="registration-card">
+        <h2>Create Account</h2>
+        <p class="subtitle">Join our community today.</p>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card border-0 shadow-sm p-4">
-                <div class="card-body">
-                    <h2 class="text-center fw-bold mb-4">Create Account</h2>
-                    <p class="text-muted text-center mb-4">Join our community today.</p>
+        <form asp-action="Register" method="post">
+            @* General errors go here *@
+            <div asp-validation-summary="ModelOnly" class="error-text"></div>
 
-                    <form asp-action="Register" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+            <div class="form-group">
+                <label asp-for="Username"></label>
+                <input asp-for="Username" placeholder="johndoe" />
+                <span asp-validation-for="Username" class="error-text"></span>
+            </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Username" class="form-label small fw-semibold"></label>
-                            <input asp-for="Username" class="form-control form-control-lg bg-light border-0"
-                                   placeholder="johndoe" />
-                            <span asp-validation-for="Username" class="text-danger small"></span>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="FirstName" class="form-label small fw-semibold"></label>
-                                <input asp-for="FirstName" class="form-control bg-light border-0" />
-                                <span asp-validation-for="FirstName" class="text-danger small"></span>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="LastName" class="form-label small fw-semibold"></label>
-                                <input asp-for="LastName" class="form-control bg-light border-0" />
-                                <span asp-validation-for="LastName" class="text-danger small"></span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label small fw-semibold"></label>
-                            <input asp-for="Email" class="form-control bg-light border-0"
-                                   placeholder="name@example.com" />
-                            <span asp-validation-for="Email" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-4">
-                            <label asp-for="Password" class="form-label small fw-semibold"></label>
-                            <div class="input-group">
-                                <input asp-for="Password" id="passwordField" class="form-control bg-light border-0" />
-                                <button class="btn btn-light border-0 bg-light" type="button" id="togglePassword">
-                                    <span id="toggleIcon">👁️</span>
-                                </button>
-                            </div>
-                            <span asp-validation-for="Password" class="text-danger small"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-dark btn-lg w-100 shadow-sm">Register</button>
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <span class="text-muted small">Already have an account?</span>
-                        <a asp-controller="Login" asp-action="Index" class="text-decoration-none small fw-bold text-dark">Login</a>
-                    </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="FirstName"></label>
+                    <input asp-for="FirstName" />
+                    <span asp-validation-for="FirstName" class="error-text"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="LastName"></label>
+                    <input asp-for="LastName" />
+                    <span asp-validation-for="LastName" class="error-text"></span>
                 </div>
             </div>
+
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" placeholder="name@example.com" />
+                <span asp-validation-for="Email" class="error-text"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <div class="password-wrapper">
+                    <input asp-for="Password" id="passwordField" />
+                    <button type="button" id="togglePassword">👁️</button>
+                </div>
+                <span asp-validation-for="Password" class="error-text"></span>
+            </div>
+
+            <button type="submit" class="btn-submit">Register</button>
+        </form>
+
+        <div class="footer-link">
+            <span>Already have an account?</span>
+            <a asp-controller="Login" asp-action="Index">Login</a>
         </div>
     </div>
 </div>
 
 <style>
-    body {
-        background-color: #f8f9fa;
+    :root {
+        --bg-color: #f8f9fa;
+        --error-color: #dc3545;
+        --input-bg: #f1f3f5;
+        --primary-black: #212529;
     }
 
-    .form-control:focus {
-        background-color: #fff !important;
-        border: 1px solid #000 !important;
-        box-shadow: none;
+    body { background-color: var(--bg-color); font-family: sans-serif; }
+
+    .registration-wrapper {
+        display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;
     }
 
-    .btn-dark:hover {
-        background-color: #333;
+    .registration-card {
+        background: white; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        width: 100%; max-width: 450px;
     }
+
+    h2 { text-align: center; margin-bottom: 0.5rem; font-weight: 700; }
+    .subtitle { text-align: center; color: #6c757d; margin-bottom: 2rem; font-size: 0.9rem; }
+
+    .form-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+    label { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
+    input { 
+        padding: 12px; border-radius: 6px; border: 1px solid transparent; 
+        background: var(--input-bg); font-size: 1rem;
+    }
+    input:focus { outline: none; border-color: var(--primary-black); background: #fff; }
+
+    .password-wrapper { display: flex; position: relative; }
+    .password-wrapper input { width: 100%; }
+    #togglePassword { 
+        position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; cursor: pointer;
+    }
+
+    .error-text { color: var(--error-color); font-size: 0.75rem; margin-top: 4px; }
+
+    .btn-submit {
+        width: 100%; padding: 14px; background: var(--primary-black); color: white;
+        border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px;
+    }
+    .btn-submit:hover { background: #000; }
+
+    .footer-link { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; }
+    .footer-link a { color: var(--primary-black); font-weight: 700; text-decoration: none; }
 </style>
