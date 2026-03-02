@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using OnlyFriends.Services;
 using OnlyFriends.Models.DTOS.EventDTOS;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using OnlyFriends.Models.ViewModels;
 
 namespace OnlyFriends.Controllers
 {
@@ -15,10 +18,28 @@ namespace OnlyFriends.Controllers
             _activityService = activityService;
         }
 
-        public async Task<IActionResult> Homepage()
+        public async Task<IActionResult> Homepage(string tab = "all")
         {
             IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
-            return View(activities);
+            int? currentUserId = GetCurrentUserId();
+            string activeTab = tab.Equals("my", StringComparison.OrdinalIgnoreCase) ? "my" : "all";
+
+            IEnumerable<GetEventDTO> joinedEvents = [];
+            if (currentUserId.HasValue)
+            {
+                joinedEvents = activities.Where(e => e.UserEvents.Any(ue =>
+                    ue.UserId == currentUserId.Value &&
+                    ue.RequestStatus != EnumRequestStatus.Rejected));
+            }
+
+            var vm = new HomepageViewModel
+            {
+                AllEvents = activities,
+                JoinedEvents = joinedEvents,
+                ActiveTab = activeTab
+            };
+
+            return View(vm);
         }
 
         public IActionResult Index()
@@ -35,6 +56,18 @@ namespace OnlyFriends.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private int? GetCurrentUserId()
+        {
+            string? claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                                 ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (int.TryParse(claimValue, out int userId))
+            {
+                return userId;
+            }
+
+            return null;
         }
     }
 }

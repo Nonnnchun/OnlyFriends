@@ -57,7 +57,51 @@ public sealed class EventService : IEventService
 
     public async Task<IEnumerable<GetEventDTO>> GetEventsAsync()
     {
-        IEnumerable<GetEventDTO> activitys = await _context.Events.AsNoTracking().OrderByDescending(e => e.StartAt).ProjectToType<GetEventDTO>().ToListAsync();
+        IEnumerable<GetEventDTO> activitys = await _context.Events
+            .AsNoTracking()
+            .OrderByDescending(e => e.StartAt)
+            .Select(e => new GetEventDTO
+            {
+                Id = e.Id,
+                Title = e.Title,
+                Info = e.Info,
+                Location = e.Location,
+                EventType = e.EventType,
+                EventStatus = e.EventStatus,
+                JointType = e.JointType,
+                Capacity = e.Capacity,
+                PosterUrl = e.PosterUrl,
+                StartAt = e.StartAt,
+                EndAt = e.EndAt,
+                TimeZone = e.TimeZone,
+                Latitude = e.Latitude,
+                Longitude = e.Longitude,
+                Users = new List<User>(),
+                UserEvents = e.UserEvents.Select(ue => new UserEvent
+                {
+                    UserId = ue.UserId,
+                    EventId = ue.EventId,
+                    RequestStatus = ue.RequestStatus
+                }).ToList(),
+                Owner = new Models.DTOS.UserDTOS.GetUserDTO
+                {
+                    Id = e.Owner.Id,
+                    Username = e.Owner.Username,
+                    FirstName = e.Owner.FirstName,
+                    LastName = e.Owner.LastName,
+                    ProfilePictureUrl = e.Owner.ProfilePictureUrl,
+                    Bio = e.Owner.Bio,
+                    Email = e.Owner.Email,
+                    Password = e.Owner.Password,
+                    Events = new List<Event>()
+                },
+                Category = new Models.DTOS.CategoryDTOS.GetCategoryDTO
+                {
+                    Id = e.Category.Id,
+                    CategoryName = e.Category.CategoryName
+                }
+            })
+            .ToListAsync();
         return activitys;
     }
 
