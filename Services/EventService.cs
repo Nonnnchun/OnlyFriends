@@ -76,7 +76,19 @@ public sealed class EventService : IEventService
                 TimeZone = e.TimeZone,
                 Latitude = e.Latitude,
                 Longitude = e.Longitude,
-                Users = new List<User>(),
+                Users = e.UserEvents
+                    .Where(ue => ue.RequestStatus != EnumRequestStatus.Rejected)
+                    .Select(ue => new User
+                    {
+                        Id = ue.User.Id,
+                        Username = ue.User.Username,
+                        FirstName = ue.User.FirstName,
+                        LastName = ue.User.LastName,
+                        ProfilePictureUrl = ue.User.ProfilePictureUrl,
+                        Bio = ue.User.Bio,
+                        Email = ue.User.Email,
+                        Password = ue.User.Password
+                    }).ToList(),
                 UserEvents = e.UserEvents.Select(ue => new UserEvent
                 {
                     UserId = ue.UserId,
