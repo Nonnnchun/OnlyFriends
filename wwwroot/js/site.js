@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   async function getNotifications() {
     try {
-      const res = await fetch('/api/notifications', { cache: 'no-store' });
+      const res = await fetch('/api/notifications', { cache: 'no-store', credentials: 'include' });
       if (res.status === 401) {
         return { unauthorized: true, items: [] };
       }
@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     await fetch('/api/notifications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
+      body: JSON.stringify({ name }),
+      credentials: 'include'
     });
     document.dispatchEvent(new CustomEvent('notifications:changed'));
   }
@@ -26,12 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
     await fetch(`/api/notifications/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, name })
+      body: JSON.stringify({ id, name }),
+      credentials: 'include'
     });
     document.dispatchEvent(new CustomEvent('notifications:changed'));
   }
   async function deleteNotification(id) {
-    await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
+    await fetch(`/api/notifications/${id}`, { method: 'DELETE', credentials: 'include' });
     document.dispatchEvent(new CustomEvent('notifications:changed'));
   }
   function populateBell(result) {
@@ -86,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function isAuthenticated() {
     try {
-      const res = await fetch('/api/auth/me', { cache: 'no-store' });
+      const res = await fetch('/api/auth/me', { cache: 'no-store', credentials: 'include' });
       return res.ok;
     } catch {
       return false;

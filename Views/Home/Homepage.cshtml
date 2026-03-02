@@ -1,4 +1,4 @@
-﻿@using OnlyFriends.Models
+@using OnlyFriends.Models
 @using OnlyFriends.Models.DTOS.EventDTOS
 @model IEnumerable<GetEventDTO>
 
@@ -9,16 +9,17 @@
 
 <div class="main-container">
 
-    <div class="page-header">
-        <div class="page-title">กิจกรรม</div>
-        <div class="header-actions">
-            <button type="button" class="btn-add" onclick="window.location.href='@Url.Action("CreateActivity", "Home")'">
-                Create Activity
-            </button>
+        <div class="page-header">
+            <div class="page-title">กิจกรรม</div>
+            <div class="header-actions">
+                <button type="button" class="of-btn of-btn-neutral"
+                        onclick="window.location.href='@Url.Action("CreateActivity", "Home")'">
+                    Create Activity
+                </button>
+            </div>
         </div>
-    </div>
 
-    @if (Model != null)
+    @if (Model != null && Model.Any())
     {
         @foreach (var item in Model)
         {
@@ -77,9 +78,24 @@
     }
     else
     {
-        <div style="text-align:center; padding: 60px; color:#999;">
-            ไม่มีกิจกรรมในขณะนี้
-        </div>
+        <section class="events-empty-state">
+            <div class="events-empty-card">
+                <div class="events-empty-icon">
+                    <div class="events-empty-illustration">
+                        <span class="events-empty-emoji">🗓️</span>
+                    </div>
+                    <span class="events-empty-badge">0</span>
+                </div>
+                <h2 class="events-empty-title">ไม่มีเหตุการณ์ที่จะเกิดขึ้น</h2>
+                <p class="events-empty-sub">
+                    คุณไม่มีกิจกรรมที่ใกล้จะเกิดขึ้นเร็ว ๆ นี้ ทำไมไม่ลองจัดงานดูสักงานล่ะ?
+                </p>
+                <button type="button" class="of-btn of-btn-neutral events-empty-btn"
+                        onclick="window.location.href='@Url.Action("CreateActivity", "Home")'">
+                    + สร้างกิจกรรม
+                </button>
+            </div>
+        </section>
     }
 
 </div>

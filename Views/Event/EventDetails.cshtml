@@ -27,7 +27,9 @@
     int spotsLeft = capacity > 0 ? Math.Max(0, capacity - going) : -1;
 
     // Location
-    var mapQuery = $"{Model.Latitude},{Model.Longitude}"; 
+    var lat = Model?.Latitude ?? 0;
+    var lng = Model?.Longitude ?? 0;
+    var mapQuery = $"{lat},{lng}";
     var mapSrc = $"https://www.google.com/maps?q={mapQuery}&output=embed"; 
     var mapOpenUrl = $"https://www.google.com/maps/search/?api=1&query={mapQuery}"; 
     var ownerAvatar = owner?.ProfilePictureUrl ?? "/images/avatar-placeholder.png";

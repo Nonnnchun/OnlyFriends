@@ -7,7 +7,11 @@ namespace OnlyFriends.Controllers
     {
         public IActionResult Heropage()
         {
-            
+            if (User?.Identity?.IsAuthenticated ?? false)
+            {
+                return RedirectToAction("Homepage", "Home");
+            }
+
             return View();
         }
     }

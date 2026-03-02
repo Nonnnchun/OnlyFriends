@@ -3,16 +3,12 @@
    ==================================================== */
 .landing-wrapper {
     font-family: 'Prompt', sans-serif;
-    background-color: #ffffff; 
-    
-    /* ทริคลอยตัวทับกรอบของระบบไปเลย (ลบขอบขาว/ขอบล่างกวนใจ) */
-    position: absolute; 
-    top: 0;
-    left: 0;
+    background-color: #ffffff;
+
+    /* ให้กินพื้นที่เต็มจอ แต่ไม่ทับ footer */
     width: 100%;
     min-height: 100vh;
-    z-index: 999; /* บัง Footer และ Layout เดิมให้มิด */
-    
+
     display: flex;
     flex-direction: column;
     overflow-x: hidden;

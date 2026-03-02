@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -52,12 +53,19 @@ namespace OnlyFriends.Controllers
             }
 
             var creds = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)), SecurityAlgorithms.HmacSha256);
-            var claims = new[]
+            var claimsList = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email)
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
+            if (!string.IsNullOrWhiteSpace(user.ProfilePictureUrl))
+            {
+                claimsList.Add(new Claim("picture", user.ProfilePictureUrl));
+            }
+            var claims = claimsList.ToArray();
             var expires = DateTime.UtcNow.AddHours(1);
             var token = new JwtSecurityToken(
                 issuer: issuer,
@@ -72,12 +80,16 @@ namespace OnlyFriends.Controllers
         }
 
         [HttpGet("me")]
-        [Microsoft.AspNetCore.Authorization.Authorize]
+        [Authorize]
         public async Task<IActionResult> Me()
         {
-            var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-            if (string.IsNullOrEmpty(sub)) return Unauthorized();
-            if (!int.TryParse(sub, out var userId)) return Unauthorized();
+            // Note: with default inbound claim mapping, "sub" is often mapped to ClaimTypes.NameIdentifier.
+            var userIdRaw =
+                User.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+            if (string.IsNullOrEmpty(userIdRaw)) return Unauthorized();
+            if (!int.TryParse(userIdRaw, out var userId)) return Unauthorized();
             var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return Unauthorized();
             return Ok(new { id = user.Id, username = user.Username, email = user.Email });

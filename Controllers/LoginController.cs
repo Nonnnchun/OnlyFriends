@@ -53,12 +53,19 @@ namespace OnlyFriends.Controllers
             }
 
             var creds = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)), SecurityAlgorithms.HmacSha256);
-            var claims = new[]
+            var claimsList = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email)
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
+            if (!string.IsNullOrWhiteSpace(user.ProfilePictureUrl))
+            {
+                claimsList.Add(new Claim("picture", user.ProfilePictureUrl));
+            }
+            var claims = claimsList.ToArray();
             var expires = DateTime.UtcNow.AddHours(1);
             var token = new JwtSecurityToken(issuer, audience, claims, expires: expires, signingCredentials: creds);
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);

@@ -1,10 +1,13 @@
 <div class="notif-bell dropdown">
-    <button class="btn position-relative" id="notifBell" type="button" onclick="toggleBell()">
+    <button class="notif-bell-btn" id="notifBell" type="button" onclick="toggleBell()" title="การแจ้งเตือน">
         <span class="notif-icon">🔔</span>
-        <span class="" id="notifCount">0</span>
     </button>
     <div class="dropdown-content notif-dropdown" id="notifMenu">
-        <div class="p-3 text-muted" id="notifEmpty">ยังไม่มีการแจ้งเตือน</div>
-        <div id="notifList"></div>
+        <div class="notif-empty-card" id="notifEmpty">
+            <div class="notif-empty-emoji">🌙</div>
+            <div class="notif-empty-title">ยังไม่มีการแจ้งเตือน</div>
+            <div class="notif-empty-subtitle">สร้างอีเวนต์และเชิญเพื่อนๆ มาร่วมสนุก</div>
+        </div>
+        <ul id="notifList" class="notif-list"></ul>
     </div>
 </div>
