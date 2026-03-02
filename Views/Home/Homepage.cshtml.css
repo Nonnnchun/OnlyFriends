@@ -180,4 +180,8 @@
         object-fit: cover;
     }
 
-    
+    .card-link {
+    text-decoration: none; /* Removes underline from text */
+    color: inherit; /* Inherits text color */
+    display: block; /* Makes the anchor fill the container */
+}

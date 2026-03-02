@@ -30,9 +30,9 @@ namespace OnlyFriends.Controllers
         [Route("/event/manage/{id}")]
         public async Task<IActionResult> ManageDetails(int id)
         {
-            IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
-            if (activities == null) return NotFound();
-            return View("ManageDetails",activities.FirstOrDefault(a => a.Id == id));
+            var activity = await _activityService.FindEventByIdAsync(id);
+            if (activity == null) return NotFound();
+            return View("ManageDetails",activity);
         }
     }
 }
