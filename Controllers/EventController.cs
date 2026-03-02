@@ -9,6 +9,8 @@ using OnlyFriends.Models.DTOS.EventDTOS;
 using OnlyFriends.Services;
 using Microsoft.AspNetCore.Authorization;
 using EntityFramework.Exceptions.Common;
+using System.Security.Claims;
+using Mapster;
 
 
 
@@ -36,6 +38,24 @@ namespace OnlyFriends.Controllers
         [Route("/event/manage/{id}")]
         public async Task<IActionResult> ManageDetails(int id)
         {
+            // try
+            // {
+            //     var activity = await _activityService.FindEventByIdAsync(id);
+            //     if (activity == null)
+            //     {
+            //         return NotFound("Event not found!");
+            //     }
+                // var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                // if (userId != activity.Owner.Id)
+                // {
+                //     return Unauthorized("Only owner can edit this event!");
+                // }
+            //     return View("ManageDetails", activity);
+            // }
+            // catch (Exception ex)
+            // {
+            //     return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            // }
             var activity = await _activityService.FindEventByIdAsync(id);
             if (activity == null) return NotFound();
             return View("ManageDetails", activity);
