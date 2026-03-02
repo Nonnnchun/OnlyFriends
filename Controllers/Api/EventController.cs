@@ -40,6 +40,15 @@ namespace OnlyFriends.ApiControllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        
+        // Kaka Please do it. fuck
+        // [HttpPost]
+        // [ValidateAntiForgeryToken]
+        // public IActionResult SendInvites([FromBody] InviteRequest req)
+        // {
+        //     // req.EventId, req.UserIds, req.Message
+        //     return Json(new { success = true });
+        // }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEventAsync(int id, UpdateEventDTO activityToUpdate)
@@ -70,13 +79,13 @@ namespace OnlyFriends.ApiControllers
          {
              try
              {
-           await _activityService.AddParticipantManualAsync(new AddUserToEventDTO { EventId = eventId, UserId = userId }); 
-           return Ok(new { message = "Accepted immediately" });
+                await _activityService.AddParticipantManualAsync(new AddUserToEventDTO { EventId = eventId, UserId = userId }); 
+                return Ok(new { message = "Accepted immediately" });
              }
-             catch (Exception ex)
+                catch (Exception ex)
              {
-           _logger.LogError(ex, ex.Message);
-           return StatusCode(500, ex.Message);
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(500, ex.Message);
              }
          }
         

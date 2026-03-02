@@ -89,12 +89,12 @@ public sealed class EventService : IEventService
      {
      EventId = userEventToAdd.EventId,
      UserId = userEventToAdd.UserId,
-     RequestStatus = EnumRequestStatus.Accepted
+     RequestStatus = EnumRequestStatus.Pending
      });
      }
      else
      {
-     ue.RequestStatus = EnumRequestStatus.Accepted;
+     ue.RequestStatus = EnumRequestStatus.Pending;
      }
      
      await _context.SaveChangesAsync();

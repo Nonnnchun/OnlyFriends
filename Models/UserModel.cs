@@ -14,7 +14,6 @@ namespace OnlyFriends.Models
         public required string Email { get; set; }
         public required string Password { get; set; }
         public ICollection<Event> CreatedEvents { get; } = new List<Event>();
-
         public List<Event> Events { get; } = [];
         public List<UserEvent> UserEvents { get; } = [];
     }
