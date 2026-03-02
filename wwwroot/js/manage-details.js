@@ -321,16 +321,124 @@ async function loadCategoryOptions() {
     }
 }
 
-// Init
-document.addEventListener('DOMContentLoaded', () => {
-    const panel = document.getElementById('editPanel');
-    if (panel) {
-        regOpen = panel.dataset.regOpen === 'true';
-        syncRegistrationUI();
+// Participant status controls
+const PARTICIPANT_STATUS = {
+    accepted: 'Accepted',
+    pending: 'Pending',
+    rejected: 'Rejected'
+};
+
+function getJointType() {
+    const type = (document.getElementById('editPanel')?.dataset.jointType || '').toLowerCase();
+    return type === 'public' ? 'public' : 'private';
+}
+
+function normalizeParticipantStatus(status, fallback = PARTICIPANT_STATUS.pending) {
+    const value = String(status || '').trim().toLowerCase();
+    if (value === 'accepted') return PARTICIPANT_STATUS.accepted;
+    if (value === 'rejected') return PARTICIPANT_STATUS.rejected;
+    if (value === 'pending') return PARTICIPANT_STATUS.pending;
+    return fallback;
+}
+
+function setParticipantStatusBadge(statusEl, status) {
+    if (!statusEl) return;
+    statusEl.textContent = status;
+    statusEl.classList.remove('is-accepted', 'is-pending', 'is-rejected');
+    if (status === PARTICIPANT_STATUS.accepted) statusEl.classList.add('is-accepted');
+    if (status === PARTICIPANT_STATUS.pending) statusEl.classList.add('is-pending');
+    if (status === PARTICIPANT_STATUS.rejected) statusEl.classList.add('is-rejected');
+}
+
+function syncParticipantActionButtons(item, status, isPublic) {
+    item.querySelectorAll('.participant-action').forEach((btn) => {
+        const buttonStatus = normalizeParticipantStatus(btn.dataset.statusValue || btn.textContent, '');
+        const isPendingButton = buttonStatus === PARTICIPANT_STATUS.pending;
+
+        if (isPublic && isPendingButton) {
+            btn.style.display = 'none';
+            return;
+        }
+
+        btn.style.display = '';
+        btn.classList.toggle('active', buttonStatus === status);
+    });
+}
+
+function applyParticipantStatus(item, status) {
+    if (!item) return;
+
+    const isPublic = getJointType() === 'public';
+    let nextStatus = normalizeParticipantStatus(status);
+
+    if (isPublic && nextStatus === PARTICIPANT_STATUS.pending) {
+        nextStatus = PARTICIPANT_STATUS.accepted;
     }
 
-    loadCategoryOptions();
-});
+    item.dataset.status = nextStatus;
+    setParticipantStatusBadge(item.querySelector('[data-status-target]'), nextStatus);
+    syncParticipantActionButtons(item, nextStatus, isPublic);
+}
+
+function updateParticipantSummaryStats() {
+    const participants = document.querySelectorAll('#participantList .registrant-item');
+    let accepted = 0;
+    let pending = 0;
+
+    participants.forEach((item) => {
+        const status = normalizeParticipantStatus(item.dataset.status, '');
+        if (status === PARTICIPANT_STATUS.accepted) accepted += 1;
+        if (status === PARTICIPANT_STATUS.pending) pending += 1;
+    });
+
+    const approvedEl = document.getElementById('statApproved');
+    const registeredEl = document.getElementById('statRegistered');
+    if (approvedEl) approvedEl.textContent = String(accepted);
+    if (registeredEl) registeredEl.textContent = String(pending);
+}
+
+function resetStatusFilterToAll() {
+    currentStatus = '';
+    const buttons = document.querySelectorAll('.filter-tabs .filter-btn');
+    buttons.forEach((button) => button.classList.remove('active'));
+    if (buttons.length > 0) buttons[0].classList.add('active');
+}
+
+function initializeParticipantStatusUI() {
+    const isPublic = getJointType() === 'public';
+
+    document.querySelectorAll('#participantList .registrant-item').forEach((item) => {
+        const storedStatus = normalizeParticipantStatus(item.dataset.status);
+        const defaultStatus = (isPublic && storedStatus !== PARTICIPANT_STATUS.rejected)
+            ? PARTICIPANT_STATUS.accepted
+            : storedStatus;
+        applyParticipantStatus(item, defaultStatus);
+    });
+
+    document.querySelectorAll('[data-private-only="true"]').forEach((el) => {
+        el.style.display = isPublic ? 'none' : '';
+    });
+
+    if (isPublic && currentStatus.toLowerCase() === PARTICIPANT_STATUS.pending.toLowerCase()) {
+        resetStatusFilterToAll();
+    }
+
+    updateParticipantSummaryStats();
+}
+
+function setParticipantStatus(buttonEl, nextStatus) {
+    const item = buttonEl?.closest('.registrant-item');
+    if (!item) return;
+
+    const isPublic = getJointType() === 'public';
+    const normalizedStatus = normalizeParticipantStatus(nextStatus);
+
+    if (isPublic && normalizedStatus === PARTICIPANT_STATUS.pending) return;
+
+    applyParticipantStatus(item, normalizedStatus);
+    updateParticipantSummaryStats();
+    applyFilters();
+}
 
 // Participant filtering
 let currentStatus = '';
@@ -368,7 +476,21 @@ function applyFilters() {
     if (empty) empty.style.display = count === 0 ? 'block' : 'none';
 }
 
-let selectedVisibility = '@(Model.JointType == EnumJointType.Public ? "public" : "private")';
+// Init
+let selectedVisibility = 'private';
+
+document.addEventListener('DOMContentLoaded', () => {
+    const panel = document.getElementById('editPanel');
+    if (panel) {
+        regOpen = panel.dataset.regOpen === 'true';
+        selectedVisibility = panel.dataset.jointType || 'private';
+        syncRegistrationUI();
+    }
+
+    loadCategoryOptions();
+    initializeParticipantStatusUI();
+    applyFilters();
+});
 
 function openVisibilityModal() {
     document.getElementById('visibilityOverlay').classList.add('open');

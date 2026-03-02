@@ -357,16 +357,18 @@
                         <div class="filter-tabs" style="display:flex;gap:8px;margin-bottom:16px">
                             <button class="filter-btn active" onclick="filterByStatus(this, '')">All</button>
                             <button class="filter-btn" onclick="filterByStatus(this, 'Accepted')">Accepted</button>
-                            <button class="filter-btn" onclick="filterByStatus(this, 'Pending')">Pending</button>
+                            <button class="filter-btn" data-private-only="true" onclick="filterByStatus(this, 'Pending')">Pending</button>
                             <button class="filter-btn" onclick="filterByStatus(this, 'Rejected')">Rejected</button>
                         </div>
                         <div class="registrant-list" id="participantList">
                             @foreach (var reg in Model.Users)
                             {
+                                var userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);
+                                var statusText = userEvent?.RequestStatus.ToString() ?? "Pending";
                                 <div class="registrant-item"
                                      data-name="@reg.FirstName @reg.LastName"
                                      data-email="@reg.Email"
-                                     data-status="@{var userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);}@userEvent?.RequestStatus">
+                                     data-status="@statusText">
                                     <img class="reg-avatar"
                                          src="@reg.ProfilePictureUrl"
                                          alt="@reg.Username.Substring(0,1).ToUpper()"
@@ -377,10 +379,14 @@
                                             <span class="reg-Email">@reg.Email</span>
                                         </div>
                                     </div>
-                                    <div class="reg-time" style="margin-left:auto; white-space:nowrap;">
-                                        <span class="reg-status">@userEvent?.RequestStatus</span>
-                                        @userEvent?.RegisteredAt.ToString("dd MMM yyyy ,HH:mm")
-
+                                    <div class="reg-time participant-meta">
+                                        <span class="reg-status participant-status" data-status-target>@statusText</span>
+                                        <span class="reg-date">@userEvent?.RegisteredAt.ToString("dd MMM yyyy ,HH:mm")</span>
+                                    </div>
+                                    <div class="participant-actions">
+                                        <button type="button" class="participant-action accept" data-status-value="Accepted" onclick="setParticipantStatus(this, 'Accepted')">Accept</button>
+                                        <button type="button" class="participant-action pending" data-status-value="Pending" data-private-only="true" onclick="setParticipantStatus(this, 'Pending')">Pending</button>
+                                        <button type="button" class="participant-action reject" data-status-value="Rejected" onclick="setParticipantStatus(this, 'Rejected')">Reject</button>
                                     </div>
                                 </div>
                             }
@@ -417,7 +423,8 @@
       <aside class="edit-panel"
              id="editPanel"
              data-event-id="@Model.Id"
-             data-reg-open="@((Model.EventStatus == EnumEventStatus.Open).ToString().ToLower())">
+             data-reg-open="@((Model.EventStatus == EnumEventStatus.Open).ToString().ToLower())"
+             data-joint-type="@Model.JointType.ToString().ToLower()">
   
           <div class="panel-header">
               <div class="panel-title">Edit Event</div>
