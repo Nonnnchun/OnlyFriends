@@ -8,6 +8,7 @@ using OnlyFriends.ApiControllers;
 using OnlyFriends.Models.DTOS.EventDTOS;
 using OnlyFriends.Services;
 using Microsoft.AspNetCore.Authorization;
+using EntityFramework.Exceptions.Common;
 
 
 namespace OnlyFriends.Controllers
@@ -34,9 +35,33 @@ namespace OnlyFriends.Controllers
             if (activity == null) return NotFound();
             return View("ManageDetails",activity);
         }
-        public IActionResult Create()
+
+        [HttpGet]
+        public async Task<IActionResult> Create()
         {
             return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateEventDTO activityToCreate)
+        {
+            try
+            {
+                await _activityService.AddEventAsync(activityToCreate);
+                return RedirectToAction("Homepage", "Home");
+            }
+            catch (UniqueConstraintException  ex)
+            {
+               ModelState.AddModelError(ex.ConstraintName, ex.ConstraintProperties[0]);
+                
+                return View("Homepage", "Home");
+            }
+            // catch (KeyNotFoundException ex)
+            // {
+                
+            //     return View("Login");
+            // }
         }
     }
 }

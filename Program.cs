@@ -73,6 +73,8 @@ builder.Services.AddAuthorization(options =>
 // Create app
 var app = builder.Build();
 
+app.UseStaticFiles(); // <--- Add this back!
+app.MapStaticAssets();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -80,10 +82,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // <--- Add this back!
 app.UseRouting();
 
-app.MapStaticAssets();
 
 app.UseAuthentication();
 app.UseAuthorization();
