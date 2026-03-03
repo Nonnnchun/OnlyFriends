@@ -8,31 +8,115 @@ using OnlyFriends.ApiControllers;
 using OnlyFriends.Models.DTOS.EventDTOS;
 using OnlyFriends.Services;
 using Microsoft.AspNetCore.Authorization;
+using EntityFramework.Exceptions.Common;
+using System.Security.Claims;
+using Mapster;
+
 
 
 namespace OnlyFriends.Controllers
 {
     public class EventController : Controller
+    {
+        private readonly IEventService _activityService;
+        private readonly ILogger<EventController> _logger;
+
+        public EventController(IEventService activityService, ILogger<EventController> logger)
         {
-            private readonly IEventService _activityService;
-            public EventController(IEventService activityService)
-            {
-                _activityService = activityService;
-            }
+            _activityService = activityService;
+            _logger = logger;
+        }
+
 
         [Route("/event/view/{id}")]
         public async Task<IActionResult> EventDetails(int id)
         {
             IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
-            return View("Details",activities.FirstOrDefault(a => a.Id == id));
+            return View("Details", activities.FirstOrDefault(a => a.Id == id));
         }
 
         [Route("/event/manage/{id}")]
         public async Task<IActionResult> ManageDetails(int id)
         {
-            IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
-            if (activities == null) return NotFound();
-            return View("ManageDetails",activities.FirstOrDefault(a => a.Id == id));
+            try
+            {
+                var activity = await _activityService.FindEventByIdAsync(id);
+                if (activity == null)
+                {
+                    return NotFound("Event not found!");
+                }
+                var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                if (userId != activity.Owner.Id)
+                {
+                    return Unauthorized("Only owner can edit this event!");
+                }
+                return View("ManageDetails", activity);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
+
+        [Authorize]
+        [HttpPut("event/manage/{id}")]
+        public async Task<IActionResult> Update(int id,[FromBody] UpdateEventDTO activityToUpdate)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(activityToUpdate);
+            }
+            var activity = await _activityService.FindEventByIdAsync(id);
+            if (activity == null)
+            {
+                return NotFound("Event not found!");
+            }
+            var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            if (userId != activity.Owner.Id)
+            {
+                return Unauthorized("Only owner can update this event!");
+            }
+
+            await _activityService.UpdateEventAsync(activityToUpdate);
+            // return NotFound(activityToUpdate);
+            // return RedirectToAction("Homepage", "Home");
+            return Ok();
+
+
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Create()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateEventDTO activityToCreate)
+        {
+            try
+            {
+                var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                // Convert kind to UTC to fix database error (IDK)
+                activityToCreate.StartAt = DateTime.SpecifyKind(activityToCreate.StartAt, DateTimeKind.Utc);
+                activityToCreate.EndAt = DateTime.SpecifyKind(activityToCreate.EndAt, DateTimeKind.Utc);
+                activityToCreate.OwnerId = userId;
+                await _activityService.AddEventAsync(activityToCreate);
+                return RedirectToAction("Homepage", "Home");
+            }
+            catch (UniqueConstraintException ex)
+            {
+                ModelState.AddModelError(ex.ConstraintName, ex.ConstraintProperties[0]);
+
+                return View("Homepage", "Home");
+            }
+            // catch (KeyNotFoundException ex)
+            // {
+
+            //     return View("Login");
+            // }
+        }
+
     }
 }

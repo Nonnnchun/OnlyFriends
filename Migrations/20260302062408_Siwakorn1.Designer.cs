@@ -12,8 +12,8 @@ using OnlyFriends.Data;
 namespace onlyfriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260228091405_AddEventInvitesAndNotificationUser")]
-    partial class AddEventInvitesAndNotificationUser
+    [Migration("20260302062408_Siwakorn1")]
+    partial class Siwakorn1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,22 +33,11 @@ namespace onlyfriends.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("EventName")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer");
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Notification");
                 });
@@ -135,50 +124,6 @@ namespace onlyfriends.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("OnlyFriends.Models.EventInvite", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("InvitedByUserId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RecipientEmail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("RecipientUserId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("RespondedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("InvitedByUserId");
-
-                    b.HasIndex("RecipientUserId");
-
-                    b.ToTable("EventInvites");
-                });
-
             modelBuilder.Entity("OnlyFriends.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -216,6 +161,12 @@ namespace onlyfriends.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 
@@ -240,16 +191,6 @@ namespace onlyfriends.Migrations
                     b.ToTable("UserEvents");
                 });
 
-            modelBuilder.Entity("Notifications.Models.Notification", b =>
-                {
-                    b.HasOne("OnlyFriends.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("OnlyFriends.Models.Event", b =>
                 {
                     b.HasOne("OnlyFriends.Models.Category", "Category")
@@ -267,32 +208,6 @@ namespace onlyfriends.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("OnlyFriends.Models.EventInvite", b =>
-                {
-                    b.HasOne("OnlyFriends.Models.Event", "Event")
-                        .WithMany("EventInvites")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OnlyFriends.Models.User", "InvitedByUser")
-                        .WithMany("SentEventInvites")
-                        .HasForeignKey("InvitedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("OnlyFriends.Models.User", "RecipientUser")
-                        .WithMany("ReceivedEventInvites")
-                        .HasForeignKey("RecipientUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Event");
-
-                    b.Navigation("InvitedByUser");
-
-                    b.Navigation("RecipientUser");
                 });
 
             modelBuilder.Entity("OnlyFriends.Models.UserEvent", b =>
@@ -321,18 +236,12 @@ namespace onlyfriends.Migrations
 
             modelBuilder.Entity("OnlyFriends.Models.Event", b =>
                 {
-                    b.Navigation("EventInvites");
-
                     b.Navigation("UserEvents");
                 });
 
             modelBuilder.Entity("OnlyFriends.Models.User", b =>
                 {
                     b.Navigation("CreatedEvents");
-
-                    b.Navigation("ReceivedEventInvites");
-
-                    b.Navigation("SentEventInvites");
 
                     b.Navigation("UserEvents");
                 });

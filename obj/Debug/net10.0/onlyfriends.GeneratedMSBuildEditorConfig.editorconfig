@@ -46,10 +46,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRcX0ludml0ZU1vZGFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mrfor/Documents/GitHub/OnlyFriends/Views/Home/Createactivity.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDcmVhdGVhY3Rpdml0eS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/mrfor/Documents/GitHub/OnlyFriends/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -60,6 +56,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/mrfor/Documents/GitHub/OnlyFriends/Views/Profile/Profile.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZmlsZVxQcm9maWxlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/mrfor/Documents/GitHub/OnlyFriends/Views/Register/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVnaXN0ZXJcUmVnaXN0ZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/mrfor/Documents/GitHub/OnlyFriends/Views/Setting/Setting.cshtml]
@@ -85,6 +85,10 @@ build_metadata.AdditionalFiles.CssScope =
 [C:/Users/mrfor/Documents/GitHub/OnlyFriends/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/mrfor/Documents/GitHub/OnlyFriends/Views/Event/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = b-5ipgbxqx2m
 
 [C:/Users/mrfor/Documents/GitHub/OnlyFriends/Views/Hero/Heropage.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVyb1xIZXJvcGFnZS5jc2h0bWw=

@@ -366,6 +366,7 @@
                                 var userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);
                                 var statusText = userEvent?.RequestStatus.ToString() ?? "Pending";
                                 <div class="registrant-item"
+                                     data-user-id="@reg.Id"
                                      data-name="@reg.FirstName @reg.LastName"
                                      data-email="@reg.Email"
                                      data-status="@statusText">
@@ -473,12 +474,6 @@
                   </div>
               </div>
   
-              <div class="form-group">
-                   <label class="form-label">DEADLINE</label>
-                  <input class="form-input" type="datetime-local" id="inputDeadline"
-                         value="@(Model.EndAt.HasValue ? Model.EndAt.Value.ToString("yyyy-MM-ddTHH:mm") : "")" />
-              </div>
-  
               <hr class="divider">
   
               @* Location *@
@@ -517,5 +512,4 @@
       <i class="fa-solid fa-circle-check"></i>
       <span id="toastMsg">Saved!</span>
   </div>
-
 

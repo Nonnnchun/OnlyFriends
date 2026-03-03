@@ -12,8 +12,8 @@ using OnlyFriends.Data;
 namespace onlyfriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260226142749_AddRegisteredAtToUserEvent")]
-    partial class AddRegisteredAtToUserEvent
+    [Migration("20260302112403_siwakorn2")]
+    partial class siwakorn2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -160,6 +160,12 @@ namespace onlyfriends.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
