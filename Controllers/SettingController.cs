@@ -53,8 +53,7 @@ namespace OnlyFriends.Controllers
             }
         }
 
-        [Authorize]
-        [HttpPost("update")]
+        
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> UpdateProfile(UpdateUserDTO updatedData)

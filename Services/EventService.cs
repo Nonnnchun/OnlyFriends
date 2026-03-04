@@ -33,7 +33,7 @@ public sealed class EventService : IEventService
 
         // Get Category object
         activity.Category = await _context.Categories.FindAsync(activity.CategoryId)
-        ?? throw new KeyNotFoundException($"Category with ID {activityToCreate} does not exist!");
+        ?? throw new KeyNotFoundException($"Category with ID {activityToCreate.CategoryId} does not exist!");
 
         _context.Events.Add(activity);
         await _context.SaveChangesAsync();

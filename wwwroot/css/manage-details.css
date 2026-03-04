@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /* ============================================
    ACTIVITY BOARD - Main Stylesheet
    ============================================ */
@@ -1436,7 +1434,6 @@ footer a:hover { color: white; }
   .countdown-item { min-width: 44px; }
   .countdown-value { font-size: 1.2rem; }
 }
->>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -1516,6 +1513,25 @@ footer a:hover { color: white; }
       background: linear-gradient(135deg, #6c47ff, #ff6bba);
       display: flex; align-items: center; justify-content: center;
       font-size: 13px; color: #fff; font-weight: 600; cursor: pointer;
+    }
+
+    /* ── LAYOUT CHAIN: pass flex sizing through _Layout.cshtml wrappers ── */
+    .app-shell {
+      flex: 1;
+      min-height: 0;
+    }
+    .app-shell > .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      max-width: 100%;
+    }
+    .app-shell > .container > main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
     }
 
     /* ── LAYOUT ── */

@@ -1,3 +1,5 @@
+@using System.Security.Claims
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,22 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - OnlyFriends</title>
     <script type="importmap"></script>
-<<<<<<< HEAD
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css"  />
+    <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="~/OnlyFriends.styles.css" />
-=======
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
->>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
     @RenderSection("Styles", required: false)
 </head>
+
 <body>
     @{
         var uname = (User?.Identity?.Name
                     ?? User?.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
                     ?? User?.FindFirst("unique_name")?.Value
                     ?? "").Trim();
+        var currentUserIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var profileSlug = string.IsNullOrEmpty(uname) ? "" : "@" + uname;
         var picture = User?.FindFirst("picture")?.Value;
         var avatarUrl = !string.IsNullOrWhiteSpace(picture)
@@ -32,7 +30,8 @@
     <header>
         <nav class="custom-navbar">
             <div class="nav-left">
-                <a href="/" class="@(User?.Identity?.IsAuthenticated ?? false ? "brand" : "nav-logo-hero")">OnlyFriends</a>
+                <a href="/"
+                   class="@(User?.Identity?.IsAuthenticated ?? false ? "brand" : "nav-logo-hero")">OnlyFriends</a>
                 @if (User?.Identity?.IsAuthenticated ?? false)
                 {
                     <a asp-controller="Home" asp-action="Homepage" class="nav-link">Home</a>
@@ -56,7 +55,7 @@
                             <hr>
                             <div class="filter-item">
                                 <input type="checkbox" id="statusOpen" checked> <label
-                                    for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
+                                for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
                             </div>
                             <div class="filter-item">
                                 <input type="checkbox" id="myJoinedEvents">
@@ -66,27 +65,6 @@
                         </div>
                     </div>
 
-<<<<<<< HEAD
-                @await Html.PartialAsync("_NotificationBell")
-                <div class="dropdown" id="profileDropdown">
-                    <button class="profile-btn" onclick="toggleProfile()">
-                        <img src="https://media.nationthailand.com/uploads/images/md/2021/04/NSqRmPs4AruiQ5nqajGR.jpg"
-                             alt="Profile">
-                    </button>
-                    <div class="dropdown-content profile-menu" id="profileMenu">
-                        <a asp-controller="Setting" asp-action="Index">โปรไฟล์ของฉัน</a>
-                        <a asp-controller="Profile" asp-action="Index">กิจกรรมที่เข้าร่วม</a>
-                        <hr>
-                        @if (User.Identity?.IsAuthenticated ?? false) {
-
-                        <form asp-controller="Login" asp-action="Logout" method="post">
-                            <button type="submit" class="dropdown-logout-btn">Log Out</button>
-                        </form>
-                        } 
-                        else {
-                            <a asp-controller="Login" asp-action="Index" class="sign-in-link">Log In</a>
-                        }
-=======
                     @await Html.PartialAsync("_NotificationBell")
                     <div class="dropdown" id="profileDropdown">
                         <button class="profile-btn" onclick="toggleProfile()">
@@ -108,7 +86,6 @@
                                 <button type="submit" class="dropdown-link">ออกจากระบบ</button>
                             </form>
                         </div>
->>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
                     </div>
                 }
                 else
@@ -119,54 +96,50 @@
             </div>
         </nav>
     </header>
-        <div class="app-shell">
-            <div class="container">
-                <main role="main" class="pb-3">
-                    @RenderBody()
-                </main>
-            </div>
-
-            <footer class="app-footer">
-                <div class="app-footer-inner">
-                    <div class="app-footer-left">
-                        <div class="app-footer-brand">OnlyFriends</div>
-                        <p class="app-footer-text">
-                            จัดกิจกรรม นัดพบ และค้นหาเพื่อนใหม่ได้ในที่เดียว
-                        </p>
-                    </div>
-                    <div class="app-footer-links">
-                        <div class="app-footer-column">
-                            <div class="app-footer-title">โปรไฟล์ของฉัน</div>
-                            @if (((User?.Identity?.IsAuthenticated) ?? false) && !string.IsNullOrEmpty(uname))
-                            {
-                                <a href="/user/@profileSlug">ดูโปรไฟล์</a>
-                            }
-                            else
-                            {
-                                <a href="/login">เข้าสู่ระบบ</a>
-                            }
-                            <a href="/setting">การตั้งค่า</a>
-                        </div>
-                        <div class="app-footer-column">
-                            <div class="app-footer-title">ข้อมูล</div>
-                            <a asp-controller="Home" asp-action="Privacy">ความเป็นส่วนตัว</a>
-                            <span class="app-footer-badge">โครงการตัวอย่าง</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="app-footer-bottom">
-                    <span>© @DateTime.Now.Year OnlyFriends</span>
-                    <span class="app-footer-meta">สร้างเพื่อการเรียนรู้และทดลองใช้งาน</span>
-                </div>
-            </footer>
+    <div class="app-shell">
+        <div class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
         </div>
-        <script src="~/lib/jquery/dist/jquery.min.js"></script>
-<<<<<<< HEAD
-        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="~/js/site.js" ></script>
-=======
-        <script src="~/js/site.js" asp-append-version="true"></script>
->>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
-        @RenderSection("Scripts", required: false)
-    </body>
+
+        <footer class="app-footer">
+            <div class="app-footer-inner">
+                <div class="app-footer-left">
+                    <div class="app-footer-brand">OnlyFriends</div>
+                    <p class="app-footer-text">
+                        จัดกิจกรรม นัดพบ และค้นหาเพื่อนใหม่ได้ในที่เดียว
+                    </p>
+                </div>
+                <div class="app-footer-links">
+                    <div class="app-footer-column">
+                        <div class="app-footer-title">โปรไฟล์ของฉัน</div>
+                        @if (((User?.Identity?.IsAuthenticated) ?? false) && !string.IsNullOrEmpty(uname))
+                        {
+                            <a href="/user/@profileSlug">ดูโปรไฟล์</a>
+                        }
+                        else
+                        {
+                            <a href="/login">เข้าสู่ระบบ</a>
+                        }
+                        <a href="/setting">การตั้งค่า</a>
+                    </div>
+                    <div class="app-footer-column">
+                        <div class="app-footer-title">ข้อมูล</div>
+                        <a asp-controller="Home" asp-action="Privacy">ความเป็นส่วนตัว</a>
+                        <span class="app-footer-badge">โครงการตัวอย่าง</span>
+                    </div>
+                </div>
+            </div>
+            <div class="app-footer-bottom">
+                <span>© @DateTime.Now.Year OnlyFriends</span>
+                <span class="app-footer-meta">สร้างเพื่อการเรียนรู้และทดลองใช้งาน</span>
+            </div>
+        </footer>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+
 </html>

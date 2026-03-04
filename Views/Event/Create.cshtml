@@ -373,8 +373,8 @@
                         console.log(result);
                         console.log("🚀 ข้อมูลที่จะส่ง:", eventToCreate);
                         alert("✅ ตรวจสอบข้อมูลสำเร็จ! ดู Payload ได้ใน Console");
-                        if (response.redirectUrl) {
-                            window.location.href = response.redirectUrl;
+                        if (result.redirectUrl) {
+                            window.location.href = result.redirectUrl;
                         }
                     },
                     error: function (xhr, status, error) {
@@ -385,8 +385,4 @@
 
             }
     </script>
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
