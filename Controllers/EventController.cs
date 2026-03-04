@@ -19,11 +19,13 @@ namespace OnlyFriends.Controllers
     public class EventController : Controller
     {
         private readonly IEventService _activityService;
+        private readonly ICategoryService _categoryService;
         private readonly ILogger<EventController> _logger;
 
-        public EventController(IEventService activityService, ILogger<EventController> logger)
+        public EventController(IEventService activityService, ICategoryService categoryService, ILogger<EventController> logger)
         {
             _activityService = activityService;
+            _categoryService = categoryService;
             _logger = logger;
         }
 
@@ -88,6 +90,7 @@ namespace OnlyFriends.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
+            ViewData["Categories"] = await _categoryService.GetCategoriesAsync();
             return View();
         }
 

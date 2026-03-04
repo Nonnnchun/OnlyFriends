@@ -1,7 +1,9 @@
 @using OnlyFriends.Models.DTOS.EventDTOS
+@using OnlyFriends.Models.DTOS.CategoryDTOS
 @model CreateEventDTO
 @{
     ViewData["Title"] = "สร้างกิจกรรม";
+    var categories = ViewData["Categories"] as IEnumerable<GetCategoryDTO>;
 }
 
 @section Styles {
@@ -84,10 +86,12 @@
                     <select class="eventCategorySelect"
                             style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px;">
                         <option value="">เลือกหมวดหมู่</option>
-                        <option value="1">สัมมนา</option>
-                        <option value="2">เวิร์กช็อป</option>
-                        <option value="3">แข่งขัน</option>
-                        <option value="4">พบปะสังสรรค์</option>
+                        @if (categories != null) {
+                            @foreach (var category in categories) 
+                            {
+                                <option value="@category.Id">@category.CategoryName</option>
+                            }
+                        }
                     </select>
 
                     <button type="button"
@@ -146,6 +150,8 @@
             const EnumEventStatus = { Draft: 1, Published: 2 };
             const EnumJointType = { Public: 1, RequireApproval: 2 };
 
+            let posterDataUrl = null;
+
             document.addEventListener('DOMContentLoaded', () => {
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('startDate').value = today;
@@ -157,6 +163,26 @@
 
             document.querySelector('.upload-btn').addEventListener('click', () => {
                 document.getElementById('posterInput').click();
+            });
+
+            document.getElementById('posterInput').addEventListener('change', function () {
+                const file = this.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    posterDataUrl = e.target.result;
+                    const preview = document.querySelector('.poster-preview');
+                    let img = preview.querySelector('img.poster-img');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.className = 'poster-img';
+                        img.style.cssText = 'width:100%; height:100%; object-fit:cover; border-radius:inherit; position:absolute; top:0; left:0;';
+                        preview.style.position = 'relative';
+                        preview.prepend(img);
+                    }
+                    img.src = posterDataUrl;
+                };
+                reader.readAsDataURL(file);
             });
 
             function togglePriceInput() {
@@ -298,18 +324,20 @@
                 const isFree = document.getElementById('ticketType').value === 'free';
                 const ticketPrice = isFree ? 0 : (parseFloat(document.getElementById('ticketPrice').value) || 0);
 
+                const categoryId = parseInt(document.querySelector('.eventCategorySelect').value);
+
                 const eventToCreate = {
                     title: title,
                     info: combinedInfo,
-                    location: "Thailand",
+                    location: location,
                     latitude: lat ? parseFloat(lat) : null,
                     longitude: lng ? parseFloat(lng) : null,
                     eventType: eventTypeEnum,
                     eventStatus: EnumEventStatus.Published,
                     jointType: EnumJointType.Public,
                     capacity: capacity,
-                    categoryId: 1,
-                    posterUrl: null,
+                    categoryId: categoryId,
+                    posterUrl: posterDataUrl,
                     startAt: startAtStr,
                     endAt: endAtStr
                 };
@@ -318,6 +346,16 @@
 
                 if (!eventToCreate.title) {
                     alert("❌ กรุณากรอกชื่อกิจกรรม");
+                    return;
+                }
+
+                if (!categoryId) {
+                    alert("❌ กรุณาเลือกหมวดหมู่กิจกรรม");
+                    return;
+                }
+
+                if (!eventToCreate.location) {
+                    alert("❌ กรุณากรอกสถานที่");
                     return;
                 }
 
