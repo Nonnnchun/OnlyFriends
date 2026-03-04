@@ -13,11 +13,10 @@
     <link rel="stylesheet" href="~/OnlyFriends.styles.css" />
 </head>
 <body>
-
     <div class="landing-wrapper">
         <nav class="landing-nav">
             <div class="nav-left">
-                <a href="/Home/Homepage" class="landing-brand">OnlyFriends</a>
+                <a href="/" class="landing-brand nav-logo-hero">OnlyFriends</a>
             </div>
             <div class="nav-right">
                 <span class="live-time" id="clock"></span>
@@ -41,15 +40,53 @@
                     เริ่มต้นกิจกรรมที่คุณสนใจ ชวนเพื่อนใหม่มาร่วมจอย
                 </p>
                 
-                <button class="btn-primary" onclick="window.location.href='@Url.Action("Create", "Event")'">
-                    สร้างกิจกรรมแรกของคุณ
-                </button>
+                <button class="of-btn of-btn-primary" id="heroCreateBtn">สร้างกิจกรรมแรกของคุณ</button>
             </div>
 
             <div class="hero-image-container">
                 <img src="https://i.ibb.co/bR8KPymn/OIG3-5-AXItu-Z-KQ776k-FBJAb.jpg" alt="Event App Preview" class="hero-image" />
             </div>
         </main>
+    </div>
+
+    <footer class="landing-footer">
+        <div class="landing-footer-inner">
+            <div class="landing-footer-left">
+                <div class="landing-footer-brand">OnlyFriends</div>
+                <p class="landing-footer-text">
+                    แพลตฟอร์มนัดทำกิจกรรมและเจอเพื่อนใหม่ ออกแบบมาสำหรับการชวนกันไปสนุกแบบง่าย ๆ
+                </p>
+            </div>
+            <div class="landing-footer-links">
+                <div class="landing-footer-column">
+                    <div class="landing-footer-title">เกี่ยวกับเรา</div>
+                    <a href="/Home/Homepage">สำรวจกิจกรรม</a>
+                    <a href="/Home/Privacy">นโยบายความเป็นส่วนตัว</a>
+                </div>
+                <div class="landing-footer-column">
+                    <div class="landing-footer-title">เริ่มต้น</div>
+                    <a href="@Url.Action("Index","Login")">เข้าสู่ระบบ</a>
+                    <a href="/register">สมัครสมาชิก</a>
+                </div>
+            </div>
+        </div>
+        <div class="landing-footer-bottom">
+            <span>© @DateTime.Now.Year OnlyFriends</span>
+            <span class="landing-footer-meta">สร้างเพื่อการเรียนรู้และทดลองใช้งาน</span>
+        </div>
+    </footer>
+
+    <div id="heroLoginPrompt" class="hero-modal-backdrop is-hidden">
+        <div class="hero-modal">
+            <h2 class="hero-modal-title">ต้องเข้าสู่ระบบก่อน</h2>
+            <p class="hero-modal-text">
+                เพื่อสร้างกิจกรรมใหม่ กรุณาเข้าสู่ระบบก่อนค่ะ
+            </p>
+            <div class="hero-modal-actions">
+                <button class="of-btn of-btn-neutral" id="heroModalClose">ปิด</button>
+                <button class="of-btn of-btn-primary" id="heroGoLogin">ไปหน้าเข้าสู่ระบบ</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -60,7 +97,65 @@
             document.getElementById('clock').innerText = `${hours} นาฬิกา ${minutes} นาที GMT+7`;
         }
         setInterval(updateClock, 1000);
-        updateClock(); 
+        updateClock();
+
+        async function heroIsAuthenticated() {
+            try {
+                const res = await fetch('/api/auth/me', { cache: 'no-store', credentials: 'include' });
+                return res.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        (function () {
+            const createBtn = document.getElementById('heroCreateBtn');
+            const modal = document.getElementById('heroLoginPrompt');
+            const closeBtn = document.getElementById('heroModalClose');
+            const goLoginBtn = document.getElementById('heroGoLogin');
+            if (!createBtn) return;
+
+            function openModal() {
+                if (modal) {
+                    modal.classList.remove('is-hidden');
+                }
+            }
+            function closeModal() {
+                if (modal) {
+                    modal.classList.add('is-hidden');
+                }
+            }
+
+            createBtn.addEventListener('click', async function (e) {
+                e.preventDefault();
+                const authed = await heroIsAuthenticated();
+                if (authed) {
+                    window.location.href = '@Url.Action("Create", "Event")';
+                    return;
+                }
+                openModal();
+            });
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    closeModal();
+                });
+            }
+
+            if (goLoginBtn) {
+                goLoginBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.location.href = '@Url.Action("Index", "Login")';
+                });
+            }
+
+            window.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        })();
     </script>
 </body>
 </html>

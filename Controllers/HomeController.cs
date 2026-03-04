@@ -18,6 +18,11 @@ namespace OnlyFriends.Controllers
             _activityService = activityService;
         }
 
+        public IActionResult CreateActivity()
+        {
+            return RedirectToAction("Create", "Event");
+        }
+
         public async Task<IActionResult> Homepage(string tab = "all")
         {
             IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
@@ -40,16 +45,6 @@ namespace OnlyFriends.Controllers
             };
 
             return View(vm);
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

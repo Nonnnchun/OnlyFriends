@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   async function getNotifications() {
     try {
-      const res = await fetch('/api/notifications', { cache: 'no-store' });
+      const res = await fetch('/api/notifications', { cache: 'no-store', credentials: 'include' });
       if (res.status === 401) {
         return { unauthorized: true, items: [] };
       }
@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     await fetch('/api/notifications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
+      body: JSON.stringify({ name }),
+      credentials: 'include'
     });
     document.dispatchEvent(new CustomEvent('notifications:changed'));
   }
@@ -26,12 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
     await fetch(`/api/notifications/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, name })
+      body: JSON.stringify({ id, name }),
+      credentials: 'include'
     });
     document.dispatchEvent(new CustomEvent('notifications:changed'));
   }
   async function deleteNotification(id) {
-    await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
+    await fetch(`/api/notifications/${id}`, { method: 'DELETE', credentials: 'include' });
     document.dispatchEvent(new CustomEvent('notifications:changed'));
   }
   function populateBell(result) {
@@ -49,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const li = document.createElement('li');
       li.className = 'p-3';
       const a = document.createElement('a');
-      a.href = '/Login';
+      a.href = '/login';
       a.textContent = 'กรุณาเข้าสู่ระบบเพื่อดูการแจ้งเตือน';
       li.appendChild(a);
       list.appendChild(li);
@@ -83,15 +85,52 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteNotification,
     refreshBell: loadBellNotifications
   };
+
+  async function isAuthenticated() {
+    try {
+      const res = await fetch('/api/auth/me', { cache: 'no-store', credentials: 'include' });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async function handleRequireAuthClick(e) {
+    const authed = await isAuthenticated();
+    if (!authed) {
+      e.preventDefault();
+      window.location.href = '/login';
+      return false;
+    }
+    return true;
+  }
+
+  document.querySelectorAll('[data-require-auth="true"]').forEach(el => {
+    el.addEventListener('click', handleRequireAuthClick);
+  });
 });
 
-//----------------------------------------------------------------------------------------------------------------------------------
+// แสดงเวลาแบบเดียวกับหน้า Heropage บน Navbar (ถ้ามี element navClock)
+function updateNavClock() {
+  const el = document.getElementById('navClock');
+  if (!el) return;
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  el.textContent = `${hours} นาฬิกา ${minutes} นาที GMT+7`;
+}
+setInterval(updateNavClock, 1000);
+updateNavClock();
+
+//----------------------------------------------------------------------------------------
 
 // เปิด-ปิด เมนูตัวกรอง
 function toggleFilter() {
     document.getElementById("filterMenu").classList.toggle("show");
     // ปิดเมนูโปรไฟล์ถ้าเปิดอยู่
     document.getElementById("profileMenu").classList.remove("show"); 
+    var bell = document.getElementById("notifMenu");
+    if (bell) bell.classList.remove("show");
 }
 
 // เปิด-ปิด เมนูโปรไฟล์
@@ -99,6 +138,8 @@ function toggleProfile() {
     document.getElementById("profileMenu").classList.toggle("show");
     // ปิดเมนูตัวกรองถ้าเปิดอยู่
     document.getElementById("filterMenu").classList.remove("show");
+    var bell = document.getElementById("notifMenu");
+    if (bell) bell.classList.remove("show");
 }
 
 function applyFilter() {
@@ -111,32 +152,16 @@ window.onclick = function(event) {
     if (!event.target.closest('.dropdown')) {
         document.getElementById("filterMenu").classList.remove("show");
         document.getElementById("profileMenu").classList.remove("show");
+        var bell = document.getElementById("notifMenu");
+        if (bell) bell.classList.remove("show");
     }
 }
 
-// เปิด-ปิด เมนูตัวกรอง
-function toggleFilter() {
-    document.getElementById("filterMenu").classList.toggle("show");
-    // ปิดเมนูโปรไฟล์ถ้าเปิดอยู่
-    document.getElementById("profileMenu").classList.remove("show"); 
-}
-
-// เปิด-ปิด เมนูโปรไฟล์
-function toggleProfile() {
-    document.getElementById("profileMenu").classList.toggle("show");
-    // ปิดเมนูตัวกรองถ้าเปิดอยู่
+// เปิด-ปิด กระดิ่งแจ้งเตือน
+function toggleBell() {
+    var menu = document.getElementById("notifMenu");
+    if (!menu) return;
+    menu.classList.toggle("show");
     document.getElementById("filterMenu").classList.remove("show");
-}
-
-function applyFilter() {
-    alert("กำลังกรองข้อมูล...");
-    document.getElementById("filterMenu").classList.remove("show");
-}
-
-// ถ้าคลิกพื้นที่ว่างๆ นอกเมนู ให้ปิด Dropdown ทั้งหมด
-window.onclick = function(event) {
-    if (!event.target.closest('.dropdown')) {
-        document.getElementById("filterMenu").classList.remove("show");
-        document.getElementById("profileMenu").classList.remove("show");
-    }
+    document.getElementById("profileMenu").classList.remove("show");
 }

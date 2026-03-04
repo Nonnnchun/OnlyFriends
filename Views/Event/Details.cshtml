@@ -1,7 +1,10 @@
 @model OnlyFriends.Models.DTOS.EventDTOS.GetEventDTO
 @using OnlyFriends.Models.DTOS.EventDTOS
 @using OnlyFriends.Models
+<<<<<<< HEAD
 @using System.Security.Claims
+=======
+>>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
 
 @{
     ViewData["Title"] = Model.Title ?? "Event Details";
@@ -32,11 +35,14 @@
     var mapSrc = $"https://www.google.com/maps?q={mapQuery}&output=embed"; 
     var mapOpenUrl = $"https://www.google.com/maps/search/?api=1&query={mapQuery}"; 
     var ownerAvatar = owner?.ProfilePictureUrl ?? "/images/avatar-placeholder.png";
+<<<<<<< HEAD
     var currentUserIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     @* bool canManageEvent = int.TryParse(currentUserIdClaim, out var currentUserId) && owner?.Id == currentUserId; *@
     bool canManageEvent = currentUserIdClaim == owner.Id.ToString(); // TODO: replace with real permission check
     bool hasJoined = int.TryParse(currentUserIdClaim, out var parsedUserId) &&
         (Model.UserEvents?.Any(ue => ue.UserId == parsedUserId) ?? false);
+=======
+>>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
 
     string locName = Model?.Location ?? "No Location";
     string locDetail = "";
@@ -71,6 +77,7 @@
                 <img class="ev-poster" src="@poster" alt="Event poster" />
 
                 <div class="ev-card-body">
+<<<<<<< HEAD
                     @if (canManageEvent)
                     {
                         <div class="ev-manage-card">
@@ -88,11 +95,19 @@
                                 <img class="ev-host-avatar" src="@ownerAvatar" alt="host" />
                                 <span>@Model?.Owner.Username</span>
                             </a>
+=======
+                    <div class="ev-section-title">Hosted By</div>
+                    <ul class="ev-host-list">
+                        <li class="ev-host-item">
+                            <img class="ev-host-avatar" src="@ownerAvatar" alt="host" />
+                            <span>@Model?.Owner.Username</span>
+>>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
                         </li>
                     </ul>
                     <div class="ev-going">
                         <div class="ev-going-num">@going Went</div>
                             <div class="avatar-group">
+<<<<<<< HEAD
                                 @foreach(var user in Model?.Users.Take(6) ?? Enumerable.Empty<User>()) {
                                     var userAvatar = string.IsNullOrEmpty(user.ProfilePictureUrl)
                                         ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(user.Username)}&background=e8e0f7&color=5b4a8f&size=64&bold=true"
@@ -102,6 +117,12 @@
                                     </a>
                                 }
                             </div>
+=======
+                                 @foreach(var user in Model?.Users.Take(6) ?? Enumerable.Empty<User>()) {
+                                     <img src="@user.ProfilePictureUrl" alt="@user.Username" class="avatar-img" />
+                                 } 
+                             </div> 
+>>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
                             <div class="ev-muted ev-small"> 
                                 @if (capacity > 0) 
                                 { 
@@ -115,6 +136,10 @@
                         </div>
                         <div class="action-links">
                             <a href="#" class="action-link">Contact the Host</a>
+<<<<<<< HEAD
+=======
+                            <a href="#" class="action-link">Report Event</a>
+>>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
                         </div> 
                          <div class="ev-tags">
                             <span class="ev-tag">#@categoryName</span>
@@ -169,7 +194,11 @@
             </div>
 
             <!-- Registration card -->
+<<<<<<< HEAD
             <div class="ev-join-card" data-status="@Model?.EventStatus" data-joinmode="@Model?.JointType" data-event-id="@Model?.Id" data-joined="@hasJoined.ToString().ToLower()">
+=======
+            <div class="ev-join-card" data-status="@Model?.EventStatus" data-joinmode="@Model?.JointType">
+>>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
                 @if (Model?.EventStatus == EnumEventStatus.Closed)
                 {
                     <div class="ev-reg-body">x
@@ -216,10 +245,14 @@
                             </div>
                         </div>
 
+<<<<<<< HEAD
                         <div class="ev-join-actions">
                             <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">Request to Join</button>
                             <button class="ev-btn-wide ev-btn-wide--outline" type="button" id="btnCancelJoin" style="display:none;">Cancel Request</button>
                         </div>
+=======
+                        <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">Request to Join</button>
+>>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
                     </div>
                 }
                 else
@@ -241,6 +274,7 @@
                                 <div class="ev-panel-title">Registrations are accepted on a first-come, first-served basis.</div>
                                 <div class="ev-muted">Seats are limited. Your spot is confirmed immediately until capacity is full.</div>
                             </div>
+<<<<<<< HEAD
                         </div>
                     </div>
 
@@ -264,6 +298,26 @@
                             </button>
                         </div>
                     </div>
+=======
+                        </div>
+                    </div>
+
+                    <div class="ev-join-body">
+                        <div class="ev-join-welcome">Welcome! To join the event, please register below.</div>
+
+                        <div class="ev-user-row">
+                            <img class="ev-user-avatar" src="@ownerAvatar" alt="avatar" />
+                            <div class="ev-user-meta">
+                                <span class="ev-user-name">@Model?.Owner.Username</span>
+                                <span class="ev-muted">@Model?.Owner.Email</span>
+                            </div>
+                        </div>
+
+                        <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">
+                            Request to Join
+                        </button>
+                    </div>
+>>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
                 }
             </div>
 
@@ -290,5 +344,9 @@
 </div>
 
 @section Scripts {
+<<<<<<< HEAD
     <script src="~/js/event-detail.js" ></script>
+=======
+    <script src="~/js/event-detail.js" asp-append-version="true"></script>
+>>>>>>> 4e4cac32615431b78493492498acb7619dcd62a2
 }

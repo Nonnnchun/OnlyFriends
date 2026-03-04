@@ -23,7 +23,7 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
     //     public int Capacity { get; set; }
     //     public int OwnerId { get; set; } // เก็บไว้เทสต์ก่อนได้ครับ
     // }
-      public class CreateEventDTO
+    public class CreateEventDTO
     {
         public required string Title { get; set; }
         public string? Info { get; set; }
@@ -40,6 +40,5 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
         public required int Capacity { get; set; }
         public int OwnerId { get; set; }
         public required int CategoryId { get; set; } // Required foreign key property
-
     }
 }

@@ -4,7 +4,7 @@ using OnlyFriends.Models.DTOs;
 
 namespace Notifications.Models
 {
-[Table("Notification")]
+   [Table("Notification")]
    public class Notification
    {
       [Key]
