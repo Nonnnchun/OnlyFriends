@@ -307,6 +307,61 @@ input[type="email"]::placeholder {
   background: #fff;
 }
 
+/* Navbar dropdown */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background-color: white;
+    min-width: 220px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    border: 1px solid #eee;
+    z-index: 1000;
+    padding: 10px;
+    flex-direction: column;
+}
+
+.dropdown-content.show {
+    display: flex;
+}
+
+.dropdown-content a {
+    display: block;
+    color: #333;
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.profile-menu form {
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown-logout-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #e53935;
+    cursor: pointer;
+}
+
+.dropdown-logout-btn:hover {
+    background-color: #f1f1f1;
+}
+
 /* Homepage segmented tabs */
 .event-tabs {
   display: inline-flex;

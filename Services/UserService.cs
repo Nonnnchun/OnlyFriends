@@ -13,6 +13,8 @@ public interface IUserService
     Task DeleteUserAsync(User user);
     Task<GetUserDTO?> FindUserByIdAsync(int id);
     Task<IEnumerable<GetUserDTO>> GetUsersAsync();
+    Task SendFriendRequestAsync(int requesterId, int addresseeId);
+    Task RemoveFriendAsync(int userId, int friendId);
 }
 public sealed class UserService : IUserService
 {
@@ -62,5 +64,37 @@ public sealed class UserService : IUserService
         }
         userToUpdate.Adapt(user);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task SendFriendRequestAsync(int requesterId, int addresseeId)
+    {
+        var existing = await _context.Friendships
+            .FirstOrDefaultAsync(f =>
+                (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
+                (f.RequesterId == addresseeId && f.AddresseeId == requesterId));
+
+        if (existing != null) return;
+
+        _context.Friendships.Add(new Friendship
+        {
+            RequesterId = requesterId,
+            AddresseeId = addresseeId,
+            Status = FriendshipStatus.Pending
+        });
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task RemoveFriendAsync(int userId, int friendId)
+    {
+        var friendship = await _context.Friendships
+            .FirstOrDefaultAsync(f =>
+                (f.RequesterId == userId && f.AddresseeId == friendId) ||
+                (f.RequesterId == friendId && f.AddresseeId == userId));
+
+        if (friendship != null)
+        {
+            _context.Friendships.Remove(friendship);
+            await _context.SaveChangesAsync();
+        }
     }
 }

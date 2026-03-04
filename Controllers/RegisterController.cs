@@ -34,11 +34,11 @@ namespace OnlyFriends.Controllers.Api
                 await _userService.AddUserAsync(userToCreate);
                 return RedirectToAction("Index", "Login");
             } 
-            catch (UniqueConstraintException  ex)
+            catch (UniqueConstraintException ex)
             {
-               ModelState.AddModelError(ex.ConstraintName, ex.ConstraintProperties[0]);
-                
-                return View("Register");
+                var property = ex.ConstraintProperties.FirstOrDefault() ?? string.Empty;
+                ModelState.AddModelError(property, $"{property} is already taken.");
+                return View("Register", userToCreate);
             }
 
         
