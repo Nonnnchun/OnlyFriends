@@ -4,6 +4,7 @@ using OnlyFriends.Models;
 using System.Linq;
 using OnlyFriends.Models.DTOS.UserDTOS;
 using OnlyFriends.Services;
+using System.Security.Claims;
 
 namespace OnlyFriends.Controllers
 {
@@ -28,6 +29,8 @@ namespace OnlyFriends.Controllers
                 return StatusCode(StatusCodes.Status404NotFound, "User not found");
             }
 
+            var currentUserIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            ViewData["CurrentUserId"] = int.TryParse(currentUserIdStr, out var currentUserId) ? currentUserId : 0;
             return View("Profile", userDTO);
         }
     }

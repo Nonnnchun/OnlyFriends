@@ -84,17 +84,24 @@
                     <div class="ev-section-title">Hosted By</div>
                     <ul class="ev-host-list">
                         <li class="ev-host-item">
-                            <img class="ev-host-avatar" src="@ownerAvatar" alt="host" />
-                            <span>@Model?.Owner.Username</span>
+                            <a href="/user/@owner?.Id" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">
+                                <img class="ev-host-avatar" src="@ownerAvatar" alt="host" />
+                                <span>@Model?.Owner.Username</span>
+                            </a>
                         </li>
                     </ul>
                     <div class="ev-going">
                         <div class="ev-going-num">@going Went</div>
                             <div class="avatar-group">
-                                 @foreach(var user in Model?.Users.Take(6) ?? Enumerable.Empty<User>()) {
-                                     <img src="@user.ProfilePictureUrl" alt="@user.Username" class="avatar-img" />
-                                 } 
-                             </div> 
+                                @foreach(var user in Model?.Users.Take(6) ?? Enumerable.Empty<User>()) {
+                                    var userAvatar = string.IsNullOrEmpty(user.ProfilePictureUrl)
+                                        ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(user.Username)}&background=e8e0f7&color=5b4a8f&size=64&bold=true"
+                                        : user.ProfilePictureUrl;
+                                    <a href="/user/@user.Id" title="@user.Username">
+                                        <img src="@userAvatar" alt="@user.Username" class="avatar-img" />
+                                    </a>
+                                }
+                            </div>
                             <div class="ev-muted ev-small"> 
                                 @if (capacity > 0) 
                                 { 

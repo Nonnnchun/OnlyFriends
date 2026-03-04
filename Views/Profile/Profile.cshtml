@@ -1,11 +1,17 @@
 @model OnlyFriends.Models.DTOS.UserDTOS.GetUserDTO
+@using System.Security.Claims
 @{
     ViewData["Title"] = "Profile";
-    //now using User id 1 info and mock event
     var username = Model.Username;
     var firstName = Model.FirstName;
     var lastName = Model.LastName;
     var bio = Model.Bio;
+
+    var currentUserId = (int)(ViewData["CurrentUserId"] ?? 0);
+    var isOwnProfile = currentUserId != 0 && currentUserId == Model.Id;
+    var avatarUrl = string.IsNullOrEmpty(Model.ProfilePictureUrl)
+        ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(username)}&background=e8e0f7&color=5b4a8f&size=128&bold=true"
+        : Model.ProfilePictureUrl;
 
     var joinedDate = "February 2026";
     var hosted = 0;
@@ -210,6 +216,22 @@
         margin-top: 2px;
     }
 
+    .btn-add-friend {
+        margin-top: 12px;
+        padding: 8px 20px;
+        background: #333;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-add-friend:hover { background: #000; }
+    .btn-add-friend:disabled { background: #aaa; cursor: default; }
+
     @@media (max-width: 600px) {
         .profile-header {
             flex-direction: column;
@@ -242,14 +264,7 @@
 
         <!-- Avatar -->
         <div class="profile-avatar">
-            @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
-            {
-                <img src="@Model.ProfilePictureUrl" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
-            }
-            else
-            {
-                <span>😊</span>
-            }
+            <img src="@avatarUrl" alt="@username" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
         </div>
 
         <!-- Info -->
@@ -270,6 +285,13 @@
                 <span><strong>@hosted</strong> Hosted</span>
                 <span><strong>@attended</strong> Attended</span>
             </div>
+
+            @if (!isOwnProfile && currentUserId != 0)
+            {
+                <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id">
+                    Add Friend
+                </button>
+            }
         </div>
 
     </div>
@@ -315,3 +337,34 @@
     }
 
 </div>
+
+@section Scripts {
+<script>
+    const btn = document.getElementById('btnAddFriend');
+    if (btn) {
+        btn.addEventListener('click', function () {
+            const targetId = btn.dataset.userId;
+            btn.disabled = true;
+            btn.innerText = 'Sending...';
+
+            fetch(`/user/friends/${targetId}`, { method: 'POST' })
+                .then(res => {
+                    if (res.ok) {
+                        btn.innerText = 'Request Sent';
+                    } else if (res.status === 401) {
+                        window.location.href = '/Login';
+                    } else {
+                        btn.disabled = false;
+                        btn.innerText = 'Add Friend';
+                        alert('Failed to send request. Please try again.');
+                    }
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerText = 'Add Friend';
+                    alert('Network error. Please try again.');
+                });
+        });
+    }
+</script>
+}

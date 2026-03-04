@@ -92,6 +92,7 @@ namespace OnlyFriends.Controllers
         public async Task<IActionResult> JoinActivity(int eventId)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var activity = await _activityService.FindEventByIdAsync(eventId);
             await _activityService.AddUserToEvent(new AddUserToEventDTO { UserId = userId, EventId = eventId });
             return Ok();
         }
