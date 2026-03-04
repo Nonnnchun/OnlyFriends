@@ -371,6 +371,11 @@
                     },
                     success: function (result) {
                         console.log(result);
+                        console.log("🚀 ข้อมูลที่จะส่ง:", eventToCreate);
+                        alert("✅ ตรวจสอบข้อมูลสำเร็จ! ดู Payload ได้ใน Console");
+                        if (response.redirectUrl) {
+                            window.location.href = response.redirectUrl;
+                        }
                     },
                     error: function (xhr, status, error) {
                         console.error(error);
@@ -378,8 +383,6 @@
                 });
 
 
-                console.log("🚀 ข้อมูลที่จะส่ง:", eventToCreate);
-                alert("✅ ตรวจสอบข้อมูลสำเร็จ! ดู Payload ได้ใน Console");
             }
     </script>
 }

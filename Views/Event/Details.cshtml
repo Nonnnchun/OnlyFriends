@@ -34,7 +34,9 @@
     var ownerAvatar = owner?.ProfilePictureUrl ?? "/images/avatar-placeholder.png";
     var currentUserIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     @* bool canManageEvent = int.TryParse(currentUserIdClaim, out var currentUserId) && owner?.Id == currentUserId; *@
-    bool canManageEvent = true; // TODO: replace with real permission check
+    bool canManageEvent = currentUserIdClaim == owner.Id.ToString(); // TODO: replace with real permission check
+    bool hasJoined = int.TryParse(currentUserIdClaim, out var parsedUserId) &&
+        (Model.UserEvents?.Any(ue => ue.UserId == parsedUserId) ?? false);
 
     string locName = Model?.Location ?? "No Location";
     string locDetail = "";
@@ -160,7 +162,7 @@
             </div>
 
             <!-- Registration card -->
-            <div class="ev-join-card" data-status="@Model?.EventStatus" data-joinmode="@Model?.JointType" data-event-id="@Model?.Id">
+            <div class="ev-join-card" data-status="@Model?.EventStatus" data-joinmode="@Model?.JointType" data-event-id="@Model?.Id" data-joined="@hasJoined.ToString().ToLower()">
                 @if (Model?.EventStatus == EnumEventStatus.Closed)
                 {
                     <div class="ev-reg-body">x

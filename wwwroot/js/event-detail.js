@@ -4,69 +4,80 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnCancel = document.getElementById('btnCancelJoin');
 
     const eventId = joinCard?.dataset?.eventId;
-    const storageKey = eventId ? `event_join_request_${eventId}` : 'event_join_request';
+    const initialJoined = joinCard?.dataset?.joined === 'true';
 
-    function readRequestedState() {
-        try {
-            return window.localStorage.getItem(storageKey) === '1';
-        } catch (error) {
-            console.warn('Cannot read join request state:', error);
-            return false;
-        }
-    }
+    // btnCancel is replaced by the hover behaviour on btnJoin
+    if (btnCancel) btnCancel.style.display = 'none';
 
-    function writeRequestedState(requested) {
-        try {
-            if (requested) {
-                window.localStorage.setItem(storageKey, '1');
-            } else {
-                window.localStorage.removeItem(storageKey);
-            }
-        } catch (error) {
-            console.warn('Cannot save join request state:', error);
-        }
-    }
-
-    function setJoinButtonsState(requested) {
-        if (!btnJoin || !btnCancel) return;
+    function setJoined(joined) {
+        if (!btnJoin) return;
 
         btnJoin.disabled = false;
-        btnCancel.disabled = false;
-        btnJoin.innerText = 'Request to Join';
-        btnCancel.innerText = 'Cancel Request';
+        btnJoin.style.display = 'block';
 
-        btnJoin.style.display = requested ? 'none' : 'block';
-        btnCancel.style.display = requested ? 'block' : 'none';
+        if (joined) {
+            btnJoin.innerText = 'Joined';
+            btnJoin.classList.add('ev-btn-joined');
+            btnJoin.onmouseenter = () => { btnJoin.innerText = 'Cancel Request'; };
+            btnJoin.onmouseleave = () => { btnJoin.innerText = 'Joined'; };
+            btnJoin.onclick = handleCancel;
+        } else {
+            btnJoin.innerText = 'Request to Join';
+            btnJoin.classList.remove('ev-btn-joined');
+            btnJoin.onmouseenter = null;
+            btnJoin.onmouseleave = null;
+            btnJoin.onclick = handleJoin;
+        }
     }
 
-    if (btnJoin && btnCancel) {
-        setJoinButtonsState(readRequestedState());
+    function handleJoin() {
+        if (btnJoin.disabled) return;
+        btnJoin.disabled = true;
+        btnJoin.innerText = 'Processing...';
 
-        btnJoin.addEventListener('click', function () {
-            if (btnJoin.disabled) return;
+        fetch(`/event/join/${eventId}`, { method: 'POST' })
+            .then(res => {
+                if (res.ok) {
+                    setJoined(true);
+                } else if (res.status === 401) {
+                    window.location.href = '/Login';
+                } else {
+                    alert('Failed to join. Please try again.');
+                    setJoined(false);
+                }
+            })
+            .catch(() => {
+                alert('Network error. Please try again.');
+                setJoined(false);
+            });
+    }
 
-            btnJoin.disabled = true;
-            btnJoin.innerText = 'Processing...';
+    function handleCancel() {
+        if (btnJoin.disabled) return;
+        btnJoin.disabled = true;
+        btnJoin.innerText = 'Processing...';
+        btnJoin.onmouseenter = null;
+        btnJoin.onmouseleave = null;
 
-            setTimeout(() => {
-                writeRequestedState(true);
-                setJoinButtonsState(true);
-                console.log('Join request created');
-            }, 700);
-        });
+        fetch(`/event/join/${eventId}`, { method: 'DELETE' })
+            .then(res => {
+                if (res.ok) {
+                    setJoined(false);
+                } else if (res.status === 401) {
+                    window.location.href = '/Login';
+                } else {
+                    alert('Failed to cancel. Please try again.');
+                    setJoined(true);
+                }
+            })
+            .catch(() => {
+                alert('Network error. Please try again.');
+                setJoined(true);
+            });
+    }
 
-        btnCancel.addEventListener('click', function () {
-            if (btnCancel.disabled) return;
-
-            btnCancel.disabled = true;
-            btnCancel.innerText = 'Processing...';
-
-            setTimeout(() => {
-                writeRequestedState(false);
-                setJoinButtonsState(false);
-                console.log('Join request cancelled');
-            }, 700);
-        });
+    if (btnJoin && eventId) {
+        setJoined(initialJoined);
     }
 
     const locBox = document.querySelector('.ev-meta-item:last-child');

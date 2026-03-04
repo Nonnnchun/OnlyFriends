@@ -87,6 +87,24 @@ namespace OnlyFriends.Controllers
 
         }
 
+        [Authorize]
+        [HttpPost("/event/join/{eventId}")]
+        public async Task<IActionResult> JoinActivity(int eventId)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            await _activityService.AddUserToEvent(new AddUserToEventDTO { UserId = userId, EventId = eventId });
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpDelete("/event/join/{eventId}")]
+        public async Task<IActionResult> CancelJoin(int eventId)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            await _activityService.CancelJoinEvent(userId, eventId);
+            return Ok();
+        }
+
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -106,7 +124,7 @@ namespace OnlyFriends.Controllers
                 activityToCreate.EndAt = DateTime.SpecifyKind(activityToCreate.EndAt, DateTimeKind.Utc);
                 activityToCreate.OwnerId = userId;
                 await _activityService.AddEventAsync(activityToCreate);
-                return RedirectToAction("Homepage", "Home");
+                return Json(new {redirectUrl = Url.Action("Homepage", "Home")});
             }
             catch (UniqueConstraintException ex)
             {

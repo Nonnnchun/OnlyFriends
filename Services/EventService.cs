@@ -16,6 +16,7 @@ public interface IEventService
     Task<IEnumerable<GetEventDTO>> GetEventsAsync();
     Task AddUserToEvent(AddUserToEventDTO userEventToAdd);
     Task AddParticipantManualAsync(AddUserToEventDTO userEventToAdd);
+    Task CancelJoinEvent(int userId, int eventId);
 }
 public sealed class EventService : IEventService
 {
@@ -76,10 +77,38 @@ public sealed class EventService : IEventService
         await _context.SaveChangesAsync();
     }
 
-    // TODO:
     public async Task AddUserToEvent(AddUserToEventDTO userEventToAdd)
     {
-        //Event activity = _context.Events.Where(e => userEventToAdd.EventId == e.Id)
+        var ue = await _context.UserEvents
+            .FirstOrDefaultAsync(x => x.EventId == userEventToAdd.EventId && x.UserId == userEventToAdd.UserId);
+
+        if (ue == null)
+        {
+            _context.UserEvents.Add(new UserEvent
+            {
+                EventId = userEventToAdd.EventId,
+                UserId = userEventToAdd.UserId,
+                RequestStatus = EnumRequestStatus.Pending
+            });
+        }
+        else
+        {
+            ue.RequestStatus = EnumRequestStatus.Pending;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task CancelJoinEvent(int userId, int eventId)
+    {
+        var ue = await _context.UserEvents
+            .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId);
+
+        if (ue != null)
+        {
+            _context.UserEvents.Remove(ue);
+            await _context.SaveChangesAsync();
+        }
     }
 
     public async Task AddParticipantManualAsync(AddUserToEventDTO userEventToAdd)
