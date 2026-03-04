@@ -10,15 +10,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/manage-details.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/invite-modal.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/add-host-modal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/manage-details.css"  />
+    <link rel="stylesheet" href="~/css/invite-modal.css"  />
+    <link rel="stylesheet" href="~/css/add-host-modal.css"  />
 }
 
     @section Scripts {
-      <script src="~/js/manage-details.js" asp-append-version="true"></script>
-      <script src="~/js/invite-modal.js" asp-append-version="true"></script>
-      <script src="~/js/add-host-modal.js" asp-append-version="true"></script>
+      <script src="~/js/manage-details.js" ></script>
+      <script src="~/js/invite-modal.js" ></script>
+      <script src="~/js/add-host-modal.js" ></script>
 }
   @Html.AntiForgeryToken()
   @await Html.PartialAsync("_InviteModal", Model)

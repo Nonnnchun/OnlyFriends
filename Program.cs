@@ -73,9 +73,6 @@ builder.Services.AddAuthorization(options =>
 // Create app
 var app = builder.Build();
 
-app.UseStaticFiles(); // <--- Add this back!
-app.MapStaticAssets();
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -84,14 +81,14 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Hero}/{action=Heropage}/{id?}")
     .WithStaticAssets();
+
+app.MapStaticAssets();
 
 app.Run();
