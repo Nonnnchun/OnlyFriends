@@ -10,81 +10,87 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
+    @{
+        var uname = (User?.Identity?.Name
+                    ?? User?.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+                    ?? User?.FindFirst("unique_name")?.Value
+                    ?? "").Trim();
+        var profileSlug = string.IsNullOrEmpty(uname) ? "" : "@" + uname;
+        var picture = User?.FindFirst("picture")?.Value;
+        var avatarUrl = !string.IsNullOrWhiteSpace(picture)
+            ? picture
+            : (!string.IsNullOrEmpty(uname)
+                ? $"https://ui-avatars.com/api/?background=f0f2f5&color=111&name={Uri.EscapeDataString(uname)}"
+                : "https://ui-avatars.com/api/?background=f0f2f5&color=111&name=U");
+    }
     <header>
         <nav class="custom-navbar">
             <div class="nav-left">
-                <a href="/Home/Homepage" class="brand">OnlyFriends</a>
-                <a href="/Home/Homepage" class="nav-link">Home</a>
-                <a href="/Home/CreateActivity" class="nav-link" data-require-auth="true">Create Activity</a>
+                <a href="/" class="@(User?.Identity?.IsAuthenticated ?? false ? "brand" : "nav-logo-hero")">OnlyFriends</a>
+                @if (User?.Identity?.IsAuthenticated ?? false)
+                {
+                    <a asp-controller="Home" asp-action="Homepage" class="nav-link">Home</a>
+                    <a asp-controller="Home" asp-action="CreateActivity" class="nav-link">Create Activity</a>
+                }
             </div>
             <div class="nav-right">
-
-                <div class="dropdown" id="filterDropdown">
-                    <button class="nav-btn" onclick="toggleFilter()">
-                        กรองเนื้อหา
-                    </button>
-                    <div class="dropdown-content" id="filterMenu">
-                        <div class="filter-item">
-                            <input type="checkbox" id="catSports"> <label for="catSports">เกมส์</label>
+                @if (User?.Identity?.IsAuthenticated ?? false)
+                {
+                    <div class="dropdown" id="filterDropdown">
+                        <button class="nav-btn" onclick="toggleFilter()">
+                            กรองเนื้อหา
+                        </button>
+                        <div class="dropdown-content" id="filterMenu">
+                            <div class="filter-item">
+                                <input type="checkbox" id="catSports"> <label for="catSports">เกมส์</label>
+                            </div>
+                            <div class="filter-item">
+                                <input type="checkbox" id="catEdu"> <label for="catEdu">ท่องเที่ยว</label>
+                            </div>
+                            <hr>
+                            <div class="filter-item">
+                                <input type="checkbox" id="statusOpen" checked> <label
+                                    for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
+                            </div>
+                            <div class="filter-item">
+                                <input type="checkbox" id="myJoinedEvents">
+                                <label for="myJoinedEvents">กิจกรรมที่เข้าร่วม</label>
+                            </div>
+                            <button class="btn-apply" onclick="applyFilter()">นำไปใช้</button>
                         </div>
-                        <div class="filter-item">
-                            <input type="checkbox" id="catEdu"> <label for="catEdu">ท่องเที่ยว</label>
-                        </div>
-                        <hr>
-                        <div class="filter-item">
-                            <input type="checkbox" id="statusOpen" checked> <label
-                            for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
-                        </div>
-                        <div class="filter-item">
-                            <input type="checkbox" id="myJoinedEvents">
-                            <label for="myJoinedEvents">กิจกรรมที่เข้าร่วม</label>
-                        </div>
-                        <button class="btn-apply" onclick="applyFilter()">นำไปใช้</button>
                     </div>
-                </div>
 
-                @await Html.PartialAsync("_NotificationBell")
-                <div class="dropdown" id="profileDropdown">
-                    @{
-                        var uname = (User?.Identity?.Name
-                                    ?? User?.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
-                                    ?? User?.FindFirst("unique_name")?.Value
-                                    ?? "").Trim();
-                        var profileSlug = string.IsNullOrEmpty(uname) ? "" : "@" + uname;
-                        var picture = User?.FindFirst("picture")?.Value;
-                        var avatarUrl = !string.IsNullOrWhiteSpace(picture)
-                            ? picture
-                            : (!string.IsNullOrEmpty(uname)
-                                ? $"https://ui-avatars.com/api/?background=f0f2f5&color=111&name={Uri.EscapeDataString(uname)}"
-                                : "https://ui-avatars.com/api/?background=f0f2f5&color=111&name=U");
-                    }
-                    <button class="profile-btn" onclick="toggleProfile()">
-                        <img src="@avatarUrl" alt="Profile">
-                    </button>
-                    <div class="dropdown-content profile-menu" id="profileMenu">
-                        @if (((User?.Identity?.IsAuthenticated) ?? false) && !string.IsNullOrEmpty(uname))
-                        {
-                            <a href="/user/@profileSlug" data-my-profile id="myProfileLink">โปรไฟล์ของฉัน</a>
-                        }
-                        else
-                        {
-                            <a href="/login" data-my-profile id="myProfileLink">โปรไฟล์ของฉัน</a>
-                        }
-                        <a href="/setting">การตั้งค่า</a>
-                        <hr>
-                        @if (((User?.Identity?.IsAuthenticated) ?? false)) {
-
-                        <form method="post" action="/login/logout">
-                            <button type="submit" class="btn btn-link p-0 m-0 align-baseline" style="color:red">Log Out</button>
-                        </form>
-                        } 
-                        else {
-                            <a href="/login" class="sign-in-link">Log In</a>
-                        }
+                    @await Html.PartialAsync("_NotificationBell")
+                    <div class="dropdown" id="profileDropdown">
+                        <button class="profile-btn" onclick="toggleProfile()">
+                            <img src="@avatarUrl" alt="Profile">
+                        </button>
+                        <div class="dropdown-content profile-menu" id="profileMenu">
+                            @if (!string.IsNullOrEmpty(uname))
+                            {
+                                <a href="/user/@profileSlug" data-my-profile id="myProfileLink">โปรไฟล์ของฉัน</a>
+                            }
+                            else
+                            {
+                                <a href="/login" data-my-profile id="myProfileLink">โปรไฟล์ของฉัน</a>
+                            }
+                            <a href="/setting">การตั้งค่า</a>
+                            <hr>
+                            <form method="post" action="/login/logout">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-link">ออกจากระบบ</button>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            </nav>
-        </header>
+                }
+                else
+                {
+                    <span class="live-time" id="navClock"></span>
+                    <a href="/login" class="sign-in-link">Sign in</a>
+                }
+            </div>
+        </nav>
+    </header>
         <div class="app-shell">
             <div class="container">
                 <main role="main" class="pb-3">

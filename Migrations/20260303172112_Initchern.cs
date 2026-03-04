@@ -102,7 +102,8 @@ namespace onlyfriends.Migrations
                 {
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     EventId = table.Column<int>(type: "integer", nullable: false),
-                    RequestStatus = table.Column<int>(type: "integer", nullable: false)
+                    RequestStatus = table.Column<int>(type: "integer", nullable: false),
+                    RegisteredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

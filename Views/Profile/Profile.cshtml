@@ -8,6 +8,12 @@
     // Stats logic
     var hostedCount = Model.CreatedEvents?.Count ?? 0;
     var attendedCount = joinedEvents.Count;
+    //now using User id 1 info and mock event
+    var username = Model.Username;
+    var firstName = Model.FirstName;
+    var lastName = Model.LastName;
+    var bio = Model.Bio;
+
 }
 
 <style>
@@ -67,6 +73,12 @@
         margin: 0 0 6px;
     }
 
+    .profile-joined {
+        color: #888;
+        font-size: 0.88rem;
+        margin: 0 0 8px;
+    }
+
     .profile-stats {
         color: #555;
         font-size: 0.9rem;
@@ -92,6 +104,22 @@
         gap: 20px;
     }
 
+    .nothing-box {
+        margin-top: 40px;
+        opacity: .6;
+        text-align: center;
+    }
+
+    .nothing-box img {
+        width: 150px;
+        margin-bottom: 20px;
+    }
+
+    .event-list {
+        margin-top: 40px;
+        text-align: left;
+    }
+
     .event-card {
         border-radius: 12px;
         border: 1px solid #eee;
@@ -110,6 +138,23 @@
     .event-card-image {
         width: 200px;
         min-height: 140px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .event-card:hover {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .event-card-image {
+        width: 220px;
+        flex-shrink: 0;
+        overflow: hidden;
     }
 
     .event-card-image img {
@@ -124,12 +169,26 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        display: block;
+    }
+
+    .event-card-body {
+        padding: 20px 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 1;
     }
 
     .event-card-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
     }
 
     .event-card h4 {
@@ -175,6 +234,64 @@
         .profile-header { flex-direction: column; text-align: center; }
         .profile-info { text-align: center; }
         .profile-stats { justify-content: center; }
+        color: #1a1a1a;
+    }
+
+    .event-card p {
+        color: #666;
+        margin: 0 0 14px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .event-meta {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 0.82rem;
+        color: #888;
+    }
+
+    .event-meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .event-tag {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background-color: #f0f4ff;
+        color: #4a6cf7;
+        white-space: nowrap;
+        align-self: flex-start;
+        margin-top: 2px;
+    }
+
+    @@media (max-width: 600px) {
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .profile-info {
+            text-align: center;
+        }
+
+        .profile-stats {
+            justify-content: center;
+        }
+
+        .event-card {
+            flex-direction: column;
+        }
+
+        .event-card-image {
+            width: 100%;
+            height: 180px;
+        }
     }
 </style>
 
@@ -217,6 +334,7 @@
         <div class="event-list">
             @foreach (var evt in Model.CreatedEvents)
             {
+                <a href="/event/view/@evt.Id" class="card-link" style="text-decoration:none;color:inherit;">
                 <div class="event-card">
                     <div class="event-card-image">
                         <img src="@(evt.PosterUrl ?? "https://via.placeholder.com/200x140?text=No+Poster")" alt="Event Poster" />
@@ -228,12 +346,13 @@
                         </div>
                         <p class="event-desc">@evt.Info</p>
                         <div class="event-meta">
-                            <span><i class="bi bi-calendar"></i> @(evt.StartAt?.ToString("dd MMM yyyy") ?? "TBA")</span>
-                            <span><i class="bi bi-geo-alt"></i> @evt.Location</span>
-                            <span><i class="bi bi-people"></i> Capacity: @evt.Capacity</span>
+                            <span>📅 @(evt.StartAt?.ToString("dd MMM yyyy") ?? "TBA")</span>
+                            <span>📍 @evt.Location</span>
+                            <span>👥 Capacity: @evt.Capacity</span>
                         </div>
                     </div>
                 </div>
+                </a>
             }
         </div>
     }
@@ -251,6 +370,7 @@
         <div class="event-list">
             @foreach (var evt in joinedEvents)
             {
+                <a href="/event/view/@evt.Id" class="card-link" style="text-decoration:none;color:inherit;">
                 <div class="event-card" style="border-left: 4px solid #4a6cf7;">
                     <div class="event-card-image">
                         <img src="@(evt.PosterUrl ?? "https://via.placeholder.com/200x140?text=Joined+Event")" alt="Event Poster" />
@@ -262,11 +382,12 @@
                         </div>
                         <p class="event-desc">@evt.Info</p>
                         <div class="event-meta">
-                            <span><i class="bi bi-calendar"></i> @(evt.StartAt?.ToString("dd MMM yyyy") ?? "TBA")</span>
-                            <span><i class="bi bi-geo-alt"></i> @evt.Location</span>
+                            <span>📅 @(evt.StartAt?.ToString("dd MMM yyyy") ?? "TBA")</span>
+                            <span>📍 @evt.Location</span>
                         </div>
                     </div>
                 </div>
+                </a>
             }
         </div>
     }
@@ -274,6 +395,9 @@
     {
         <div class="nothing-box">
             Hasn't joined any events yet.
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486830.png" />
+            <h4>Nothing Here, Yet</h4>
+            <p>@username has no public events at this time.</p>
         </div>
     }
 

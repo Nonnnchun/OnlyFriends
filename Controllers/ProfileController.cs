@@ -19,7 +19,7 @@ namespace OnlyFriends.Controllers
             _context = context;
         }
 
-        // Specific route: localhost:5212/user/Dem
+        // Specific route: /user/{username} or /user/@{username}
         [HttpGet("user/{username}")]
         public async Task<IActionResult> Index(string username)
         {
@@ -28,7 +28,13 @@ namespace OnlyFriends.Controllers
                 return RedirectToAction("Homepage", "Home");
             }
 
-            // Find user by Username (Case-insensitive)
+            // Allow both "username" and "@username" slugs
+            if (username.StartsWith("@"))
+            {
+                username = username[1..];
+            }
+
+            // Find user by Username (case-insensitive)
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
 

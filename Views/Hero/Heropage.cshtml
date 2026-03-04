@@ -13,11 +13,10 @@
     <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
 </head>
 <body>
-
     <div class="landing-wrapper">
         <nav class="landing-nav">
             <div class="nav-left">
-                <a href="/Home/Homepage" class="landing-brand">OnlyFriends</a>
+                <a href="/" class="landing-brand nav-logo-hero">OnlyFriends</a>
             </div>
             <div class="nav-right">
                 <span class="live-time" id="clock"></span>
@@ -41,9 +40,7 @@
                     เริ่มต้นกิจกรรมที่คุณสนใจ ชวนเพื่อนใหม่มาร่วมจอย
                 </p>
                 
-                <button class="of-btn of-btn-primary" id="heroCreateBtn">
-                    สร้างกิจกรรมแรกของคุณ
-                </button>
+                <button class="of-btn of-btn-primary" id="heroCreateBtn">สร้างกิจกรรมแรกของคุณ</button>
             </div>
 
             <div class="hero-image-container">
@@ -133,7 +130,7 @@
                 e.preventDefault();
                 const authed = await heroIsAuthenticated();
                 if (authed) {
-                    window.location.href = '@Url.Action("CreateActivity", "Home")';
+                    window.location.href = '@Url.Action("Create", "Event")';
                     return;
                 }
                 openModal();

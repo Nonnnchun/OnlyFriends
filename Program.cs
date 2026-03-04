@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Cryptography;
 using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
 using Mapster;
 using EntityFramework.Exceptions.PostgreSQL; // For the .UseExceptionProcessor() method
 

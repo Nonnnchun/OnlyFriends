@@ -110,40 +110,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// แสดงเวลาแบบเดียวกับหน้า Heropage บน Navbar (ถ้ามี element navClock)
+function updateNavClock() {
+  const el = document.getElementById('navClock');
+  if (!el) return;
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  el.textContent = `${hours} นาฬิกา ${minutes} นาที GMT+7`;
+}
+setInterval(updateNavClock, 1000);
+updateNavClock();
+
 //----------------------------------------------------------------------------------------
-
-// เปิด-ปิด เมนูตัวกรอง
-function toggleFilter() {
-    document.getElementById("filterMenu").classList.toggle("show");
-    // ปิดเมนูโปรไฟล์ถ้าเปิดอยู่
-    document.getElementById("profileMenu").classList.remove("show"); 
-    var bell = document.getElementById("notifMenu");
-    if (bell) bell.classList.remove("show");
-}
-
-// เปิด-ปิด เมนูโปรไฟล์
-function toggleProfile() {
-    document.getElementById("profileMenu").classList.toggle("show");
-    // ปิดเมนูตัวกรองถ้าเปิดอยู่
-    document.getElementById("filterMenu").classList.remove("show");
-    var bell = document.getElementById("notifMenu");
-    if (bell) bell.classList.remove("show");
-}
-
-function applyFilter() {
-    alert("กำลังกรองข้อมูล...");
-    document.getElementById("filterMenu").classList.remove("show");
-}
-
-// ถ้าคลิกพื้นที่ว่างๆ นอกเมนู ให้ปิด Dropdown ทั้งหมด
-window.onclick = function(event) {
-    if (!event.target.closest('.dropdown')) {
-        document.getElementById("filterMenu").classList.remove("show");
-        document.getElementById("profileMenu").classList.remove("show");
-        var bell = document.getElementById("notifMenu");
-        if (bell) bell.classList.remove("show");
-    }
-}
 
 // เปิด-ปิด เมนูตัวกรอง
 function toggleFilter() {

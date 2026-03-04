@@ -175,6 +175,9 @@ namespace onlyfriends.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("RequestStatus")
                         .HasColumnType("integer");
 
@@ -212,13 +215,15 @@ namespace onlyfriends.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OnlyFriends.Models.User", null)
+                    b.HasOne("OnlyFriends.Models.User", "User")
                         .WithMany("UserEvents")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Event");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("OnlyFriends.Models.Category", b =>

@@ -215,6 +215,7 @@
     font-weight: 700;
     color: #111;
     text-decoration: none; /* เอาขีดเส้นใต้ออก */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
 
 .landing-brand:hover {

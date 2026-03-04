@@ -1,5 +1,3 @@
-using OnlyFriends.Models;
-
 namespace OnlyFriends.Models.DTOS.UserDTOS
 {
         public class GetUserDTO

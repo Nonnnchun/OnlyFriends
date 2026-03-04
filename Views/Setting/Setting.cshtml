@@ -14,19 +14,19 @@
 
     .settings-container {
         width: 90%;
-        max-width: 800px;
+        max-width: 900px;
         margin: 40px auto;
         padding-bottom: 40px;
     }
 
     .page-title {
-        font-size: 32px;
+        font-size: 36px;
         font-weight: 700;
         margin-bottom: 25px;
     }
 
     .section-title {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 600;
         margin-bottom: 5px;
         margin-top: 15px;
@@ -115,7 +115,7 @@
         display: block;
     }
 
-    input, textarea {
+    input, select, textarea {
         width: 100%;
         padding: 12px;
         border: 1px solid #ddd;
@@ -123,6 +123,7 @@
         font-size: 14px;
         box-sizing: border-box;
         font-family: inherit;
+        font-family: "Inter", sans-serif;
     }
 
     input:focus, textarea:focus {
@@ -136,15 +137,16 @@
     }
 
     .save-btn {
-        margin-top: 25px;
-        padding: 12px 30px;
-        border-radius: 8px;
+        margin-top: 20px;
+        padding: 10px 22px;
+        border-radius: 999px;
         border: none;
-        background: black;
+        background: #111;
         color: white;
         cursor: pointer;
         font-size: 14px;
         font-weight: 600;
+        transition: background 0.2s ease;
     }
 
     .save-btn:hover {
@@ -164,6 +166,29 @@
     .danger-btn:hover {
         background: #fff5f5;
     }
+
+    .item-box {
+        background: #f9f9f9;
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #eee;
+        margin-bottom: 15px;
+    }
+
+    .danger-btn {
+        background: #e53935;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s ease;
+    }
+
+    .danger-btn:hover {
+        background: #c62828;
+    }
 </style>
 
 <div class="settings-container">
@@ -171,6 +196,7 @@
 
     @* Use multipart/form-data for image uploads *@
     <form asp-action="UpdateProfile" asp-controller="Setting" method="post" enctype="multipart/form-data">
+        @* Hidden ID field ensures we update the correct user *@
         <input type="hidden" asp-for="Id" />
 
         <div class="section-title">Your Profile</div>
@@ -197,23 +223,24 @@
                 </div>
             </div>
 
+            <div class="form-group">
             <div class="grid-2">
                 <div>
                     <label class="form-label">First Name</label>
-                    <input type="text" asp-for="FirstName" placeholder="Enter first name">
+                    <input type="text" asp-for="FirstName" placeholder="John">
                 </div>
                 <div>
                     <label class="form-label">Last Name</label>
-                    <input type="text" asp-for="LastName" placeholder="Enter last name">
+                    <input type="text" asp-for="LastName" placeholder="Doe">
                 </div>
             </div>
 
-            <div class="form-group">
+            <div style="margin-top:20px;">
                 <label class="form-label">Username</label>
                 <input type="text" asp-for="Username" placeholder="username">
             </div>
 
-            <div class="form-group">
+            <div style="margin-top:20px;">
                 <label class="form-label">Bio</label>
                 <textarea asp-for="Bio" placeholder="Write something about yourself..."></textarea>
             </div>
