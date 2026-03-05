@@ -6,10 +6,6 @@
     var categories = ViewData["Categories"] as IEnumerable<GetCategoryDTO>;
 }
 
-@section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-}
 <div class="create-container">
     <div class="left-col">
         <div class="poster-preview">
@@ -64,7 +60,7 @@
 
         <div class="input-group" style="display: flex; gap: 10px; align-items: center;">
             <span>📍</span>
-            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่..." style="flex: 1; border: none; outline: none; background: transparent;">
+            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน..." style="flex: 1; border: none; outline: none; background: transparent;">
             <button type="button" id="btnSearchLocation" class="btn-search-loc" onclick="searchOSMLocation()">ค้นหา</button>
         </div>
 
@@ -72,7 +68,11 @@
         <input type="hidden" id="Longitude" name="Longitude">
 
         <div id="mapContainer" style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block;">
-            <div id="map" style="width: 100%; height: 100%;"></div>
+            <iframe id="mapFrame"
+                    title="Event map preview"
+                    style="width: 100%; height: 100%; border: 0;"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
         <div class="input-group">
             <span>📝</span>
@@ -137,160 +137,125 @@
     </div>
 </div>
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
     <script>
-            const EnumEventType = { Online: 0, Offline: 1 };
-            const EnumEventStatus = { Open: 0, Closed: 1 };
-            const EnumJointType = { Private: 0, Public: 1 };
+        const EnumEventType = { Online: 0, Offline: 1 };
+        const EnumEventStatus = { Open: 0, Closed: 1 };
+        const EnumJointType = { Private: 0, Public: 1 };
+        const defaultLat = 13.7563;
+        const defaultLng = 100.5018;
 
-            let posterDataUrl = null;
+        let posterDataUrl = null;
 
-            document.addEventListener('DOMContentLoaded', () => {
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('startDate').value = today;
-                document.getElementById('endDate').value = today;
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
 
-                // เรียกใช้งานแผนที่เมื่อโหลดหน้าเว็บเสร็จ
-                initMap();
-            });
+            initMap();
+            updateLocationPlaceholder();
 
-            document.querySelector('.upload-btn').addEventListener('click', () => {
+            document.querySelector('.upload-btn')?.addEventListener('click', () => {
                 document.getElementById('posterInput').click();
             });
+        });
 
-            document.getElementById('posterInput').addEventListener('change', function () {
-                const file = this.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    posterDataUrl = e.target.result;
-                    const preview = document.querySelector('.poster-preview');
-                    let img = preview.querySelector('img.poster-img');
-                    if (!img) {
-                        img = document.createElement('img');
-                        img.className = 'poster-img';
-                        img.style.cssText = 'width:100%; height:100%; object-fit:cover; border-radius:inherit; position:absolute; top:0; left:0;';
-                        preview.style.position = 'relative';
-                        preview.prepend(img);
-                    }
-                    img.src = posterDataUrl;
-                };
-                reader.readAsDataURL(file);
-            });
+        document.getElementById('posterInput').addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                posterDataUrl = e.target.result;
+                const preview = document.querySelector('.poster-preview');
+                let img = preview.querySelector('img.poster-img');
+                if (!img) {
+                    img = document.createElement('img');
+                    img.className = 'poster-img';
+                    img.style.cssText = 'width:100%; height:100%; object-fit:cover; border-radius:inherit; position:absolute; top:0; left:0;';
+                    preview.style.position = 'relative';
+                    preview.prepend(img);
+                }
+                img.src = posterDataUrl;
+            };
+            reader.readAsDataURL(file);
+        });
 
-            function togglePriceInput() {
-                const type = document.getElementById('ticketType').value;
-                const priceContainer = document.getElementById('priceInputContainer');
-                const priceInput = document.getElementById('ticketPrice');
+        function togglePriceInput() {
+            const type = document.getElementById('ticketType').value;
+            const priceContainer = document.getElementById('priceInputContainer');
+            const priceInput = document.getElementById('ticketPrice');
 
-                if (type === 'paid') {
-                    priceContainer.style.display = 'flex';
-                    priceInput.focus();
+            if (type === 'paid') {
+                priceContainer.style.display = 'flex';
+                priceInput.focus();
+            } else {
+                priceContainer.style.display = 'none';
+                priceInput.value = '';
+            }
+        }
+
+        function initMap() {
+            setMapLocation(defaultLat, defaultLng);
+            updateLatLngFields(defaultLat, defaultLng);
+        }
+
+        function setMapLocation(lat, lng) {
+            const mapFrame = document.getElementById("mapFrame");
+            if (!mapFrame) return;
+            const query = encodeURIComponent(`${lat},${lng}`);
+            mapFrame.src = `https://www.google.com/maps?q=${query}&z=15&output=embed`;
+        }
+
+        function updateLatLngFields(lat, lng) {
+            document.getElementById("Latitude").value = lat;
+            document.getElementById("Longitude").value = lng;
+        }
+
+        async function searchOSMLocation() {
+            const query = document.getElementById('eventLocation').value;
+            if (!query) return;
+
+            const btnSearch = document.getElementById('btnSearchLocation');
+            const originalText = btnSearch.innerText;
+            btnSearch.innerText = "กำลังหา...";
+
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    setMapLocation(lat, lon);
+                    updateLatLngFields(lat, lon);
                 } else {
-                    priceContainer.style.display = 'none';
-                    priceInput.value = '';
+                    alert('ไม่พบสถานที่ ลองพิมพ์ชื่อให้กว้างขึ้น');
                 }
+            } catch (error) {
+                console.error('Error searching location:', error);
+                alert('เกิดข้อผิดพลาดในการค้นหา');
+            } finally {
+                btnSearch.innerText = originalText;
             }
+        }
 
-            // ================= JS สำหรับแผนที่ OpenStreetMap (ฟรี 100%) =================
-            let map;
-            let marker;
+        function updateLocationPlaceholder() {
+            const eventType = document.getElementById('eventType').value;
+            const locationInput = document.getElementById('eventLocation');
+            const mapContainer = document.getElementById('mapContainer');
+            const btnSearch = document.getElementById('btnSearchLocation');
 
-            function initMap() {
-                // ค่าเริ่มต้นพิกัด (กรุงเทพมหานคร)
-                const defaultLat = 13.7563;
-                const defaultLng = 100.5018;
-
-                // สร้างแผนที่และตั้งค่ามุมมองเริ่มต้น
-                map = L.map('map').setView([defaultLat, defaultLng], 13);
-
-                // ดึงภาพแผนที่จาก OpenStreetMap
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
-
-                // สร้างหมุด (Marker) แบบให้ลากได้
-                marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
-
-                // อีเวนต์เมื่อผู้ใช้ลากหมุดเสร็จ
-                marker.on('dragend', function (e) {
-                    const position = marker.getLatLng();
-                    updateLatLngFields(position.lat, position.lng);
-                });
-
-                // อีเวนต์เมื่อผู้ใช้คลิกบนแผนที่ (ให้หมุดย้ายตามไปเลย)
-                map.on('click', function (e) {
-                    marker.setLatLng(e.latlng);
-                    updateLatLngFields(e.latlng.lat, e.latlng.lng);
-                });
+            if (eventType === 'online') {
+                locationInput.placeholder = "เพิ่มลิงก์การประชุม (เช่น Zoom, Google Meet)";
+                mapContainer.style.display = 'none';
+                btnSearch.style.display = 'none';
+                document.getElementById("Latitude").value = "";
+                document.getElementById("Longitude").value = "";
+            } else {
+                locationInput.placeholder = "ค้นหาสถานที่จัดงาน...";
+                mapContainer.style.display = 'block';
+                btnSearch.style.display = 'block';
             }
-
-            function updateLatLngFields(lat, lng) {
-                document.getElementById("Latitude").value = lat;
-                document.getElementById("Longitude").value = lng;
-            }
-
-            // ฟังก์ชันค้นหาสถานที่ (ใช้ Nominatim API ฟรีของ OpenStreetMap)
-            async function searchOSMLocation() {
-                const query = document.getElementById('eventLocation').value;
-                if (!query) return;
-
-                // เปลี่ยนข้อความปุ่มเพื่อบอกผู้ใช้ว่ากำลังค้นหา
-                const btnSearch = document.getElementById('btnSearchLocation');
-                const originalText = btnSearch.innerText;
-                btnSearch.innerText = "กำลังหา...";
-
-                try {
-                    // เรียก API ค้นหาสถานที่
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-                    const data = await response.json();
-
-                    if (data && data.length > 0) {
-                        // เจอสถานที่ ดึงค่า Lat/Lng ตัวแรกที่เจอ
-                        const lat = parseFloat(data[0].lat);
-                        const lon = parseFloat(data[0].lon);
-
-                        // เลื่อนแผนที่ไปจุดนั้นและย้ายหมุด
-                        map.setView([lat, lon], 16);
-                        marker.setLatLng([lat, lon]);
-                        updateLatLngFields(lat, lon);
-                    } else {
-                        alert('ไม่พบสถานที่ ลองพิมพ์ชื่อให้กว้างขึ้น หรือคลิกเพื่อปักหมุดบนแผนที่เองได้เลยครับ');
-                    }
-                } catch (error) {
-                    console.error('Error searching location:', error);
-                    alert('เกิดข้อผิดพลาดในการค้นหา');
-                } finally {
-                    btnSearch.innerText = originalText;
-                }
-            }
-            // =========================================================================
-
-            function updateLocationPlaceholder() {
-                const eventType = document.getElementById('eventType').value;
-                const locationInput = document.getElementById('eventLocation');
-                const mapContainer = document.getElementById('mapContainer');
-                const btnSearch = document.getElementById('btnSearchLocation');
-
-                if (eventType === 'online') {
-                    locationInput.placeholder = "เพิ่มลิงก์การประชุม (เช่น Zoom, Google Meet)";
-                    mapContainer.style.display = 'none'; // ซ่อนแผนที่
-                    btnSearch.style.display = 'none'; // ซ่อนปุ่มค้นหา
-                    document.getElementById("Latitude").value = "";
-                    document.getElementById("Longitude").value = "";
-                } else {
-                    locationInput.placeholder = "ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่...";
-                    mapContainer.style.display = 'block'; // โชว์แผนที่
-                    btnSearch.style.display = 'block'; // โชว์ปุ่มค้นหา
-
-                    // คำสั่งสำคัญของ Leaflet: ให้แผนที่วาดตัวเองใหม่เมื่อสลับกลับมาโชว์
-                    if (map) {
-                        setTimeout(() => { map.invalidateSize(); }, 100);
-                    }
-                }
-            }
+        }
 
             function submitEvent() {
                 const title = document.getElementById('eventTitle').value;

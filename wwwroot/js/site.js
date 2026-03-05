@@ -45,19 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateBadge(count) {
-    let badge = document.getElementById('notifBadge');
-    const bell = document.getElementById('notifBell');
-    if (!bell) return;
+    const badge = document.getElementById('notifCount');
+    if (!badge) return;
     if (count > 0) {
-      if (!badge) {
-        badge = document.createElement('span');
-        badge.id = 'notifBadge';
-        badge.className = 'notif-badge';
-        bell.appendChild(badge);
-      }
       badge.textContent = count > 9 ? '9+' : String(count);
-    } else if (badge) {
-      badge.remove();
+      badge.style.display = 'inline-block';
+    } else {
+      badge.textContent = '0';
+      badge.style.display = 'none';
     }
   }
 
@@ -183,48 +178,50 @@ updateNavClock();
 
 //----------------------------------------------------------------------------------------
 
+function closeAllMenus() {
+  document.getElementById("filterMenu")?.classList.remove("show");
+  document.getElementById("profileMenu")?.classList.remove("show");
+  document.getElementById("notifMenu")?.classList.remove("show");
+  document.getElementById("notifBell")?.setAttribute("aria-expanded", "false");
+}
+
 // เปิด-ปิด เมนูตัวกรอง
 function toggleFilter() {
-    var filterMenu = document.getElementById("filterMenu");
-    var profileMenu = document.getElementById("profileMenu");
-    if (filterMenu) filterMenu.classList.toggle("show");
-    if (profileMenu) profileMenu.classList.remove("show");
-    var bell = document.getElementById("notifMenu");
-    if (bell) bell.classList.remove("show");
+  const filterMenu = document.getElementById("filterMenu");
+  const next = !filterMenu?.classList.contains("show");
+  closeAllMenus();
+  if (next) filterMenu?.classList.add("show");
 }
 
 // เปิด-ปิด เมนูโปรไฟล์
 function toggleProfile() {
-    var profileMenu = document.getElementById("profileMenu");
-    var filterMenu = document.getElementById("filterMenu");
-    if (profileMenu) profileMenu.classList.toggle("show");
-    if (filterMenu) filterMenu.classList.remove("show");
-    var bell = document.getElementById("notifMenu");
-    if (bell) bell.classList.remove("show");
+  const profileMenu = document.getElementById("profileMenu");
+  const next = !profileMenu?.classList.contains("show");
+  closeAllMenus();
+  if (next) profileMenu?.classList.add("show");
+}
+
+// เปิด-ปิด เมนูแจ้งเตือน
+function toggleNotifMenu(event) {
+  event?.stopPropagation();
+  const notifMenu = document.getElementById("notifMenu");
+  const bell = document.getElementById("notifBell");
+  const next = !notifMenu?.classList.contains("show");
+  closeAllMenus();
+  if (next) {
+    notifMenu?.classList.add("show");
+    bell?.setAttribute("aria-expanded", "true");
+  }
 }
 
 function applyFilter() {
-    alert("กำลังกรองข้อมูล...");
-    document.getElementById("filterMenu").classList.remove("show");
+  alert("กำลังกรองข้อมูล...");
+  document.getElementById("filterMenu")?.classList.remove("show");
 }
 
 // ถ้าคลิกพื้นที่ว่างๆ นอกเมนู ให้ปิด Dropdown ทั้งหมด
-window.onclick = function(event) {
-    if (!event.target.closest('.dropdown')) {
-        var filterMenu = document.getElementById("filterMenu");
-        var profileMenu = document.getElementById("profileMenu");
-        if (filterMenu) filterMenu.classList.remove("show");
-        if (profileMenu) profileMenu.classList.remove("show");
-        var bell = document.getElementById("notifMenu");
-        if (bell) bell.classList.remove("show");
-    }
-}
-
-// เปิด-ปิด กระดิ่งแจ้งเตือน
-function toggleBell() {
-    var menu = document.getElementById("notifMenu");
-    if (!menu) return;
-    menu.classList.toggle("show");
-    document.getElementById("filterMenu").classList.remove("show");
-    document.getElementById("profileMenu").classList.remove("show");
-}
+window.addEventListener("click", function (event) {
+  if (!event.target.closest(".dropdown")) {
+    closeAllMenus();
+  }
+});
