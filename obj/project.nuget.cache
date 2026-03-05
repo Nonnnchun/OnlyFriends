@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "73w614ph2v8=",
+  "dgSpecHash": "byYW3+shYSI=",
   "success": true,
-  "projectFilePath": "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj",
+  "projectFilePath": "/Users/skyyyy/Desktop/web/OnlyFriends/OnlyFriends.csproj",
   "expectedPackageFiles": [
     "/Users/skyyyy/.nuget/packages/azure.core/1.47.1/azure.core.1.47.1.nupkg.sha512",
     "/Users/skyyyy/.nuget/packages/azure.identity/1.14.2/azure.identity.1.14.2.nupkg.sha512",

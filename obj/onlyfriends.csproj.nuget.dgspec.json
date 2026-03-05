@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj": {}
+    "/Users/skyyyy/Desktop/web/OnlyFriends/OnlyFriends.csproj": {}
   },
   "projects": {
-    "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj": {
+    "/Users/skyyyy/Desktop/web/OnlyFriends/OnlyFriends.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj",
-        "projectName": "onlyfriends",
-        "projectPath": "/Users/skyyyy/Desktop/web/OnlyFriends/onlyfriends.csproj",
+        "projectUniqueName": "/Users/skyyyy/Desktop/web/OnlyFriends/OnlyFriends.csproj",
+        "projectName": "OnlyFriends",
+        "projectPath": "/Users/skyyyy/Desktop/web/OnlyFriends/OnlyFriends.csproj",
         "packagesPath": "/Users/skyyyy/.nuget/packages/",
         "outputPath": "/Users/skyyyy/Desktop/web/OnlyFriends/obj/",
         "projectStyle": "PackageReference",

@@ -17,8 +17,8 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.TargetFrameworkIdentifier = .NETCoreApp
 build_property.TargetFrameworkVersion = v10.0
-build_property.RootNamespace = onlyfriends
-build_property.RootNamespace = onlyfriends
+build_property.RootNamespace = OnlyFriends
+build_property.RootNamespace = OnlyFriends
 build_property.ProjectDir = /Users/skyyyy/Desktop/web/OnlyFriends/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
@@ -88,16 +88,16 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Users/skyyyy/Desktop/web/OnlyFriends/Views/Event/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXZlbnQvQ3JlYXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = b-bcyx4tflvc
+build_metadata.AdditionalFiles.CssScope = b-nr5tave7p7
 
 [/Users/skyyyy/Desktop/web/OnlyFriends/Views/Hero/Heropage.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSGVyby9IZXJvcGFnZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = b-9ki552pj4h
+build_metadata.AdditionalFiles.CssScope = b-ekihjvsfhi
 
 [/Users/skyyyy/Desktop/web/OnlyFriends/Views/Home/Homepage.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Ib21lcGFnZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = b-y45jm4otww
+build_metadata.AdditionalFiles.CssScope = b-7nj4zuublm
 
 [/Users/skyyyy/Desktop/web/OnlyFriends/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = b-ubi76e761p
+build_metadata.AdditionalFiles.CssScope = b-7tso5gcndu
