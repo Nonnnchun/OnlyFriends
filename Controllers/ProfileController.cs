@@ -71,6 +71,22 @@ namespace OnlyFriends.Controllers
 
             var currentUserIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             ViewData["CurrentUserId"] = int.TryParse(currentUserIdStr, out var currentUserId) ? currentUserId : 0;
+
+            // Check friendship status between current user and profile user
+            if (currentUserId != 0 && currentUserId != user.Id)
+            {
+                var friendship = await _context.Friendships.FirstOrDefaultAsync(f =>
+                    (f.RequesterId == currentUserId && f.AddresseeId == user.Id) ||
+                    (f.RequesterId == user.Id && f.AddresseeId == currentUserId));
+
+                ViewData["FriendshipStatus"] = friendship?.Status.ToString() ?? "None";
+                ViewData["FriendshipRequesterId"] = friendship?.RequesterId;
+            }
+            else
+            {
+                ViewData["FriendshipStatus"] = "None";
+            }
+
             return View("Profile", userDTO);
         }
     }

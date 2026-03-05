@@ -12,6 +12,11 @@ namespace OnlyFriends.Services
       Task DeleteNotificationAsync(int id);
       Task<NotificationViewModel?> FindNotificationsByIdAsync(int id);
       Task<IEnumerable<NotificationViewModel>> GetNotificationAsync();
+
+      // Friend request notifications
+      Task AddFriendRequestNotificationAsync(int toUserId, int fromUserId, string senderUsername);
+      Task DeleteFriendRequestNotificationAsync(int fromUserId, int toUserId);
+      Task<IEnumerable<NotificationViewModel>> GetNotificationsForUserAsync(int userId);
    }
 
    public sealed class NotificationService : INotificationService
@@ -78,6 +83,46 @@ namespace OnlyFriends.Services
          var notifications = await _context.Notifications
                                              .AsNoTracking()
                                              .ToListAsync();
+
+         return notifications.Select(NotificationViewModel.FromEntity);
+      }
+
+      public async Task AddFriendRequestNotificationAsync(int toUserId, int fromUserId, string senderUsername)
+      {
+         var notification = new Notification
+         {
+            Type = "FriendRequest",
+            ToUserId = toUserId,
+            FromUserId = fromUserId,
+            Message = $"{senderUsername} wants to be your friend",
+            CreatedAt = DateTime.UtcNow
+         };
+         _context.Notifications.Add(notification);
+         await _context.SaveChangesAsync();
+      }
+
+      public async Task DeleteFriendRequestNotificationAsync(int fromUserId, int toUserId)
+      {
+         var notification = await _context.Notifications
+            .FirstOrDefaultAsync(n =>
+               n.Type == "FriendRequest" &&
+               n.FromUserId == fromUserId &&
+               n.ToUserId == toUserId);
+
+         if (notification != null)
+         {
+            _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
+         }
+      }
+
+      public async Task<IEnumerable<NotificationViewModel>> GetNotificationsForUserAsync(int userId)
+      {
+         var notifications = await _context.Notifications
+            .AsNoTracking()
+            .Where(n => n.ToUserId == userId)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
 
          return notifications.Select(NotificationViewModel.FromEntity);
       }

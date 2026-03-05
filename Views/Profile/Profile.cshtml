@@ -310,9 +310,30 @@
 
             @if (!isOwnProfile && currentUserId != 0)
             {
-                <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id">
-                    Add Friend
-                </button>
+                var friendStatus = ViewData["FriendshipStatus"] as string ?? "None";
+                var friendRequesterId = ViewData["FriendshipRequesterId"] as int?;
+                if (friendStatus == "Accepted")
+                {
+                    <button class="btn-add-friend" disabled>Friends ✓</button>
+                }
+                else if (friendStatus == "Pending" && friendRequesterId == currentUserId)
+                {
+                    <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id" disabled>
+                        Request Sent
+                    </button>
+                }
+                else if (friendStatus == "Pending" && friendRequesterId == Model.Id)
+                {
+                    <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id" data-action="accept">
+                        Accept Request
+                    </button>
+                }
+                else
+                {
+                    <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id">
+                        Add Friend
+                    </button>
+                }
             }
         </div>
     </div>
@@ -399,28 +420,35 @@
 <script>
     const btn = document.getElementById('btnAddFriend');
     if (btn) {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', async function () {
             const targetId = btn.dataset.userId;
+            const action = btn.dataset.action;
             btn.disabled = true;
-            btn.innerText = 'Sending...';
+            btn.innerText = action === 'accept' ? 'Accepting...' : 'Sending...';
 
-            fetch(`/user/friends/${targetId}`, { method: 'POST' })
-                .then(res => {
-                    if (res.ok) {
-                        btn.innerText = 'Request Sent';
-                    } else if (res.status === 401) {
-                        window.location.href = '/Login';
-                    } else {
-                        btn.disabled = false;
-                        btn.innerText = 'Add Friend';
-                        alert('Failed to send request. Please try again.');
-                    }
-                })
-                .catch(() => {
+            try {
+                let res;
+                if (action === 'accept') {
+                    res = await fetch(`/user/friends/${targetId}/accept`, { method: 'PATCH' });
+                } else {
+                    res = await fetch(`/user/friends/${targetId}`, { method: 'POST' });
+                }
+
+                if (res.ok) {
+                    btn.innerText = action === 'accept' ? 'Friends ✓' : 'Request Sent';
+                    btn.disabled = true;
+                } else if (res.status === 401) {
+                    window.location.href = '/Login';
+                } else {
                     btn.disabled = false;
-                    btn.innerText = 'Add Friend';
-                    alert('Network error. Please try again.');
-                });
+                    btn.innerText = action === 'accept' ? 'Accept Request' : 'Add Friend';
+                    alert('Something went wrong. Please try again.');
+                }
+            } catch {
+                btn.disabled = false;
+                btn.innerText = action === 'accept' ? 'Accept Request' : 'Add Friend';
+                alert('Network error. Please try again.');
+            }
         });
     }
 </script>

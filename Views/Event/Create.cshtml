@@ -141,9 +141,9 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
-            const EnumEventType = { Online: 1, Offline: 2 };
-            const EnumEventStatus = { Draft: 1, Published: 2 };
-            const EnumJointType = { Public: 1, RequireApproval: 2 };
+            const EnumEventType = { Online: 0, Offline: 1 };
+            const EnumEventStatus = { Open: 0, Closed: 1 };
+            const EnumJointType = { Private: 0, Public: 1 };
 
             let posterDataUrl = null;
 
@@ -297,6 +297,8 @@
                 const info = document.getElementById('eventInfo').value;
                 const location = document.getElementById('eventLocation').value;
 
+                const visibilityStr = document.getElementById('eventVisibility').value;
+                const jointType = EnumJointType[visibilityStr] ?? EnumJointType.Public;
                 const lat = document.getElementById('Latitude').value;
                 const lng = document.getElementById('Longitude').value;
 
@@ -328,8 +330,8 @@
                     latitude: lat ? parseFloat(lat) : null,
                     longitude: lng ? parseFloat(lng) : null,
                     eventType: eventTypeEnum,
-                    eventStatus: EnumEventStatus.Published,
-                    jointType: EnumJointType.Public,
+                    eventStatus: EnumEventStatus.Open,
+                    jointType: jointType,
                     capacity: capacity,
                     categoryId: categoryId,
                     posterUrl: posterDataUrl,

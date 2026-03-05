@@ -93,6 +93,13 @@ namespace OnlyFriends.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var activity = await _activityService.FindEventByIdAsync(eventId);
+            if (userId == activity.Owner.Id )
+            {
+                return BadRequest("You cant join your own event!");
+            } else if (activity.EventStatus == EnumEventStatus.Closed || activity.Users.Count == activity.Capacity)
+            {
+                return Conflict("This event is not accepting new participants");
+            }
             await _activityService.AddUserToEvent(new AddUserToEventDTO { UserId = userId, EventId = eventId });
             return Ok();
         }

@@ -1,3 +1,45 @@
+<style>
+    .notif-badge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: #e53935;
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+    .notif-bell-btn { position: relative; }
+    .notif-item {
+        padding: 12px 14px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.85rem;
+        color: #333;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-msg { margin-bottom: 8px; }
+    .notif-actions { display: flex; gap: 8px; }
+    .notif-btn {
+        flex: 1;
+        padding: 5px 0;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .notif-btn-accept { background: #111; color: #fff; }
+    .notif-btn-accept:hover { background: #333; }
+    .notif-btn-decline { background: #f0f0f0; color: #555; }
+    .notif-btn-decline:hover { background: #e0e0e0; }
+</style>
+
 <div class="notif-bell dropdown">
     <button class="notif-bell-btn" id="notifBell" type="button" onclick="toggleBell()" title="การแจ้งเตือน">
         <span class="notif-icon">🔔</span>
@@ -11,3 +53,4 @@
         <ul id="notifList" class="notif-list"></ul>
     </div>
 </div>
+
