@@ -15,6 +15,7 @@ public interface IEventService
     Task<GetEventDTO?> FindEventByIdAsync(int id);
     Task<IEnumerable<GetEventDTO>> GetEventsAsync();
     Task AddUserToEvent(AddUserToEventDTO userEventToAdd);
+    Task AcceptJoinRequest(int eventId, int userId);
     Task CancelJoinEvent(int userId, int eventId);
 }
 public sealed class EventService : IEventService
@@ -78,6 +79,7 @@ public sealed class EventService : IEventService
 
     public async Task AddUserToEvent(AddUserToEventDTO userEventToAdd)
     {
+        var status = userEventToAdd.RequestStatus ?? EnumRequestStatus.Pending;
         var ue = await _context.UserEvents
             .FirstOrDefaultAsync(x => x.EventId == userEventToAdd.EventId && x.UserId == userEventToAdd.UserId);
 
@@ -87,14 +89,24 @@ public sealed class EventService : IEventService
             {
                 EventId = userEventToAdd.EventId,
                 UserId = userEventToAdd.UserId,
-                RequestStatus = EnumRequestStatus.Pending
+                RequestStatus = status
             });
         }
         else
         {
-            ue.RequestStatus = EnumRequestStatus.Pending;
+            ue.RequestStatus = status;
         }
 
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task AcceptJoinRequest(int eventId, int userId)
+    {
+        var ue = await _context.UserEvents
+            .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId)
+            ?? throw new KeyNotFoundException($"No pending request found for user {userId} in event {eventId}");
+
+        ue.RequestStatus = EnumRequestStatus.Accepted;
         await _context.SaveChangesAsync();
     }
 

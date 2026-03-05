@@ -185,18 +185,20 @@ updateNavClock();
 
 // เปิด-ปิด เมนูตัวกรอง
 function toggleFilter() {
-    document.getElementById("filterMenu").classList.toggle("show");
-    // ปิดเมนูโปรไฟล์ถ้าเปิดอยู่
-    document.getElementById("profileMenu").classList.remove("show"); 
+    var filterMenu = document.getElementById("filterMenu");
+    var profileMenu = document.getElementById("profileMenu");
+    if (filterMenu) filterMenu.classList.toggle("show");
+    if (profileMenu) profileMenu.classList.remove("show");
     var bell = document.getElementById("notifMenu");
     if (bell) bell.classList.remove("show");
 }
 
 // เปิด-ปิด เมนูโปรไฟล์
 function toggleProfile() {
-    document.getElementById("profileMenu").classList.toggle("show");
-    // ปิดเมนูตัวกรองถ้าเปิดอยู่
-    document.getElementById("filterMenu").classList.remove("show");
+    var profileMenu = document.getElementById("profileMenu");
+    var filterMenu = document.getElementById("filterMenu");
+    if (profileMenu) profileMenu.classList.toggle("show");
+    if (filterMenu) filterMenu.classList.remove("show");
     var bell = document.getElementById("notifMenu");
     if (bell) bell.classList.remove("show");
 }
@@ -209,8 +211,10 @@ function applyFilter() {
 // ถ้าคลิกพื้นที่ว่างๆ นอกเมนู ให้ปิด Dropdown ทั้งหมด
 window.onclick = function(event) {
     if (!event.target.closest('.dropdown')) {
-        document.getElementById("filterMenu").classList.remove("show");
-        document.getElementById("profileMenu").classList.remove("show");
+        var filterMenu = document.getElementById("filterMenu");
+        var profileMenu = document.getElementById("profileMenu");
+        if (filterMenu) filterMenu.classList.remove("show");
+        if (profileMenu) profileMenu.classList.remove("show");
         var bell = document.getElementById("notifMenu");
         if (bell) bell.classList.remove("show");
     }

@@ -19,11 +19,13 @@ namespace OnlyFriends.ApiControllers
     public class EventController : ControllerBase
     {
         private readonly IEventService _activityService;
+        private readonly INotificationService _notificationService;
         private readonly ILogger<EventController> _logger;
 
-        public EventController(IEventService activityService, ILogger<EventController> logger)
+        public EventController(IEventService activityService, INotificationService notificationService, ILogger<EventController> logger)
         {
             _activityService = activityService;
+            _notificationService = notificationService;
             _logger = logger;
         }
 
@@ -83,10 +85,62 @@ namespace OnlyFriends.ApiControllers
          {
              try
              {
-                await _activityService.AddUserToEvent(new AddUserToEventDTO { EventId = eventId, UserId = userId });
-                return Ok(new { message = "Accepted immediately" });
+                var eventDto = await _activityService.FindEventByIdAsync(eventId);
+                if (eventDto == null)
+                    return NotFound("Event not found");
+
+                if (eventDto.JointType == EnumJointType.Private)
+                {
+                    await _activityService.AddUserToEvent(new AddUserToEventDTO
+                    {
+                        EventId = eventId,
+                        UserId = userId,
+                        RequestStatus = EnumRequestStatus.Pending
+                    });
+
+                    // Notify the event owner about the join request
+                    var requesterUsername = User.Identity?.Name ?? $"User#{userId}";
+                    await _notificationService.AddJoinRequestNotificationAsync(
+                        eventDto.Owner.Id, userId, requesterUsername, eventDto.Title);
+
+                    return Ok(new { message = "Join request sent. Waiting for owner approval." });
+                }
+                else
+                {
+                    await _activityService.AddUserToEvent(new AddUserToEventDTO
+                    {
+                        EventId = eventId,
+                        UserId = userId,
+                        RequestStatus = EnumRequestStatus.Accepted
+                    });
+                    return Ok(new { message = "Joined successfully" });
+                }
              }
-                catch (Exception ex)
+             catch (Exception ex)
+             {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(500, ex.Message);
+             }
+         }
+
+         [Authorize]
+         [HttpPost("{eventId}/accept/{userId}")]
+         public async Task<IActionResult> AcceptJoinRequest(int eventId, int userId)
+         {
+             try
+             {
+                var eventDto = await _activityService.FindEventByIdAsync(eventId);
+                if (eventDto == null)
+                    return NotFound("Event not found");
+
+                await _activityService.AcceptJoinRequest(eventId, userId);
+                return Ok(new { message = "Join request accepted" });
+             }
+             catch (KeyNotFoundException ex)
+             {
+                return NotFound(ex.Message);
+             }
+             catch (Exception ex)
              {
                 _logger.LogError(ex, ex.Message);
                 return StatusCode(500, ex.Message);

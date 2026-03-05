@@ -20,12 +20,14 @@ namespace OnlyFriends.Controllers
     {
         private readonly IEventService _activityService;
         private readonly ICategoryService _categoryService;
+        private readonly INotificationService _notificationService;
         private readonly ILogger<EventController> _logger;
 
-        public EventController(IEventService activityService, ICategoryService categoryService, ILogger<EventController> logger)
+        public EventController(IEventService activityService, ICategoryService categoryService, INotificationService notificationService, ILogger<EventController> logger)
         {
             _activityService = activityService;
             _categoryService = categoryService;
+            _notificationService = notificationService;
             _logger = logger;
         }
 
@@ -93,15 +95,66 @@ namespace OnlyFriends.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var activity = await _activityService.FindEventByIdAsync(eventId);
-            if (userId == activity.Owner.Id )
+            if (userId == activity.Owner.Id)
             {
                 return BadRequest("You cant join your own event!");
-            } else if (activity.EventStatus == EnumEventStatus.Closed || activity.Users.Count == activity.Capacity)
+            }
+            else if (activity.EventStatus == EnumEventStatus.Closed || activity.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted) >= activity.Capacity)
             {
                 return Conflict("This event is not accepting new participants");
             }
-            await _activityService.AddUserToEvent(new AddUserToEventDTO { UserId = userId, EventId = eventId });
-            return Ok();
+
+            if (activity.JointType == EnumJointType.Private)
+            {
+                await _activityService.AddUserToEvent(new AddUserToEventDTO
+                {
+                    UserId = userId,
+                    EventId = eventId,
+                    RequestStatus = EnumRequestStatus.Pending
+                });
+                var requesterUsername = User.FindFirst(ClaimTypes.Name)?.Value ?? $"User#{userId}";
+                await _notificationService.AddJoinRequestNotificationAsync(
+                    activity.Owner.Id, userId, requesterUsername, activity.Title);
+                return Ok(new { message = "Join request sent. Waiting for owner approval." });
+            }
+            else
+            {
+                await _activityService.AddUserToEvent(new AddUserToEventDTO
+                {
+                    UserId = userId,
+                    EventId = eventId,
+                    RequestStatus = EnumRequestStatus.Accepted
+                });
+                return Ok(new { message = "Joined successfully" });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("/event/accept/{eventId}/{userId}")]
+        public async Task<IActionResult> AcceptJoinRequest(int eventId, int userId)
+        {
+            try
+            {
+                var activity = await _activityService.FindEventByIdAsync(eventId);
+                if (activity == null)
+                    return NotFound("Event not found");
+
+                var ownerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                if (ownerId != activity.Owner.Id)
+                    return Unauthorized("Only the event owner can accept join requests");
+
+                await _activityService.AcceptJoinRequest(eventId, userId);
+                return Ok(new { message = "Join request accepted" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         [Authorize]

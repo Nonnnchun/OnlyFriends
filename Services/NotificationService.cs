@@ -17,6 +17,9 @@ namespace OnlyFriends.Services
       Task AddFriendRequestNotificationAsync(int toUserId, int fromUserId, string senderUsername);
       Task DeleteFriendRequestNotificationAsync(int fromUserId, int toUserId);
       Task<IEnumerable<NotificationViewModel>> GetNotificationsForUserAsync(int userId);
+
+      // Event join request notifications
+      Task AddJoinRequestNotificationAsync(int ownerId, int fromUserId, string requesterUsername, string eventTitle);
    }
 
    public sealed class NotificationService : INotificationService
@@ -125,6 +128,21 @@ namespace OnlyFriends.Services
             .ToListAsync();
 
          return notifications.Select(NotificationViewModel.FromEntity);
+      }
+
+      public async Task AddJoinRequestNotificationAsync(int ownerId, int fromUserId, string requesterUsername, string eventTitle)
+      {
+         var notification = new Notification
+         {
+            Type = "JoinRequest",
+            ToUserId = ownerId,
+            FromUserId = fromUserId,
+            EventName = eventTitle,
+            Message = $"{requesterUsername} wants to join your event \"{eventTitle}\"",
+            CreatedAt = DateTime.UtcNow
+         };
+         _context.Notifications.Add(notification);
+         await _context.SaveChangesAsync();
       }
    }
 }
