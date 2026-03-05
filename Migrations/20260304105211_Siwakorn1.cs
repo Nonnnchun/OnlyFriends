@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace onlyfriends.Migrations
 {
     /// <inheritdoc />
-    public partial class Initchern : Migration
+    public partial class Siwakorn1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -50,11 +50,17 @@ namespace onlyfriends.Migrations
                     ProfilePictureUrl = table.Column<string>(type: "text", nullable: true),
                     Bio = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
-                    Password = table.Column<string>(type: "text", nullable: false)
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -97,6 +103,32 @@ namespace onlyfriends.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Friendships",
+                columns: table => new
+                {
+                    RequesterId = table.Column<int>(type: "integer", nullable: false),
+                    AddresseeId = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Friendships", x => new { x.RequesterId, x.AddresseeId });
+                    table.ForeignKey(
+                        name: "FK_Friendships_Users_AddresseeId",
+                        column: x => x.AddresseeId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Friendships_Users_RequesterId",
+                        column: x => x.RequesterId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserEvents",
                 columns: table => new
                 {
@@ -133,6 +165,11 @@ namespace onlyfriends.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Friendships_AddresseeId",
+                table: "Friendships",
+                column: "AddresseeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserEvents_UserId",
                 table: "UserEvents",
                 column: "UserId");
@@ -144,6 +181,11 @@ namespace onlyfriends.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_UserId",
+                table: "Users",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_Username",
                 table: "Users",
                 column: "Username",
@@ -153,6 +195,9 @@ namespace onlyfriends.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Friendships");
+
             migrationBuilder.DropTable(
                 name: "Notification");
 

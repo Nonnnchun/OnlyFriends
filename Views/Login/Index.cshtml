@@ -10,6 +10,17 @@
       <link rel="stylesheet" href="~/css/site.css">
       <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <style>
+         .login-error-box {
+            color: #dc3545;
+            font-size: 0.85rem;
+            background: #fff5f5;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            border: 1px solid #f5c2c7;
+         }
+      </style>
    </head>
    <body>
       <header class="main-header">
@@ -49,6 +60,16 @@
                         <button type="button" class="toggle-eye" aria-label="toggle password" data-target="password">👁️</button>
                      </div>
                   </div>
+
+                  @if (!ViewData.ModelState.IsValid)
+                  {
+                     <div class="login-error-box">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                           <div>@error.ErrorMessage</div>
+                        }
+                     </div>
+                  }
 
                   <button type="submit" class="btn btn-primary">Login</button>
                </form>

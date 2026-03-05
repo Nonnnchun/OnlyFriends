@@ -1,4 +1,5 @@
 @model OnlyFriends.Models.DTOS.UserDTOS.GetUserDTO
+@using System.Security.Claims
 @{
     ViewData["Title"] = "Profile";
     
@@ -13,6 +14,17 @@
     var firstName = Model.FirstName;
     var lastName = Model.LastName;
     var bio = Model.Bio;
+
+    var currentUserId = (int)(ViewData["CurrentUserId"] ?? 0);
+    var isOwnProfile = currentUserId != 0 && currentUserId == Model.Id;
+    var avatarUrl = string.IsNullOrEmpty(Model.ProfilePictureUrl)
+        ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(username)}&background=e8e0f7&color=5b4a8f&size=128&bold=true"
+        : Model.ProfilePictureUrl;
+
+    var joinedDate = "February 2026";
+    var hosted = 0;
+    var attended = 3;
+    bool hasEvents = true;
 
 }
 
@@ -131,22 +143,6 @@
     }
 
     .event-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .event-card-image {
-        width: 200px;
-        min-height: 140px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        margin-bottom: 20px;
-        overflow: hidden;
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
-        display: flex;
-        flex-direction: row;
-    }
-
-    .event-card:hover {
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
         transform: translateY(-2px);
     }
@@ -164,15 +160,6 @@
     }
 
     .event-card-body {
-        padding: 20px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        display: block;
-    }
-
-    .event-card-body {
         padding: 20px 24px;
         display: flex;
         flex-direction: column;
@@ -184,8 +171,6 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        align-items: flex-start;
-        justify-content: space-between;
         gap: 12px;
         flex-wrap: wrap;
         margin-bottom: 8px;
@@ -228,15 +213,6 @@
         font-style: italic;
     }
 
-    @@media (max-width: 600px) {
-        .event-card { flex-direction: column; }
-        .event-card-image { width: 100%; height: 150px; }
-        .profile-header { flex-direction: column; text-align: center; }
-        .profile-info { text-align: center; }
-        .profile-stats { justify-content: center; }
-        color: #1a1a1a;
-    }
-
     .event-card p {
         color: #666;
         margin: 0 0 14px;
@@ -270,6 +246,22 @@
         margin-top: 2px;
     }
 
+    .btn-add-friend {
+        margin-top: 12px;
+        padding: 8px 20px;
+        background: #333;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-add-friend:hover { background: #000; }
+    .btn-add-friend:disabled { background: #aaa; cursor: default; }
+
     @@media (max-width: 600px) {
         .profile-header {
             flex-direction: column;
@@ -299,14 +291,7 @@
 
     <div class="profile-header">
         <div class="profile-avatar">
-            @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
-            {
-                <img src="@Model.ProfilePictureUrl" alt="Avatar" />
-            }
-            else
-            {
-                <span>😊</span>
-            }
+            <img src="@avatarUrl" alt="@username" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
         </div>
 
         <div class="profile-info">
@@ -322,6 +307,34 @@
                 <span><strong>@hostedCount</strong> Hosted</span>
                 <span><strong>@attendedCount</strong> Attended</span>
             </div>
+
+            @if (!isOwnProfile && currentUserId != 0)
+            {
+                var friendStatus = ViewData["FriendshipStatus"] as string ?? "None";
+                var friendRequesterId = ViewData["FriendshipRequesterId"] as int?;
+                if (friendStatus == "Accepted")
+                {
+                    <button class="btn-add-friend" disabled>Friends ✓</button>
+                }
+                else if (friendStatus == "Pending" && friendRequesterId == currentUserId)
+                {
+                    <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id" disabled>
+                        Request Sent
+                    </button>
+                }
+                else if (friendStatus == "Pending" && friendRequesterId == Model.Id)
+                {
+                    <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id" data-action="accept">
+                        Accept Request
+                    </button>
+                }
+                else
+                {
+                    <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id">
+                        Add Friend
+                    </button>
+                }
+            }
         </div>
     </div>
 
@@ -402,3 +415,41 @@
     }
 
 </div>
+
+@section Scripts {
+<script>
+    const btn = document.getElementById('btnAddFriend');
+    if (btn) {
+        btn.addEventListener('click', async function () {
+            const targetId = btn.dataset.userId;
+            const action = btn.dataset.action;
+            btn.disabled = true;
+            btn.innerText = action === 'accept' ? 'Accepting...' : 'Sending...';
+
+            try {
+                let res;
+                if (action === 'accept') {
+                    res = await fetch(`/user/friends/${targetId}/accept`, { method: 'PATCH' });
+                } else {
+                    res = await fetch(`/user/friends/${targetId}`, { method: 'POST' });
+                }
+
+                if (res.ok) {
+                    btn.innerText = action === 'accept' ? 'Friends ✓' : 'Request Sent';
+                    btn.disabled = true;
+                } else if (res.status === 401) {
+                    window.location.href = '/Login';
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = action === 'accept' ? 'Accept Request' : 'Add Friend';
+                    alert('Something went wrong. Please try again.');
+                }
+            } catch {
+                btn.disabled = false;
+                btn.innerText = action === 'accept' ? 'Accept Request' : 'Add Friend';
+                alert('Network error. Please try again.');
+            }
+        });
+    }
+</script>
+}

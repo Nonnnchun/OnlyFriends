@@ -9,9 +9,23 @@ namespace Notifications.Models
    {
       [Key]
       public int Id { get; set; }
+
       [Column(TypeName = "varchar(20)")]
-      [Required]
-      public required string EventName { get; set; }
+      public string EventName { get; set; } = string.Empty;
+
+      // Notification type: "FriendRequest", "EventInvite", etc.
+      public string Type { get; set; } = string.Empty;
+
+      // Who receives this notification
+      public int? ToUserId { get; set; }
+
+      // Who triggered this notification
+      public int? FromUserId { get; set; }
+
+      // Human-readable message shown in the bell
+      public string Message { get; set; } = string.Empty;
+
+      public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
       public static NotificationViewModel ToGetNotificationDto(Notification notification)
       {

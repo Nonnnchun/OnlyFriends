@@ -628,7 +628,9 @@ function closePanel() {
     document.getElementById('mainContent')?.classList.remove('panel-open');
 }
 
-// Cover photo (frontend-only preview)
+let pendingPosterUrl = null;
+
+// Cover photo (preview + payload)
 function openCoverPicker() {
     const input = document.getElementById('coverFileInput');
     if (!input) return;
@@ -642,6 +644,7 @@ function handleCoverFileChange(inputEl) {
     if (!file.type.startsWith('image/')) {
         showToast('Please choose an image file.');
         inputEl.value = '';
+        pendingPosterUrl = null;
         return;
     }
 
@@ -650,8 +653,9 @@ function handleCoverFileChange(inputEl) {
         const coverImage = document.getElementById('eventCoverImage');
         const result = e.target?.result;
         if (coverImage && typeof result === 'string') {
+            pendingPosterUrl = result;
             coverImage.src = result;
-            showToast('Cover photo updated (preview only).');
+            showToast('Cover photo ready. Click Update Event to save.');
         }
     };
     reader.readAsDataURL(file);
@@ -788,6 +792,17 @@ function toggleRegistration() {
         });
 }
 
+function toIsoUtc(localDateTime) {
+    if (!localDateTime) return null;
+    const d = new Date(localDateTime);
+    return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+function combineDateAndTimeToIsoUtc(dateValue, timeValue) {
+    if (!dateValue || !timeValue) return null;
+    return toIsoUtc(`${dateValue}T${timeValue}`);
+}
+
 // Update event
 function updateEvent() {
     const eventId = document.getElementById('editPanel')?.dataset.eventId;
@@ -796,20 +811,30 @@ function updateEvent() {
         return;
     }
 
-    const payload = {
-        id: eventId,
-        title: document.getElementById('inputTitle')?.value,
-        description: document.getElementById('inputDesc')?.value,
-        date: document.getElementById('inputDate')?.value,
-        startTime: document.getElementById('inputStart')?.value,
-        endTime: document.getElementById('inputEnd')?.value,
-        deadline: document.getElementById('inputDeadline')?.value,
-        capacity: parseInt(document.getElementById('inputCapacity')?.value, 10),
-        selectionMethod: document.querySelector('.method-option.selected .method-name')?.textContent || ''
-    };
+    const dateValue = document.getElementById('inputDate')?.value || '';
+    const startValue = document.getElementById('inputStart')?.value || '';
+    const endValue = document.getElementById('inputEnd')?.value || '';
+    const categoryEl = document.getElementById('inputCategory');
+    const categoryId = parseInt(categoryEl?.value, 10);
+    const categoryName = categoryEl?.selectedOptions?.[0]?.textContent?.trim() || '';
 
-    fetch('/Event/Update', {
-        method: 'POST',
+    const payload = {
+        id: parseInt(eventId, 10),
+        title: document.getElementById('inputTitle')?.value?.trim(),
+        info: document.getElementById('inputDesc')?.value?.trim(),
+        startAt: combineDateAndTimeToIsoUtc(dateValue, startValue),
+        endAt: combineDateAndTimeToIsoUtc(dateValue, endValue),
+        capacity: parseInt(document.getElementById('inputCapacity')?.value, 10),
+        location: document.getElementById('inputLocation')?.value?.trim(),
+        categoryId: Number.isNaN(categoryId) ? null : categoryId,
+        category: Number.isNaN(categoryId) ? null : { id: categoryId, categoryName }
+    };
+    if (pendingPosterUrl) {
+        payload.posterUrl = pendingPosterUrl;
+    }
+
+    fetch(`/event/manage/${eventId}`, {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             RequestVerificationToken: getAntiForgeryToken()
@@ -817,14 +842,17 @@ function updateEvent() {
         body: JSON.stringify(payload)
     })
         .then((r) => {
-            if (!r.ok) throw new Error('Server error');
-            return r.json();
+            if (!r.ok) throw new Error(r.response);
+            return r;
         })
         .then(() => {
+            pendingPosterUrl = null;
+            const coverInput = document.getElementById('coverFileInput');
+            if (coverInput) coverInput.value = '';
             showToast('Event updated successfully.');
             closePanel();
         })
-        .catch(() => showToast('Something went wrong. Please try again.'));
+        .catch((e) => showToast('Something went wrong. Please try again.' + e));
 }
 
 // Copy event URL
@@ -996,6 +1024,33 @@ function updateParticipantSummaryStats() {
     if (registeredEl) registeredEl.textContent = String(pending);
 }
 
+function setParticipantActionButtonsDisabled(item, disabled) {
+    if (!item) return;
+    item.querySelectorAll('.participant-action').forEach((btn) => {
+        btn.disabled = disabled;
+    });
+}
+
+async function persistParticipantStatus(eventId, userId, status) {
+    const response = await fetch('/Event/UpdateParticipantStatus', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            RequestVerificationToken: getAntiForgeryToken()
+        },
+        body: JSON.stringify({
+            eventId,
+            userId,
+            status,
+            // requestStatus: status
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to update participant status (${response.status})`);
+    }
+}
+
 function resetStatusFilterToAll() {
     currentStatus = '';
     const buttons = document.querySelectorAll('.filter-tabs .filter-btn');
@@ -1025,18 +1080,44 @@ function initializeParticipantStatusUI() {
     updateParticipantSummaryStats();
 }
 
-function setParticipantStatus(buttonEl, nextStatus) {
+async function setParticipantStatus(buttonEl, nextStatus) {
     const item = buttonEl?.closest('.registrant-item');
     if (!item) return;
 
-    const isPublic = getJointType() === 'public';
-    const normalizedStatus = normalizeParticipantStatus(nextStatus);
+    const eventId = parseInt(document.getElementById('editPanel')?.dataset.eventId, 10);
+    const userId = parseInt(item.dataset.userId, 10);
+    if (Number.isNaN(eventId) || Number.isNaN(userId)) {
+        showToast('Could not find participant or event ID.');
+        return;
+    }
 
-    if (isPublic && normalizedStatus === PARTICIPANT_STATUS.pending) return;
+    const isPublic = getJointType() === 'public';
+    const previousStatus = normalizeParticipantStatus(item.dataset.status);
+    let normalizedStatus = normalizeParticipantStatus(nextStatus);
+
+    if (isPublic && normalizedStatus === PARTICIPANT_STATUS.pending) {
+        normalizedStatus = PARTICIPANT_STATUS.accepted;
+    }
+
+    if (previousStatus === normalizedStatus) return;
 
     applyParticipantStatus(item, normalizedStatus);
     updateParticipantSummaryStats();
     applyFilters();
+
+    setParticipantActionButtonsDisabled(item, true);
+    try {
+        await persistParticipantStatus(eventId, userId, normalizedStatus);
+        showToast(`Participant status updated: ${normalizedStatus}`);
+    } catch (error) {
+        applyParticipantStatus(item, previousStatus);
+        updateParticipantSummaryStats();
+        applyFilters();
+        showToast('Could not save participant status. Please try again.');
+        console.error(error);
+    } finally {
+        setParticipantActionButtonsDisabled(item, false);
+    }
 }
 
 // Participant filtering

@@ -4,6 +4,7 @@ using OnlyFriends.Models;
 using OnlyFriends.Models.DTOS.UserDTOS;
 using Microsoft.EntityFrameworkCore;
 using OnlyFriends.Services;
+using System.Security.Claims;
 
 namespace OnlyFriends.Controllers
 {
@@ -52,8 +53,7 @@ namespace OnlyFriends.Controllers
                 LastName = user.LastName,
                 Bio = user.Bio,
                 ProfilePictureUrl = user.ProfilePictureUrl,
-                Email = user.Email ?? "", 
-                Password = "" 
+                Email = user.Email ?? ""
             };
 
             // Fetch Events owned by this user
@@ -68,6 +68,24 @@ namespace OnlyFriends.Controllers
                 .ToListAsync();
 
             ViewBag.JoinedEvents = joinedEvents;
+
+            var currentUserIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            ViewData["CurrentUserId"] = int.TryParse(currentUserIdStr, out var currentUserId) ? currentUserId : 0;
+
+            // Check friendship status between current user and profile user
+            if (currentUserId != 0 && currentUserId != user.Id)
+            {
+                var friendship = await _context.Friendships.FirstOrDefaultAsync(f =>
+                    (f.RequesterId == currentUserId && f.AddresseeId == user.Id) ||
+                    (f.RequesterId == user.Id && f.AddresseeId == currentUserId));
+
+                ViewData["FriendshipStatus"] = friendship?.Status.ToString() ?? "None";
+                ViewData["FriendshipRequesterId"] = friendship?.RequesterId;
+            }
+            else
+            {
+                ViewData["FriendshipStatus"] = "None";
+            }
 
             return View("Profile", userDTO);
         }

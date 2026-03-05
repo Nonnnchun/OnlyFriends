@@ -1,6 +1,7 @@
 @model OnlyFriends.Models.DTOS.EventDTOS.GetEventDTO
 @using OnlyFriends.Models.DTOS.EventDTOS
 @using OnlyFriends.Models
+@using System.Security.Claims
 
 @{
     ViewData["Title"] = Model.Title ?? "Event Details";
@@ -31,6 +32,11 @@
     var mapSrc = $"https://www.google.com/maps?q={mapQuery}&output=embed"; 
     var mapOpenUrl = $"https://www.google.com/maps/search/?api=1&query={mapQuery}"; 
     var ownerAvatar = owner?.ProfilePictureUrl ?? "/images/avatar-placeholder.png";
+    var currentUserIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    @* bool canManageEvent = int.TryParse(currentUserIdClaim, out var currentUserId) && owner?.Id == currentUserId; *@
+    bool canManageEvent = currentUserIdClaim == owner.Id.ToString(); // TODO: replace with real permission check
+    bool hasJoined = int.TryParse(currentUserIdClaim, out var parsedUserId) &&
+        (Model.UserEvents?.Any(ue => ue.UserId == parsedUserId) ?? false);
 
     string locName = Model?.Location ?? "No Location";
     string locDetail = "";
@@ -53,7 +59,7 @@
 
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/event-detail.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/event-detail.css"  />
 }
 
 <div class="ev-page">
@@ -65,20 +71,37 @@
                 <img class="ev-poster" src="@poster" alt="Event poster" />
 
                 <div class="ev-card-body">
+                    @if (canManageEvent)
+                    {
+                        <div class="ev-manage-card">
+                            <div class="ev-manage-text">You have manage access for this event.</div>
+                            <a href="/event/manage/@Model?.Id" class="ev-manage-btn">
+                                Manage <span aria-hidden="true">&#8599;</span>
+                            </a>
+                        </div>
+                    }
+
                     <div class="ev-section-title">Hosted By</div>
                     <ul class="ev-host-list">
                         <li class="ev-host-item">
-                            <img class="ev-host-avatar" src="@ownerAvatar" alt="host" />
-                            <span>@Model?.Owner.Username</span>
+                            <a href="/user/@owner?.Username" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">
+                                <img class="ev-host-avatar" src="@ownerAvatar" alt="host" />
+                                <span>@Model?.Owner.Username</span>
+                            </a>
                         </li>
                     </ul>
                     <div class="ev-going">
                         <div class="ev-going-num">@going Went</div>
                             <div class="avatar-group">
-                                 @foreach(var user in Model?.Users.Take(6) ?? Enumerable.Empty<User>()) {
-                                     <img src="@user.ProfilePictureUrl" alt="@user.Username" class="avatar-img" />
-                                 } 
-                             </div> 
+                                @foreach(var user in Model?.Users.Take(6) ?? Enumerable.Empty<User>()) {
+                                    var userAvatar = string.IsNullOrEmpty(user.ProfilePictureUrl)
+                                        ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(user.Username)}&background=e8e0f7&color=5b4a8f&size=64&bold=true"
+                                        : user.ProfilePictureUrl;
+                                    <a href="/user/@user.Username" title="@user.Username">
+                                        <img src="@userAvatar" alt="@user.Username" class="avatar-img" />
+                                    </a>
+                                }
+                            </div>
                             <div class="ev-muted ev-small"> 
                                 @if (capacity > 0) 
                                 { 
@@ -147,7 +170,7 @@
             </div>
 
             <!-- Registration card -->
-            <div class="ev-join-card" data-status="@Model?.EventStatus" data-joinmode="@Model?.JointType">
+            <div class="ev-join-card" data-status="@Model?.EventStatus" data-joinmode="@Model?.JointType" data-event-id="@Model?.Id" data-joined="@hasJoined.ToString().ToLower()">
                 @if (Model?.EventStatus == EnumEventStatus.Closed)
                 {
                     <div class="ev-reg-body">x
@@ -194,7 +217,10 @@
                             </div>
                         </div>
 
-                        <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">Request to Join</button>
+                        <div class="ev-join-actions">
+                            <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">Request to Join</button>
+                            <button class="ev-btn-wide ev-btn-wide--outline" type="button" id="btnCancelJoin" style="display:none;">Cancel Request</button>
+                        </div>
                     </div>
                 }
                 else
@@ -230,9 +256,14 @@
                             </div>
                         </div>
 
-                        <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">
-                            Request to Join
-                        </button>
+                        <div class="ev-join-actions">
+                            <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">
+                                Request to Join
+                            </button>
+                            <button class="ev-btn-wide ev-btn-wide--outline" type="button" id="btnCancelJoin" style="display:none;">
+                                Cancel Request
+                            </button>
+                        </div>
                     </div>
                 }
             </div>
@@ -260,5 +291,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/event-detail.js" asp-append-version="true"></script>
+    <script src="~/js/event-detail.js" ></script>
 }

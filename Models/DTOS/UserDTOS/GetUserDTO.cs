@@ -10,8 +10,7 @@ namespace OnlyFriends.Models.DTOS.UserDTOS
         public string LastName { get; set; } = string.Empty;
         
         // Removed 'required' to prevent breaking other pages like the Home page
-        public required string Email { get; set; } = string.Empty;
-        public required string Password { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
 
         // Changed to ICollection to support the HashSet returned by EF
         public ICollection<int> EventIds { get; set; } = new List<int>();

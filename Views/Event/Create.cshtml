@@ -1,9 +1,9 @@
+@using OnlyFriends.Models.DTOS.EventDTOS
+@using OnlyFriends.Models.DTOS.CategoryDTOS
+@model CreateEventDTO
 @{
     ViewData["Title"] = "สร้างกิจกรรม";
-}
-
-@section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    var categories = ViewData["Categories"] as IEnumerable<GetCategoryDTO>;
 }
 
 <div class="create-container">
@@ -60,7 +60,7 @@
 
         <div class="input-group" style="display: flex; gap: 10px; align-items: center;">
             <span>📍</span>
-            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่..." style="flex: 1; border: none; outline: none; background: transparent;">
+            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน..." style="flex: 1; border: none; outline: none; background: transparent;">
             <button type="button" id="btnSearchLocation" class="btn-search-loc" onclick="searchOSMLocation()">ค้นหา</button>
         </div>
 
@@ -68,7 +68,11 @@
         <input type="hidden" id="Longitude" name="Longitude">
 
         <div id="mapContainer" style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block;">
-            <div id="map" style="width: 100%; height: 100%;"></div>
+            <iframe id="mapFrame"
+                    title="Event map preview"
+                    style="width: 100%; height: 100%; border: 0;"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
         <div class="input-group">
             <span>📝</span>
@@ -82,17 +86,14 @@
                     <select class="eventCategorySelect"
                             style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px;">
                         <option value="">เลือกหมวดหมู่</option>
-                        <option value="1">สัมมนา</option>
-                        <option value="2">เวิร์กช็อป</option>
-                        <option value="3">แข่งขัน</option>
-                        <option value="4">พบปะสังสรรค์</option>
+                        @if (categories != null) {
+                            @foreach (var category in categories) 
+                            {
+                                <option value="@category.Id">@category.CategoryName</option>
+                            }
+                        }
                     </select>
 
-                    <button type="button"
-                            onclick="addCategoryRow(this)"
-                            style="border:none; background:#e9ecef; border-radius:6px; padding:6px 10px; cursor:pointer;">
-                        ➕
-                    </button>
                 </div>
             </div>
         </div>
@@ -135,26 +136,47 @@
         </button>
     </div>
 </div>
-
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
     <script>
-        const EnumEventType = { Online: 1, Offline: 2 };
-        const EnumEventStatus = { Draft: 1, Published: 2 };
-        const EnumJointType = { Public: 1, RequireApproval: 2 };
+        const EnumEventType = { Online: 0, Offline: 1 };
+        const EnumEventStatus = { Open: 0, Closed: 1 };
+        const EnumJointType = { Private: 0, Public: 1 };
+        const defaultLat = 13.7563;
+        const defaultLng = 100.5018;
+
+        let posterDataUrl = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('endDate').value = today;
-            
-            // เรียกใช้งานแผนที่เมื่อโหลดหน้าเว็บเสร็จ
+
             initMap();
+            updateLocationPlaceholder();
+
+            document.querySelector('.upload-btn')?.addEventListener('click', () => {
+                document.getElementById('posterInput').click();
+            });
         });
 
-        document.querySelector('.upload-btn').addEventListener('click', () => {
-            document.getElementById('posterInput').click();
+        document.getElementById('posterInput').addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                posterDataUrl = e.target.result;
+                const preview = document.querySelector('.poster-preview');
+                let img = preview.querySelector('img.poster-img');
+                if (!img) {
+                    img = document.createElement('img');
+                    img.className = 'poster-img';
+                    img.style.cssText = 'width:100%; height:100%; object-fit:cover; border-radius:inherit; position:absolute; top:0; left:0;';
+                    preview.style.position = 'relative';
+                    preview.prepend(img);
+                }
+                img.src = posterDataUrl;
+            };
+            reader.readAsDataURL(file);
         });
 
         function togglePriceInput() {
@@ -171,37 +193,16 @@
             }
         }
 
-        // ================= JS สำหรับแผนที่ OpenStreetMap (ฟรี 100%) =================
-        let map;
-        let marker;
-
         function initMap() {
-            // ค่าเริ่มต้นพิกัด (กรุงเทพมหานคร)
-            const defaultLat = 13.7563;
-            const defaultLng = 100.5018;
+            setMapLocation(defaultLat, defaultLng);
+            updateLatLngFields(defaultLat, defaultLng);
+        }
 
-            // สร้างแผนที่และตั้งค่ามุมมองเริ่มต้น
-            map = L.map('map').setView([defaultLat, defaultLng], 13);
-
-            // ดึงภาพแผนที่จาก OpenStreetMap
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-            // สร้างหมุด (Marker) แบบให้ลากได้
-            marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
-
-            // อีเวนต์เมื่อผู้ใช้ลากหมุดเสร็จ
-            marker.on('dragend', function (e) {
-                const position = marker.getLatLng();
-                updateLatLngFields(position.lat, position.lng);
-            });
-
-            // อีเวนต์เมื่อผู้ใช้คลิกบนแผนที่ (ให้หมุดย้ายตามไปเลย)
-            map.on('click', function(e) {
-                marker.setLatLng(e.latlng);
-                updateLatLngFields(e.latlng.lat, e.latlng.lng);
-            });
+        function setMapLocation(lat, lng) {
+            const mapFrame = document.getElementById("mapFrame");
+            if (!mapFrame) return;
+            const query = encodeURIComponent(`${lat},${lng}`);
+            mapFrame.src = `https://www.google.com/maps?q=${query}&z=15&output=embed`;
         }
 
         function updateLatLngFields(lat, lng) {
@@ -209,32 +210,25 @@
             document.getElementById("Longitude").value = lng;
         }
 
-        // ฟังก์ชันค้นหาสถานที่ (ใช้ Nominatim API ฟรีของ OpenStreetMap)
         async function searchOSMLocation() {
             const query = document.getElementById('eventLocation').value;
             if (!query) return;
 
-            // เปลี่ยนข้อความปุ่มเพื่อบอกผู้ใช้ว่ากำลังค้นหา
             const btnSearch = document.getElementById('btnSearchLocation');
             const originalText = btnSearch.innerText;
             btnSearch.innerText = "กำลังหา...";
 
             try {
-                // เรียก API ค้นหาสถานที่
                 const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
                 const data = await response.json();
-                
+
                 if (data && data.length > 0) {
-                    // เจอสถานที่ ดึงค่า Lat/Lng ตัวแรกที่เจอ
                     const lat = parseFloat(data[0].lat);
                     const lon = parseFloat(data[0].lon);
-                    
-                    // เลื่อนแผนที่ไปจุดนั้นและย้ายหมุด
-                    map.setView([lat, lon], 16);
-                    marker.setLatLng([lat, lon]);
+                    setMapLocation(lat, lon);
                     updateLatLngFields(lat, lon);
                 } else {
-                    alert('ไม่พบสถานที่ ลองพิมพ์ชื่อให้กว้างขึ้น หรือคลิกเพื่อปักหมุดบนแผนที่เองได้เลยครับ');
+                    alert('ไม่พบสถานที่ ลองพิมพ์ชื่อให้กว้างขึ้น');
                 }
             } catch (error) {
                 console.error('Error searching location:', error);
@@ -243,7 +237,6 @@
                 btnSearch.innerText = originalText;
             }
         }
-        // =========================================================================
 
         function updateLocationPlaceholder() {
             const eventType = document.getElementById('eventType').value;
@@ -253,131 +246,105 @@
 
             if (eventType === 'online') {
                 locationInput.placeholder = "เพิ่มลิงก์การประชุม (เช่น Zoom, Google Meet)";
-                mapContainer.style.display = 'none'; // ซ่อนแผนที่
-                btnSearch.style.display = 'none'; // ซ่อนปุ่มค้นหา
-                document.getElementById("Latitude").value = ""; 
+                mapContainer.style.display = 'none';
+                btnSearch.style.display = 'none';
+                document.getElementById("Latitude").value = "";
                 document.getElementById("Longitude").value = "";
             } else {
-                locationInput.placeholder = "ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่...";
-                mapContainer.style.display = 'block'; // โชว์แผนที่
-                btnSearch.style.display = 'block'; // โชว์ปุ่มค้นหา
-                
-                // คำสั่งสำคัญของ Leaflet: ให้แผนที่วาดตัวเองใหม่เมื่อสลับกลับมาโชว์
-                if (map) {
-                    setTimeout(() => { map.invalidateSize(); }, 100);
+                locationInput.placeholder = "ค้นหาสถานที่จัดงาน...";
+                mapContainer.style.display = 'block';
+                btnSearch.style.display = 'block';
+            }
+        }
+
+            function submitEvent() {
+                const title = document.getElementById('eventTitle').value;
+                const info = document.getElementById('eventInfo').value;
+                const location = document.getElementById('eventLocation').value;
+
+                const visibilityStr = document.getElementById('eventVisibility').value;
+                const jointType = EnumJointType[visibilityStr] ?? EnumJointType.Public;
+                const lat = document.getElementById('Latitude').value;
+                const lng = document.getElementById('Longitude').value;
+
+                const combinedInfo = location ? `Location: ${location} | Description: ${info}` : info;
+
+                const startDate = document.getElementById('startDate').value;
+                const startTime = document.getElementById('startTime').value;
+                const endDate = document.getElementById('endDate').value;
+                const endTime = document.getElementById('endTime').value;
+
+                const startAtStr = startDate && startTime ? `${startDate}T${startTime}:00` : null;
+                const endAtStr = endDate && endTime ? `${endDate}T${endTime}:00` : null;
+
+                const capacityStr = document.getElementById('eventCapacity').value;
+                const capacity = capacityStr ? parseInt(capacityStr) : 0;
+
+                const selectedEventType = document.getElementById('eventType').value;
+                const eventTypeEnum = selectedEventType === 'online' ? EnumEventType.Online : EnumEventType.Offline;
+
+                const isFree = document.getElementById('ticketType').value === 'free';
+                const ticketPrice = isFree ? 0 : (parseFloat(document.getElementById('ticketPrice').value) || 0);
+
+                const categoryId = parseInt(document.querySelector('.eventCategorySelect').value);
+
+                const eventToCreate = {
+                    title: title,
+                    info: combinedInfo,
+                    location: location,
+                    latitude: lat ? parseFloat(lat) : null,
+                    longitude: lng ? parseFloat(lng) : null,
+                    eventType: eventTypeEnum,
+                    eventStatus: EnumEventStatus.Open,
+                    jointType: jointType,
+                    capacity: capacity,
+                    categoryId: categoryId,
+                    posterUrl: posterDataUrl,
+                    startAt: startAtStr,
+                    endAt: endAtStr
+                };
+
+                // 
+
+                if (!eventToCreate.title) {
+                    alert("❌ กรุณากรอกชื่อกิจกรรม");
+                    return;
                 }
-            }
-        }
 
-        function addCategoryRow(button) {
-
-            const container = document.getElementById("categoryContainer");
-
-            // 🔥 เปลี่ยนปุ่มที่ถูกกดจาก ➕ เป็น ❌
-            button.innerHTML = "❌";
-            button.style.background = "#f8d7da";
-            button.onclick = function () {
-                removeCategoryRow(this);
-            };
-
-            // 🔥 สร้างแถวใหม่ (ที่ยังเป็น ➕)
-            const newRow = document.createElement("div");
-            newRow.className = "category-row";
-            newRow.style.display = "flex";
-            newRow.style.gap = "10px";
-            newRow.style.marginBottom = "8px";
-
-            newRow.innerHTML = `
-                <select class="eventCategorySelect"
-                        style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px;">
-                    <option value="">เลือกหมวดหมู่</option>
-                    <option value="1">สัมมนา</option>
-                    <option value="2">เวิร์กช็อป</option>
-                    <option value="3">แข่งขัน</option>
-                    <option value="4">พบปะสังสรรค์</option>
-                </select>
-
-                <button type="button"
-                        onclick="addCategoryRow(this)"
-                        style="border:none; background:#e9ecef; border-radius:6px; padding:6px 10px; cursor:pointer;">
-                    ➕
-                </button>
-            `;
-
-            container.appendChild(newRow);
-        }
-
-        function removeCategoryRow(button) {
-            button.parentElement.remove();
-        }
-
-        function submitEvent() {
-            const title = document.getElementById('eventTitle').value;
-            const info = document.getElementById('eventInfo').value;
-            const location = document.getElementById('eventLocation').value;
-            
-            const lat = document.getElementById('Latitude').value;
-            const lng = document.getElementById('Longitude').value;
-
-            const combinedInfo = location ? `Location: ${location} | Description: ${info}` : info;
-
-            const startDate = document.getElementById('startDate').value;
-            const startTime = document.getElementById('startTime').value;
-            const endDate = document.getElementById('endDate').value;
-            const endTime = document.getElementById('endTime').value;
-
-            const startAtStr = startDate && startTime ? `${startDate}T${startTime}:00` : null;
-            const endAtStr = endDate && endTime ? `${endDate}T${endTime}:00` : null;
-
-            const capacityStr = document.getElementById('eventCapacity').value;
-            const capacity = capacityStr ? parseInt(capacityStr) : 0;
-
-            const selectedEventType = document.getElementById('eventType').value;
-            const eventTypeEnum = selectedEventType === 'online' ? EnumEventType.Online : EnumEventType.Offline;
-
-            const isFree = document.getElementById('ticketType').value === 'free';
-            const ticketPrice = isFree ? 0 : (parseFloat(document.getElementById('ticketPrice').value) || 0);
-            // ===== ดึงค่า Category หลายค่า =====
-            const categorySelects = document.querySelectorAll(".eventCategorySelect");
-            const selectedCategories = [];
-
-            categorySelects.forEach(select => {
-                if (select.value) {
-                    selectedCategories.push(parseInt(select.value));
+                if (!categoryId) {
+                    alert("❌ กรุณาเลือกหมวดหมู่กิจกรรม");
+                    return;
                 }
-            });
 
-            if (selectedCategories.length === 0) {
-                alert("❌ กรุณาเลือกอย่างน้อย 1 หมวดหมู่");
-                return;
+                if (!eventToCreate.location) {
+                    alert("❌ กรุณากรอกสถานที่");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/Event/Create',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    dataType: "json",
+                    data: JSON.stringify(eventToCreate),
+                    headers: {
+                        // Reads token from a hidden input usually generated by @Html.AntiForgeryToken()
+                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        console.log(result);
+                        console.log("🚀 ข้อมูลที่จะส่ง:", eventToCreate);
+                        alert("✅ ตรวจสอบข้อมูลสำเร็จ! ดู Payload ได้ใน Console");
+                        if (result.redirectUrl) {
+                            window.location.href = result.redirectUrl;
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+
+
             }
-            const createEventDTO = {
-                Title: title,
-                Info: combinedInfo,
-                Latitude: lat ? parseFloat(lat) : null,
-                Longitude: lng ? parseFloat(lng) : null,
-                Price: ticketPrice,
-                EventType: eventTypeEnum,
-                EventStatus: EnumEventStatus.Published,
-                JointType: EnumJointType.Public,
-                Capacity: capacity,
-                OwnerId: 1,
-                CategoryIds: selectedCategories,
-                PosterUrl: null,
-                StartAt: startAtStr,
-                EndAt: endAtStr
-            };
-
-            if (!createEventDTO.Title) {
-                alert("❌ กรุณากรอกชื่อกิจกรรม");
-                return;
-            }
-
-            console.log("🚀 ข้อมูลที่จะส่ง:", createEventDTO);
-            alert("✅ ตรวจสอบข้อมูลสำเร็จ! ดู Payload ได้ใน Console");
-
-
-            
-        }
     </script>
 }

@@ -14,6 +14,7 @@ namespace OnlyFriends.Models
         public ICollection<Event> CreatedEvents { get; } = new List<Event>();
         public List<Event> Events { get; } = [];
         public List<UserEvent> UserEvents { get; } = [];
-        }
+        public List<User> Friends { get; } = [];
+    }
 
 }

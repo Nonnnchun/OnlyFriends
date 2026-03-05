@@ -31,8 +31,8 @@ namespace OnlyFriends.Controllers
         {
             var identifier = request.Identifier ?? request.Email ?? string.Empty;
             var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u =>
-                (u.Email == identifier || u.Username == identifier) && u.Password == request.Password);
-            if (user == null)
+                u.Email == identifier || u.Username == identifier);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {
                 return Unauthorized();
             }

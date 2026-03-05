@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using OnlyFriends.Services;
 using OnlyFriends.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace OnlyFriends.Controllers
 {
@@ -102,7 +103,11 @@ namespace OnlyFriends.Controllers
       {
             try
             {
-                  var notis = await _service.GetNotificationAsync();
+                  var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                  if (!int.TryParse(userIdStr, out var userId))
+                        return Unauthorized();
+
+                  var notis = await _service.GetNotificationsForUserAsync(userId);
                   return Ok(notis);
             }
             catch (Exception ex)

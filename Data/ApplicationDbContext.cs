@@ -17,6 +17,7 @@ namespace OnlyFriends.Data
         public DbSet<UserEvent> UserEvents { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Friendship> Friendships { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Event>()
@@ -36,6 +37,21 @@ namespace OnlyFriends.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<Friendship>()
+                .HasKey(f => new { f.RequesterId, f.AddresseeId });
+
+            modelBuilder.Entity<Friendship>()
+                .HasOne(f => f.Requester)
+                .WithMany()
+                .HasForeignKey(f => f.RequesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Friendship>()
+                .HasOne(f => f.Addressee)
+                .WithMany()
+                .HasForeignKey(f => f.AddresseeId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
     }

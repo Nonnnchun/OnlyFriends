@@ -16,5 +16,7 @@ namespace OnlyFriends.Models.DTOS.UserDTOS
         // Add this to handle the uploaded file
         public IFormFile? ProfilePicture { get; set; }
         public string? ProfilePictureUrl { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
     }
 }

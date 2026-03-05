@@ -57,21 +57,12 @@ namespace OnlyFriends.Controllers.Api
             try
             {
                 await _userService.AddUserAsync(userToCreate);
-                ViewBag.RegisterSuccess = true;
-                return View("Register", new CreateUserDTO
-                {
-                    Username = string.Empty,
-                    FirstName = string.Empty,
-                    LastName = string.Empty,
-                    Email = string.Empty,
-                    Password = string.Empty,
-                    Bio = string.Empty
-                });
-            }
-            catch (UniqueConstraintException)
+                return RedirectToAction("Index", "Login");
+            } 
+            catch (UniqueConstraintException ex)
             {
-                // เผื่อกรณี race condition กับ unique index ในฐานข้อมูล
-                ModelState.AddModelError(string.Empty, "ข้อมูลผู้ใช้ซ้ำในระบบ กรุณาลองใหม่อีกครั้ง");
+                var property = ex.ConstraintProperties.FirstOrDefault() ?? string.Empty;
+                ModelState.AddModelError(property, $"{property} is already taken.");
                 return View("Register", userToCreate);
             }
         }

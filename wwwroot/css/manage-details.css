@@ -1515,6 +1515,25 @@ footer a:hover { color: white; }
       font-size: 13px; color: #fff; font-weight: 600; cursor: pointer;
     }
 
+    /* ── LAYOUT CHAIN: pass flex sizing through _Layout.cshtml wrappers ── */
+    .app-shell {
+      flex: 1;
+      min-height: 0;
+    }
+    .app-shell > .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      max-width: 100%;
+    }
+    .app-shell > .container > main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
     /* ── LAYOUT ── */
     .app-body {
       display: flex;
@@ -1829,12 +1848,12 @@ footer a:hover { color: white; }
       margin-bottom: 16px;
     }
     .stat-card {
-      background: var(--surface2); border: 1px solid var(--border);
+      background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius-md); padding: 14px 16px;
     }
     .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
     .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-    .stat-card.highlight { background: var(--surface2); border: 1px solid var(--border); }
+    .stat-card.highlight { background: var(--surface); border: 1px solid var(--border); }
     .stat-card.highlight .stat-value { color: var(--accent); }
 
     /* registrant list */

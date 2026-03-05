@@ -36,20 +36,64 @@ document.addEventListener('DOMContentLoaded', () => {
     await fetch(`/api/notifications/${id}`, { method: 'DELETE', credentials: 'include' });
     document.dispatchEvent(new CustomEvent('notifications:changed'));
   }
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function updateBadge(count) {
+    const badge = document.getElementById('notifCount');
+    if (!badge) return;
+    if (count > 0) {
+      badge.textContent = count > 9 ? '9+' : String(count);
+      badge.style.display = 'inline-block';
+    } else {
+      badge.textContent = '0';
+      badge.style.display = 'none';
+    }
+  }
+
+  function removeNotifCard(notifId) {
+    const li = document.querySelector(`#notifList li[data-id="${notifId}"]`);
+    if (li) li.remove();
+    const remaining = document.querySelectorAll('#notifList li').length;
+    const empty = document.getElementById('notifEmpty');
+    if (remaining === 0 && empty) empty.style.display = '';
+    updateBadge(remaining);
+  }
+
+  async function acceptFriendRequest(fromUserId, notifId) {
+    const res = await fetch(`/user/friends/${fromUserId}/accept`, { method: 'PATCH', credentials: 'include' });
+    if (res.ok) removeNotifCard(notifId);
+    else alert('Could not accept friend request.');
+  }
+
+  async function declineFriendRequest(fromUserId, notifId) {
+    const res = await fetch(`/user/friends/${fromUserId}`, { method: 'DELETE', credentials: 'include' });
+    if (res.ok) removeNotifCard(notifId);
+    else alert('Could not decline friend request.');
+  }
+
+  // Expose accept/decline globally so inline onclick attributes can call them
+  window.acceptFriendRequest = acceptFriendRequest;
+  window.declineFriendRequest = declineFriendRequest;
+
   function populateBell(result) {
     const unauthorized = !!result?.unauthorized;
     const items = result?.items || [];
     const count = unauthorized ? 0 : (Array.isArray(items) ? items.length : 0);
-    const countEl = document.getElementById('notifCount');
-    if (countEl) countEl.textContent = String(count);
     const list = document.getElementById('notifList');
     const empty = document.getElementById('notifEmpty');
     if (!list) return;
     list.innerHTML = '';
+    updateBadge(count);
     if (unauthorized) {
       if (empty) empty.style.display = 'none';
       const li = document.createElement('li');
-      li.className = 'p-3';
+      li.className = 'notif-item';
       const a = document.createElement('a');
       a.href = '/login';
       a.textContent = 'กรุณาเข้าสู่ระบบเพื่อดูการแจ้งเตือน';
@@ -63,10 +107,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (empty) empty.style.display = 'none';
     items.slice(0, 10).forEach(n => {
-      const name = n.name || n.Name;
       const li = document.createElement('li');
-      li.className = 'notif-item p-3 border-bottom';
-      li.textContent = name;
+      li.className = 'notif-item';
+      li.dataset.id = n.id;
+
+      if (n.type === 'FriendRequest') {
+        li.innerHTML = `
+          <div class="notif-msg">👤 ${escapeHtml(n.message)}</div>
+          <div class="notif-actions">
+            <button class="notif-btn notif-btn-accept" onclick="acceptFriendRequest(${n.fromUserId}, ${n.id})">Accept</button>
+            <button class="notif-btn notif-btn-decline" onclick="declineFriendRequest(${n.fromUserId}, ${n.id})">Decline</button>
+          </div>`;
+      } else {
+        li.innerHTML = `<div class="notif-msg">🔔 ${escapeHtml(n.message || n.name)}</div>`;
+      }
       list.appendChild(li);
     });
   }
@@ -124,44 +178,50 @@ updateNavClock();
 
 //----------------------------------------------------------------------------------------
 
+function closeAllMenus() {
+  document.getElementById("filterMenu")?.classList.remove("show");
+  document.getElementById("profileMenu")?.classList.remove("show");
+  document.getElementById("notifMenu")?.classList.remove("show");
+  document.getElementById("notifBell")?.setAttribute("aria-expanded", "false");
+}
+
 // เปิด-ปิด เมนูตัวกรอง
 function toggleFilter() {
-    document.getElementById("filterMenu").classList.toggle("show");
-    // ปิดเมนูโปรไฟล์ถ้าเปิดอยู่
-    document.getElementById("profileMenu").classList.remove("show"); 
-    var bell = document.getElementById("notifMenu");
-    if (bell) bell.classList.remove("show");
+  const filterMenu = document.getElementById("filterMenu");
+  const next = !filterMenu?.classList.contains("show");
+  closeAllMenus();
+  if (next) filterMenu?.classList.add("show");
 }
 
 // เปิด-ปิด เมนูโปรไฟล์
 function toggleProfile() {
-    document.getElementById("profileMenu").classList.toggle("show");
-    // ปิดเมนูตัวกรองถ้าเปิดอยู่
-    document.getElementById("filterMenu").classList.remove("show");
-    var bell = document.getElementById("notifMenu");
-    if (bell) bell.classList.remove("show");
+  const profileMenu = document.getElementById("profileMenu");
+  const next = !profileMenu?.classList.contains("show");
+  closeAllMenus();
+  if (next) profileMenu?.classList.add("show");
+}
+
+// เปิด-ปิด เมนูแจ้งเตือน
+function toggleNotifMenu(event) {
+  event?.stopPropagation();
+  const notifMenu = document.getElementById("notifMenu");
+  const bell = document.getElementById("notifBell");
+  const next = !notifMenu?.classList.contains("show");
+  closeAllMenus();
+  if (next) {
+    notifMenu?.classList.add("show");
+    bell?.setAttribute("aria-expanded", "true");
+  }
 }
 
 function applyFilter() {
-    alert("กำลังกรองข้อมูล...");
-    document.getElementById("filterMenu").classList.remove("show");
+  alert("กำลังกรองข้อมูล...");
+  document.getElementById("filterMenu")?.classList.remove("show");
 }
 
 // ถ้าคลิกพื้นที่ว่างๆ นอกเมนู ให้ปิด Dropdown ทั้งหมด
-window.onclick = function(event) {
-    if (!event.target.closest('.dropdown')) {
-        document.getElementById("filterMenu").classList.remove("show");
-        document.getElementById("profileMenu").classList.remove("show");
-        var bell = document.getElementById("notifMenu");
-        if (bell) bell.classList.remove("show");
-    }
-}
-
-// เปิด-ปิด กระดิ่งแจ้งเตือน
-function toggleBell() {
-    var menu = document.getElementById("notifMenu");
-    if (!menu) return;
-    menu.classList.toggle("show");
-    document.getElementById("filterMenu").classList.remove("show");
-    document.getElementById("profileMenu").classList.remove("show");
-}
+window.addEventListener("click", function (event) {
+  if (!event.target.closest(".dropdown")) {
+    closeAllMenus();
+  }
+});
