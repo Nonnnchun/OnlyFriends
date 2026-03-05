@@ -8,15 +8,15 @@
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/manage-details.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/invite-modal.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/add-host-modal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/manage-details.css"  />
+    <link rel="stylesheet" href="~/css/invite-modal.css"  />
+    <link rel="stylesheet" href="~/css/add-host-modal.css"  />
 }
 
     @section Scripts {
-      <script src="~/js/manage-details.js" asp-append-version="true"></script>
-      <script src="~/js/invite-modal.js" asp-append-version="true"></script>
-      <script src="~/js/add-host-modal.js" asp-append-version="true"></script>
+      <script src="~/js/manage-details.js" ></script>
+      <script src="~/js/invite-modal.js" ></script>
+      <script src="~/js/add-host-modal.js" ></script>
 }
   @Html.AntiForgeryToken()
   @await Html.PartialAsync("_InviteModal", Model)
@@ -364,6 +364,7 @@
                                 var userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);
                                 var statusText = userEvent?.RequestStatus.ToString() ?? "Pending";
                                 <div class="registrant-item"
+                                     data-user-id="@reg.Id"
                                      data-name="@reg.FirstName @reg.LastName"
                                      data-email="@reg.Email"
                                      data-status="@statusText">
@@ -413,8 +414,7 @@
                   </div>
                   </div>
               </div>
-          </div>
-  
+
       </main>
   
       @* ══ EDIT PANEL ══ *@
@@ -469,12 +469,6 @@
                              value="@Model.EndAt?.ToString("HH:mm")"
                              oninput="previewTime()" />
                   </div>
-              </div>
-  
-              <div class="form-group">
-                   <label class="form-label">DEADLINE</label>
-                  <input class="form-input" type="datetime-local" id="inputDeadline"
-                         value="@(Model.EndAt.HasValue ? Model.EndAt.Value.ToString("yyyy-MM-ddTHH:mm") : "")" />
               </div>
   
               <hr class="divider">

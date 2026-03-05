@@ -8,12 +8,11 @@ namespace OnlyFriends.Controllers
     {
         public IActionResult Heropage()
         {
-            // Check if the user is already logged in
-            if (User != null && User.Identity.IsAuthenticated)
+            if (User?.Identity?.IsAuthenticated ?? false)
             {
-                // Redirect to their dashboard or home page
                 return RedirectToAction("Homepage", "Home");
             }
+
             return View();
         }
     }

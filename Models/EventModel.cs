@@ -53,5 +53,4 @@ namespace OnlyFriends.Models
         public required int CategoryId { get; set; } // Required foreign key property
         public required Category Category { get; set; } // Required reference navigation to principal 
     }
-
 }

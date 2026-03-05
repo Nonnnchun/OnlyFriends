@@ -1,4 +1,4 @@
-﻿@using OnlyFriends.Models
+@using OnlyFriends.Models
 @using OnlyFriends.Models.DTOS.EventDTOS
 @using OnlyFriends.Models.ViewModels
 @model HomepageViewModel
@@ -6,6 +6,7 @@
 @{
     ViewData["Title"] = "หน้าแรก";
     IEnumerable<GetEventDTO> eventsToRender = Model.ActiveTab == "my" ? Model.JoinedEvents : Model.AllEvents;
+    bool hasAnyEvents = (Model?.AllEvents?.Any() ?? false) || (Model?.JoinedEvents?.Any() ?? false);
     string lastDate = string.Empty;
 }
 
@@ -14,102 +15,117 @@
     <div class="page-header">
         <div class="page-title">กิจกรรม</div>
         <div class="header-actions">
-            <button type="button" class="btn-add" onclick="window.location.href='@Url.Action("Create", "Event")'">
-                Create Activity
-            </button>
+            <a asp-controller="Home" asp-action="CreateActivity" class="btn-add">Create Activity</a>
         </div>
     </div>
 
-    <div class="event-tabs">
-        <a asp-action="Homepage"
-           asp-controller="Home"
-           asp-route-tab="all"
-           class="event-tab all-tab @(Model.ActiveTab == "all" ? "active" : "")"
-           aria-current="@(Model.ActiveTab == "all" ? "page" : null)">
-            Event ทั้งหมด
-        </a>
-        <a asp-action="Homepage"
-           asp-controller="Home"
-           asp-route-tab="my"
-           class="event-tab my-tab @(Model.ActiveTab == "my" ? "active" : "")"
-           aria-current="@(Model.ActiveTab == "my" ? "page" : null)">
-            Event ที่สมัครแล้ว
-        </a>
-    </div>
+    @if (hasAnyEvents)
+    {
+        <div class="event-tabs">
+            <a asp-action="Homepage"
+                asp-controller="Home"
+                asp-route-tab="all"
+                class="event-tab all-tab @(Model.ActiveTab == "all" ? "active" : "")"
+                aria-current="@(Model.ActiveTab == "all" ? "page" : null)">
+                Event ทั้งหมด
+            </a>
+            <a asp-action="Homepage"
+                asp-controller="Home"
+                asp-route-tab="my"
+                class="event-tab my-tab @(Model.ActiveTab == "my" ? "active" : "")"
+                aria-current="@(Model.ActiveTab == "my" ? "page" : null)">
+                Event ที่สมัครแล้ว
+            </a>
+        </div>
 
-    <div class="home-main-content">
-        @if (eventsToRender.Any())
-        {
-            @foreach (var item in eventsToRender)
+        <div class="home-main-content">
+            @if (eventsToRender.Any())
             {
-                var eventDate = item.StartAt ?? DateTime.Now;
-                string currentDateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("th-TH"));
-                var participantCount = item.UserEvents?.Count(ue => ue.RequestStatus != EnumRequestStatus.Rejected) ?? 0;
-                var avatars = (item.Users ?? [])
-                    .Where(u => !string.IsNullOrWhiteSpace(u.ProfilePictureUrl))
-                    .Take(3)
-                    .ToList();
-
-                if (currentDateText != lastDate)
+                @foreach (var item in eventsToRender)
                 {
-                    <div class="timeline-date">@currentDateText</div>
-                    lastDate = currentDateText;
-                }
-                <a asp-action="EventDetails" asp-controller="Event" asp-route-id=@item.Id class="card-link text-decoration-none">
-                    <div class="event-card">
-                        <div class="event-info">
-                            @* 2. แสดงเวลาเริ่มกิจกรรม *@
-                            <div class="event-time">@eventDate.ToString("HH:mm")</div>
+                    var eventDate = item.StartAt ?? DateTime.Now;
+                    string currentDateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("th-TH"));
+                    var participantCount = item.UserEvents?.Count(ue => ue.RequestStatus != EnumRequestStatus.Rejected) ?? 0;
+                    var avatars = (item.Users ?? new List<User>())
+                        .Where(u => !string.IsNullOrWhiteSpace(u.ProfilePictureUrl))
+                        .Take(3)
+                        .ToList();
 
-                            <div class="event-title">@item.Title</div>
-
-                            <div class="event-organizer">
-                                👤 โดย @(item.Owner?.Username ?? "ไม่ระบุ")
-                            </div>
-
-                            <div class="event-location">📍 @item.Location</div>
-
-                            <div class="event-tags">
-                                @if (item.EventStatus == EnumEventStatus.Open)
-                                {
-                                    <span class="tag-status">เปิดรับสมัคร</span>
-                                }
-                                else
-                                {
-                                    <span class="tag-status closed">ปิดรับสมัคร</span>
-                                }
-
-                                <span class="tag-count">
-                                    @if (avatars.Any())
+                    if (currentDateText != lastDate)
+                    {
+                        <div class="timeline-date">@currentDateText</div>
+                        lastDate = currentDateText;
+                    }
+                    <a href="/event/view/@item.Id" class="card-link text-decoration-none">
+                        <div class="event-card">
+                            <div class="event-info">
+                                <div class="event-time">@eventDate.ToString("HH:mm")</div>
+                                <div class="event-title">@item.Title</div>
+                                <div class="event-organizer">
+                                    👤 โดย @(item.Owner?.Username ?? "ไม่ระบุ")
+                                </div>
+                                <div class="event-location">📍 @item.Location</div>
+                                <div class="event-tags">
+                                    @if (item.EventStatus == EnumEventStatus.Open)
                                     {
-                                        <div class="tag-avatars">
-                                            @foreach (var user in avatars)
-                                            {
-                                                <img class="tag-avatar" src="@user.ProfilePictureUrl" alt="@user.Username" loading="lazy" />
-                                            }
-                                        </div>
+                                        <span class="tag-status">เปิดรับสมัคร</span>
                                     }
-                                    +@participantCount
-                                </span>
+                                    else
+                                    {
+                                        <span class="tag-status closed">ปิดรับสมัคร</span>
+                                    }
+                                    <span class="tag-count">
+                                        @if (avatars.Any())
+                                        {
+                                            <div class="tag-avatars">
+                                                @foreach (var user in avatars)
+                                                {
+                                                    <img class="tag-avatar" src="@user.ProfilePictureUrl" alt="@user.Username" loading="lazy" />
+                                                }
+                                            </div>
+                                        }
+                                        +@participantCount
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="event-image">
+                                <img src="@(string.IsNullOrEmpty(item.PosterUrl) ? "https://placehold.co/140x140?text=No+Image" : item.PosterUrl)"
+                                    alt="@item.Title">
                             </div>
                         </div>
-
-                        <div class="event-image">
-                            <img src="@(string.IsNullOrEmpty(item.PosterUrl) ? "https://placehold.co/140x140?text=No+Image" : item.PosterUrl)"
-                                 alt="@item.Title">
-                        </div>
-                    </div>
-                </a>
+                    </a>
+                }
             }
-        }
-        else
-        {
-            <div class="empty-state">
-                @(Model.ActiveTab == "my"
-                    ? "คุณยังไม่ได้สมัครเข้าร่วมกิจกรรมใด"
-                    : "ไม่มีกิจกรรมในขณะนี้")
+            else
+            {
+                <div class="empty-state">
+                    @(Model.ActiveTab == "my"
+                        ? "คุณยังไม่ได้สมัครเข้าร่วมกิจกรรมใด"
+                        : "ไม่มีกิจกรรมในขณะนี้")
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <section class="events-empty-state">
+            <div class="events-empty-card">
+                <div class="events-empty-icon">
+                    <div class="events-empty-illustration">
+                        <span class="events-empty-emoji">🗓️</span>
+                    </div>
+                    <span class="events-empty-badge">0</span>
+                </div>
+                <h2 class="events-empty-title">ไม่มีเหตุการณ์ที่จะเกิดขึ้น</h2>
+                <p class="events-empty-sub">
+                    คุณไม่มีกิจกรรมที่ใกล้จะเกิดขึ้นเร็ว ๆ นี้ ทำไมไม่ลองจัดงานดูสักงานล่ะ?
+                </p>
+                <button type="button" class="of-btn of-btn-neutral events-empty-btn"
+                        onclick="window.location.href='@Url.Action("CreateActivity", "Home")'">
+                    + สร้างกิจกรรม
+                </button>
             </div>
-        }
-    </div>
+        </section>
+    }
 
 </div>

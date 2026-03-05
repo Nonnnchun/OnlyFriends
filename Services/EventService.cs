@@ -15,7 +15,12 @@ public interface IEventService
     Task<GetEventDTO?> FindEventByIdAsync(int id);
     Task<IEnumerable<GetEventDTO>> GetEventsAsync();
     Task AddUserToEvent(AddUserToEventDTO userEventToAdd);
-    Task AddParticipantManualAsync(AddUserToEventDTO userEventToAdd);
+    Task AcceptJoinRequest(int eventId, int userId);
+    Task CancelJoinEvent(int userId, int eventId);
+    Task ToggleRegistrationAsync(int eventId, bool isOpen);
+    Task UpdateVisibilityAsync(int eventId, bool isPublic);
+    Task UpdateParticipantStatusAsync(int eventId, int userId, EnumRequestStatus status);
+    Task SendEventInvitesAsync(int eventId, List<int> userIds);
 }
 public sealed class EventService : IEventService
 {
@@ -32,7 +37,7 @@ public sealed class EventService : IEventService
 
         // Get Category object
         activity.Category = await _context.Categories.FindAsync(activity.CategoryId)
-        ?? throw new KeyNotFoundException($"Category with ID {activity.CategoryId} does not exist!");
+        ?? throw new KeyNotFoundException($"Category with ID {activityToCreate.CategoryId} does not exist!");
 
         _context.Events.Add(activity);
         await _context.SaveChangesAsync();
@@ -47,12 +52,12 @@ public sealed class EventService : IEventService
 
     public async Task<GetEventDTO?> FindEventByIdAsync(int id)
     {
-        Event? activity = await _context.Events.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync();
-        if (activity == null)
-        {
-            return null;
-        }
-        return activity.Adapt<GetEventDTO>();
+        var result = await _context.Events
+                .Where(x => x.Id == id)
+                .AsNoTracking()
+                .ProjectToType<GetEventDTO>()
+                .FirstOrDefaultAsync();
+        return result;
     }
 
     public async Task<IEnumerable<GetEventDTO>> GetEventsAsync()
@@ -60,59 +65,7 @@ public sealed class EventService : IEventService
         IEnumerable<GetEventDTO> activitys = await _context.Events
             .AsNoTracking()
             .OrderByDescending(e => e.StartAt)
-            .Select(e => new GetEventDTO
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Info = e.Info,
-                Location = e.Location,
-                EventType = e.EventType,
-                EventStatus = e.EventStatus,
-                JointType = e.JointType,
-                Capacity = e.Capacity,
-                PosterUrl = e.PosterUrl,
-                StartAt = e.StartAt,
-                EndAt = e.EndAt,
-                TimeZone = e.TimeZone,
-                Latitude = e.Latitude,
-                Longitude = e.Longitude,
-                Users = e.UserEvents
-                    .Where(ue => ue.RequestStatus != EnumRequestStatus.Rejected)
-                    .Select(ue => new User
-                    {
-                        Id = ue.User.Id,
-                        Username = ue.User.Username,
-                        FirstName = ue.User.FirstName,
-                        LastName = ue.User.LastName,
-                        ProfilePictureUrl = ue.User.ProfilePictureUrl,
-                        Bio = ue.User.Bio,
-                        Email = ue.User.Email,
-                        Password = ue.User.Password
-                    }).ToList(),
-                UserEvents = e.UserEvents.Select(ue => new UserEvent
-                {
-                    UserId = ue.UserId,
-                    EventId = ue.EventId,
-                    RequestStatus = ue.RequestStatus
-                }).ToList(),
-                Owner = new Models.DTOS.UserDTOS.GetUserDTO
-                {
-                    Id = e.Owner.Id,
-                    Username = e.Owner.Username,
-                    FirstName = e.Owner.FirstName,
-                    LastName = e.Owner.LastName,
-                    ProfilePictureUrl = e.Owner.ProfilePictureUrl,
-                    Bio = e.Owner.Bio,
-                    Email = e.Owner.Email,
-                    Password = e.Owner.Password,
-                    Events = new List<Event>()
-                },
-                Category = new Models.DTOS.CategoryDTOS.GetCategoryDTO
-                {
-                    Id = e.Category.Id,
-                    CategoryName = e.Category.CategoryName
-                }
-            })
+            .ProjectToType<GetEventDTO>()
             .ToListAsync();
         return activitys;
     }
@@ -128,31 +81,97 @@ public sealed class EventService : IEventService
         await _context.SaveChangesAsync();
     }
 
-    // TODO:
     public async Task AddUserToEvent(AddUserToEventDTO userEventToAdd)
     {
-        //Event activity = _context.Events.Where(e => userEventToAdd.EventId == e.Id)
+        var status = userEventToAdd.RequestStatus ?? EnumRequestStatus.Pending;
+        var ue = await _context.UserEvents
+            .FirstOrDefaultAsync(x => x.EventId == userEventToAdd.EventId && x.UserId == userEventToAdd.UserId);
+
+        if (ue == null)
+        {
+            _context.UserEvents.Add(new UserEvent
+            {
+                EventId = userEventToAdd.EventId,
+                UserId = userEventToAdd.UserId,
+                RequestStatus = status
+            });
+        }
+        else
+        {
+            ue.RequestStatus = status;
+        }
+
+        await _context.SaveChangesAsync();
     }
 
-     public async Task AddParticipantManualAsync(AddUserToEventDTO userEventToAdd)
-     {
-     var ue = await _context.UserEvents
-     .FirstOrDefaultAsync(x => x.EventId == userEventToAdd.EventId && x.UserId == userEventToAdd.UserId);
-     
-     if (ue == null)
-     {
-     _context.UserEvents.Add(new UserEvent
-     {
-     EventId = userEventToAdd.EventId,
-     UserId = userEventToAdd.UserId,
-     RequestStatus = EnumRequestStatus.Pending
-     });
-     }
-     else
-     {
-     ue.RequestStatus = EnumRequestStatus.Pending;
-     }
-     
-     await _context.SaveChangesAsync();
-     }
+    public async Task AcceptJoinRequest(int eventId, int userId)
+    {
+        var ue = await _context.UserEvents
+            .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId)
+            ?? throw new KeyNotFoundException($"No pending request found for user {userId} in event {eventId}");
+
+        ue.RequestStatus = EnumRequestStatus.Accepted;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task CancelJoinEvent(int userId, int eventId)
+    {
+        var ue = await _context.UserEvents
+            .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId);
+
+        if (ue != null)
+        {
+            _context.UserEvents.Remove(ue);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task ToggleRegistrationAsync(int eventId, bool isOpen)
+    {
+        var ev = await _context.Events.FindAsync(eventId)
+            ?? throw new KeyNotFoundException($"Event {eventId} not found");
+        ev.EventStatus = isOpen ? EnumEventStatus.Open : EnumEventStatus.Closed;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateVisibilityAsync(int eventId, bool isPublic)
+    {
+        var ev = await _context.Events.FindAsync(eventId)
+            ?? throw new KeyNotFoundException($"Event {eventId} not found");
+        ev.JointType = isPublic ? EnumJointType.Public : EnumJointType.Private;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateParticipantStatusAsync(int eventId, int userId, EnumRequestStatus status)
+    {
+        var ue = await _context.UserEvents
+            .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId)
+            ?? throw new KeyNotFoundException($"No UserEvent found for user {userId} in event {eventId}");
+        ue.RequestStatus = status;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task SendEventInvitesAsync(int eventId, List<int> userIds)
+    {
+        foreach (var userId in userIds)
+        {
+            var ue = await _context.UserEvents
+                .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId);
+            if (ue == null)
+            {
+                _context.UserEvents.Add(new UserEvent
+                {
+                    EventId = eventId,
+                    UserId = userId,
+                    RequestStatus = EnumRequestStatus.Accepted
+                });
+            }
+            else
+            {
+                ue.RequestStatus = EnumRequestStatus.Accepted;
+            }
+        }
+        await _context.SaveChangesAsync();
+    }
+
 }

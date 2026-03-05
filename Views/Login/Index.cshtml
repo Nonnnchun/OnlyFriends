@@ -8,14 +8,30 @@
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="stylesheet" href="~/css/site.css">
+      <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <style>
+         .login-error-box {
+            color: #dc3545;
+            font-size: 0.85rem;
+            background: #fff5f5;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            border: 1px solid #f5c2c7;
+         }
+      </style>
    </head>
    <body>
       <header class="main-header">
-         <div class="logo">OnlyFriends</div>
-         <nav>
+         <nav class="landing-nav">
+            <div class="nav-left">
+               <a href="/" class="landing-brand nav-logo-hero">OnlyFriends</a>
+            </div>
+            <div class="nav-right">
                <a href="/Home/Homepage">Explore Events <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-               <a asp-controller="Register" asp-action="Index" class="sign-in-link">Sign In</a>
+               <a href="/Register" class="sign-in-link">Sign Up</a>
+            </div>
          </nav>
       </header>
 
@@ -27,25 +43,53 @@
                <h1>Welcome to OnlyFriends</h1>
                <p class="subtitle">Please sign in or sign up below.</p>
 
-               <form method="post" action="/Login/Index">
+               <form method="post" action="/login">
                   <div class="input-group">
                      <div class="label-row">
-                           <label for="email">Email</label>
-                           <a href="#" class="toggle-link"><i class="fa-solid fa-mobile-screen"></i> Use Phone Number</a>
+                           <label for="identifier">Email or Username</label>
                      </div>
-                     <input type="email" id="email" name="email" placeholder="you@email.com" required>
+                     <input type="text" id="identifier" name="identifier" placeholder="you@email.com or johndoe" required>
                   </div>
 
                   <div class="input-group">
                      <div class="label-row">
                            <label for="password">Password</label>
                      </div>
-                     <input type="password" id="password" name="password" placeholder="••••••••" required>
+                     <div class="input-wrap">
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                        <button type="button" class="toggle-eye" aria-label="toggle password" data-target="password">👁️</button>
+                     </div>
                   </div>
 
-                  <button type="submit" class="btn btn-primary">Continue with Email</button>
+                  @if (!ViewData.ModelState.IsValid)
+                  {
+                     <div class="login-error-box">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                           <div>@error.ErrorMessage</div>
+                        }
+                     </div>
+                  }
+
+                  <button type="submit" class="btn btn-primary">Login</button>
                </form>
+            <div class="small-text" style="margin-top:16px; color: var(--link-color);"></div>
+            Create your account?
+            <a href="/Register" style="color: var(--text-color); font-weight: 600; text-decoration: none;">Register</a>
+            </div>
          </div>
       </main>
+      <script>
+         document.addEventListener('click', function(e){
+            const btn = e.target.closest('.toggle-eye');
+            if(!btn) return;
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if(!input) return;
+            const isPwd = input.getAttribute('type') === 'password';
+            input.setAttribute('type', isPwd ? 'text' : 'password');
+            btn.textContent = isPwd ? '🙈' : '👁️';
+         });
+      </script>
    </body>
 </html>

@@ -41,12 +41,12 @@ public sealed class CategoryService : ICategoryService
 
     public async Task<GetCategoryDTO?> FindCategoryByIdAsync(int id)
     {
-        Category? category = await _context.Categories.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync();
-        if (category == null)
-        {
-            return null;
-        }
-        return category.Adapt<GetCategoryDTO>();
+        var result = await _context.Categories
+                .Where(x => x.Id == id)
+                .AsNoTracking()
+                .ProjectToType<GetCategoryDTO>()
+                .FirstOrDefaultAsync();
+        return result;
     }
 
     public async Task<IEnumerable<GetCategoryDTO>> GetCategoriesAsync()

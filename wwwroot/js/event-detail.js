@@ -1,54 +1,105 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const joinCard = document.querySelector('.ev-join-card');
     const btnJoin = document.getElementById('btnRequestJoin');
-    
-    if (btnJoin) {
-        btnJoin.addEventListener('click', async function () {
-            // ป้องกันการกดซ้ำ
-            if (btnJoin.disabled) return;
+    const btnCancel = document.getElementById('btnCancelJoin');
 
-            const originalText = btnJoin.innerText;
-            btnJoin.disabled = true;
-            btnJoin.innerText = 'Processing...';
+    const eventId = joinCard?.dataset?.eventId;
+    const initialJoined = joinCard?.dataset?.joined === 'true';
 
-            try {
-                // ตัวอย่างการส่ง Request ไปยัง Backend (เปลี่ยน URL ตามจริง)
-                // const response = await fetch('/Events/Join/' + eventId, { method: 'POST' });
-                
-                // จำลองการโหลด 1.5 วินาที
-                setTimeout(() => {
-                    btnJoin.innerText = 'Request Sent!';
-                    btnJoin.style.backgroundColor = '#10b981'; // Success Green
-                    
-                    // แสดง Notification (ควรทำ UI Modal เพิ่มเติม)
-                    console.log("Join request successful");
-                }, 1500);
+    // btnCancel is replaced by the hover behaviour on btnJoin
+    if (btnCancel) btnCancel.style.display = 'none';
 
-            } catch (error) {
-                console.error('Error joining event:', error);
-                btnJoin.disabled = false;
-                btnJoin.innerText = originalText;
-                alert('Something went wrong. Please try again.');
-            }
-        });
+    function setJoined(joined) {
+        if (!btnJoin) return;
+
+        btnJoin.disabled = false;
+        btnJoin.style.display = 'block';
+
+        if (joined) {
+            btnJoin.innerText = 'Joined';
+            btnJoin.classList.add('ev-btn-joined');
+            btnJoin.onmouseenter = () => { btnJoin.innerText = 'Cancel Request'; };
+            btnJoin.onmouseleave = () => { btnJoin.innerText = 'Joined'; };
+            btnJoin.onclick = handleCancel;
+        } else {
+            btnJoin.innerText = 'Request to Join';
+            btnJoin.classList.remove('ev-btn-joined');
+            btnJoin.onmouseenter = null;
+            btnJoin.onmouseleave = null;
+            btnJoin.onclick = handleJoin;
+        }
     }
 
-    // เปิดแผนที่เมื่อคลิกที่ชื่อสถานที่
+    function handleJoin() {
+        if (btnJoin.disabled) return;
+        btnJoin.disabled = true;
+        btnJoin.innerText = 'Processing...';
+
+        fetch(`/event/join/${eventId}`, { method: 'POST' })
+            .then(res => {
+                if (res.ok) {
+                    setJoined(true);
+                } else if (res.status === 401) {
+                    window.location.href = '/Login';
+                } else {
+                    alert('Failed to join. Please try again.');
+                    setJoined(false);
+                }
+            })
+            .catch(() => {
+                alert('Network error. Please try again.');
+                setJoined(false);
+            });
+    }
+
+    function handleCancel() {
+        if (btnJoin.disabled) return;
+        btnJoin.disabled = true;
+        btnJoin.innerText = 'Processing...';
+        btnJoin.onmouseenter = null;
+        btnJoin.onmouseleave = null;
+
+        fetch(`/event/join/${eventId}`, { method: 'DELETE' })
+            .then(res => {
+                if (res.ok) {
+                    setJoined(false);
+                } else if (res.status === 401) {
+                    window.location.href = '/Login';
+                } else {
+                    alert('Failed to cancel. Please try again.');
+                    setJoined(true);
+                }
+            })
+            .catch(() => {
+                alert('Network error. Please try again.');
+                setJoined(true);
+            });
+    }
+
+    if (btnJoin && eventId) {
+        setJoined(initialJoined);
+    }
+
     const locBox = document.querySelector('.ev-meta-item:last-child');
     if (locBox) {
         locBox.style.cursor = 'pointer';
         locBox.addEventListener('click', () => {
-            const locName = locBox.querySelector('.ev-strong').innerText.replace(' ↗', '');
+            const label = locBox.querySelector('.ev-strong')?.innerText || '';
+            const locName = label
+                .replace(/\u2197/g, '')
+                .replace(/\u00e2\u2020\u2014/g, '')
+                .trim();
+
             if (locName && locName !== 'No Location') {
                 window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locName)}`, '_blank');
             }
         });
     }
 
-    // ปรับความสูงของ Map iframe ให้เหมาะสมกับ Container (ถ้าต้องการ)
     const mapFrame = document.querySelector('.ev-map iframe');
     if (mapFrame) {
-        mapFrame.onload = function() {
-            console.log("Map loaded");
+        mapFrame.onload = function () {
+            console.log('Map loaded');
         };
     }
 });

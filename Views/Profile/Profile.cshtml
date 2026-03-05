@@ -1,50 +1,31 @@
 @model OnlyFriends.Models.DTOS.UserDTOS.GetUserDTO
+@using System.Security.Claims
 @{
     ViewData["Title"] = "Profile";
+    
+    // Fetching the joined events passed from the Controller's ViewBag
+    var joinedEvents = ViewBag.JoinedEvents as List<OnlyFriends.Models.Event> ?? new List<OnlyFriends.Models.Event>();
+    
+    // Stats logic
+    var hostedCount = Model.CreatedEvents?.Count ?? 0;
+    var attendedCount = joinedEvents.Count;
     //now using User id 1 info and mock event
     var username = Model.Username;
     var firstName = Model.FirstName;
     var lastName = Model.LastName;
     var bio = Model.Bio;
 
+    var currentUserId = (int)(ViewData["CurrentUserId"] ?? 0);
+    var isOwnProfile = currentUserId != 0 && currentUserId == Model.Id;
+    var avatarUrl = string.IsNullOrEmpty(Model.ProfilePictureUrl)
+        ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(username)}&background=e8e0f7&color=5b4a8f&size=128&bold=true"
+        : Model.ProfilePictureUrl;
+
     var joinedDate = "February 2026";
     var hosted = 0;
     var attended = 3;
     bool hasEvents = true;
 
-    var mockEvents = new[]
-    {
-        new {
-            Title = "Late Night Board Game Bash",
-            Description = "Bring your favorite board games! Snacks provided. All skill levels welcome.",
-            Date = "Saturday, March 8, 2026",
-            Time = "8:00 PM",
-            Location = "DemonineZ's Place, Bangkok",
-            Attendees = 5,
-            Tag = "Social",
-            Image = "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=800&q=80"
-        },
-        new {
-            Title = "Indie Film Night 🎬",
-            Description = "We're watching two indie films back-to-back. Discussion session after each one.",
-            Date = "Friday, March 14, 2026",
-            Time = "7:30 PM",
-            Location = "The Projector Lounge",
-            Attendees = 12,
-            Tag = "Culture",
-            Image = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80"
-        },
-        new {
-            Title = "Morning Hike at Khao Yai",
-            Description = "Easy 5km trail, great views. Carpool leaving from BTS Mo Chit at 6am.",
-            Date = "Sunday, March 22, 2026",
-            Time = "6:00 AM",
-            Location = "Khao Yai National Park",
-            Attendees = 8,
-            Tag = "Outdoor",
-            Image = "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&q=80"
-        }
-    };
 }
 
 <style>
@@ -54,6 +35,7 @@
         padding: 0 20px;
     }
 
+    /* Header Section */
     .profile-header {
         display: flex;
         align-items: center;
@@ -72,6 +54,13 @@
         justify-content: center;
         font-size: 50px;
         flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .profile-info {
@@ -107,6 +96,24 @@
         font-size: 0.9rem;
         display: flex;
         gap: 20px;
+        margin-top: 10px;
+    }
+
+    /* Section Titles */
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 40px 0 20px;
+        color: #1a1a1a;
+        padding-left: 12px;
+        border-left: 4px solid #f5deb0;
+    }
+
+    /* Event Cards */
+    .event-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
     }
 
     .nothing-box {
@@ -128,12 +135,11 @@
     .event-card {
         border-radius: 12px;
         border: 1px solid #eee;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         overflow: hidden;
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
         display: flex;
-        flex-direction: row;
+        background: #fff;
+        transition: transform 0.2s;
     }
 
     .event-card:hover {
@@ -151,7 +157,6 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        display: block;
     }
 
     .event-card-body {
@@ -164,8 +169,8 @@
 
     .event-card-header {
         display: flex;
-        align-items: flex-start;
         justify-content: space-between;
+        align-items: flex-start;
         gap: 12px;
         flex-wrap: wrap;
         margin-bottom: 8px;
@@ -174,7 +179,38 @@
     .event-card h4 {
         margin: 0;
         font-size: 1.1rem;
-        color: #1a1a1a;
+        color: #333;
+    }
+
+    .event-tag {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background: #f0f4ff;
+        color: #4a6cf7;
+        font-weight: 600;
+    }
+
+    .event-desc {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 8px 0;
+    }
+
+    .event-meta {
+        font-size: 0.85rem;
+        color: #999;
+        display: flex;
+        gap: 15px;
+    }
+
+    .nothing-box {
+        text-align: center;
+        padding: 30px;
+        background: #fafafa;
+        border-radius: 12px;
+        color: #888;
+        font-style: italic;
     }
 
     .event-card p {
@@ -210,6 +246,22 @@
         margin-top: 2px;
     }
 
+    .btn-add-friend {
+        margin-top: 12px;
+        padding: 8px 20px;
+        background: #333;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-add-friend:hover { background: #000; }
+    .btn-add-friend:disabled { background: #aaa; cursor: default; }
+
     @@media (max-width: 600px) {
         .profile-header {
             flex-direction: column;
@@ -237,77 +289,125 @@
 
 <div class="profile-container">
 
-    <!-- Profile Header -->
     <div class="profile-header">
-
-        <!-- Avatar -->
         <div class="profile-avatar">
-            @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
-            {
-                <img src="@Model.ProfilePictureUrl" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
-            }
-            else
-            {
-                <span>😊</span>
-            }
+            <img src="@avatarUrl" alt="@username" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
         </div>
 
-        <!-- Info -->
         <div class="profile-info">
-            <h2>@(firstName + " " + lastName)</h2>
-            <p class="profile-handle">@@@username</p>
-
-            @if (!string.IsNullOrEmpty(bio))
+            <h2>@Model.FirstName @Model.LastName</h2>
+            <p class="profile-handle">@@@Model.Username</p>
+            
+            @if (!string.IsNullOrEmpty(Model.Bio))
             {
-                <p class="profile-bio">@bio</p>
+                <p class="profile-bio">@Model.Bio</p>
             }
-
-            <p class="profile-joined">
-                <i class="bi bi-calendar"></i> Joined @joinedDate
-            </p>
 
             <div class="profile-stats">
-                <span><strong>@hosted</strong> Hosted</span>
-                <span><strong>@attended</strong> Attended</span>
+                <span><strong>@hostedCount</strong> Hosted</span>
+                <span><strong>@attendedCount</strong> Attended</span>
             </div>
-        </div>
 
+            @if (!isOwnProfile && currentUserId != 0)
+            {
+                var friendStatus = ViewData["FriendshipStatus"] as string ?? "None";
+                var friendRequesterId = ViewData["FriendshipRequesterId"] as int?;
+                if (friendStatus == "Accepted")
+                {
+                    <button class="btn-add-friend" disabled>Friends ✓</button>
+                }
+                else if (friendStatus == "Pending" && friendRequesterId == currentUserId)
+                {
+                    <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id" disabled>
+                        Request Sent
+                    </button>
+                }
+                else if (friendStatus == "Pending" && friendRequesterId == Model.Id)
+                {
+                    <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id" data-action="accept">
+                        Accept Request
+                    </button>
+                }
+                else
+                {
+                    <button id="btnAddFriend" class="btn-add-friend" data-user-id="@Model.Id">
+                        Add Friend
+                    </button>
+                }
+            }
+        </div>
     </div>
 
-    <hr style="margin: 40px auto; max-width: 700px;">
+    <hr style="margin: 40px auto; border: 0; border-top: 1px solid #eee;">
 
-    <!-- Events -->
-    @if (hasEvents)
+    <h3 class="section-title">@Model.FirstName's Hosted Events</h3>
+    
+    @if (Model.CreatedEvents != null && Model.CreatedEvents.Any())
     {
         <div class="event-list">
-            @foreach (var evt in mockEvents)
+            @foreach (var evt in Model.CreatedEvents)
             {
+                <a href="/event/view/@evt.Id" class="card-link" style="text-decoration:none;color:inherit;">
                 <div class="event-card">
                     <div class="event-card-image">
-                        <img src="@evt.Image" alt="@evt.Title" />
+                        <img src="@(evt.PosterUrl ?? "https://via.placeholder.com/200x140?text=No+Poster")" alt="Event Poster" />
                     </div>
                     <div class="event-card-body">
-                        <div>
-                            <div class="event-card-header">
-                                <h4>@evt.Title</h4>
-                                <span class="event-tag">@evt.Tag</span>
-                            </div>
-                            <p>@evt.Description</p>
+                        <div class="event-card-header">
+                            <h4>@evt.Title</h4>
+                            <span class="event-tag">@evt.EventType</span>
                         </div>
+                        <p class="event-desc">@evt.Info</p>
                         <div class="event-meta">
-                            <span><i class="bi bi-calendar-event"></i> @evt.Date</span>
-                            <span><i class="bi bi-clock"></i> @evt.Time</span>
-                            <span><i class="bi bi-geo-alt"></i> @evt.Location</span>
-                            <span><i class="bi bi-people"></i> @evt.Attendees attending</span>
+                            <span>📅 @(evt.StartAt?.ToString("dd MMM yyyy") ?? "TBA")</span>
+                            <span>📍 @evt.Location</span>
+                            <span>👥 Capacity: @evt.Capacity</span>
                         </div>
                     </div>
                 </div>
+                </a>
             }
         </div>
     }
     else
     {
         <div class="nothing-box">
+            No events hosted yet.
+        </div>
+    }
+
+    <h3 class="section-title">Events @Model.FirstName Joined</h3>
+
+    @if (joinedEvents.Any())
+    {
+        <div class="event-list">
+            @foreach (var evt in joinedEvents)
+            {
+                <a href="/event/view/@evt.Id" class="card-link" style="text-decoration:none;color:inherit;">
+                <div class="event-card" style="border-left: 4px solid #4a6cf7;">
+                    <div class="event-card-image">
+                        <img src="@(evt.PosterUrl ?? "https://via.placeholder.com/200x140?text=Joined+Event")" alt="Event Poster" />
+                    </div>
+                    <div class="event-card-body">
+                        <div class="event-card-header">
+                            <h4>@evt.Title</h4>
+                            <span class="event-tag" style="background: #e7f0ff;">Attending</span>
+                        </div>
+                        <p class="event-desc">@evt.Info</p>
+                        <div class="event-meta">
+                            <span>📅 @(evt.StartAt?.ToString("dd MMM yyyy") ?? "TBA")</span>
+                            <span>📍 @evt.Location</span>
+                        </div>
+                    </div>
+                </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="nothing-box">
+            Hasn't joined any events yet.
             <img src="https://cdn-icons-png.flaticon.com/512/7486/7486830.png" />
             <h4>Nothing Here, Yet</h4>
             <p>@username has no public events at this time.</p>
@@ -315,3 +415,41 @@
     }
 
 </div>
+
+@section Scripts {
+<script>
+    const btn = document.getElementById('btnAddFriend');
+    if (btn) {
+        btn.addEventListener('click', async function () {
+            const targetId = btn.dataset.userId;
+            const action = btn.dataset.action;
+            btn.disabled = true;
+            btn.innerText = action === 'accept' ? 'Accepting...' : 'Sending...';
+
+            try {
+                let res;
+                if (action === 'accept') {
+                    res = await fetch(`/user/friends/${targetId}/accept`, { method: 'PATCH' });
+                } else {
+                    res = await fetch(`/user/friends/${targetId}`, { method: 'POST' });
+                }
+
+                if (res.ok) {
+                    btn.innerText = action === 'accept' ? 'Friends ✓' : 'Request Sent';
+                    btn.disabled = true;
+                } else if (res.status === 401) {
+                    window.location.href = '/Login';
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = action === 'accept' ? 'Accept Request' : 'Add Friend';
+                    alert('Something went wrong. Please try again.');
+                }
+            } catch {
+                btn.disabled = false;
+                btn.innerText = action === 'accept' ? 'Accept Request' : 'Add Friend';
+                alert('Network error. Please try again.');
+            }
+        });
+    }
+</script>
+}

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Cryptography;
+using System.Security.Claims;
 using Mapster;
 using EntityFramework.Exceptions.PostgreSQL; // For the .UseExceptionProcessor() method
 
@@ -49,7 +50,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = issuer,
             ValidAudience = audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            NameClaimType = ClaimTypes.Name,
+            RoleClaimType = ClaimTypes.Role
         };
         options.Events = new JwtBearerEvents
         {
@@ -73,25 +76,22 @@ builder.Services.AddAuthorization(options =>
 // Create app
 var app = builder.Build();
 
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // <--- Add this back!
 app.UseRouting();
-
-app.MapStaticAssets();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Hero}/{action=Heropage}/{id?}")
     .WithStaticAssets();
+
+app.MapStaticAssets();
 
 app.Run();

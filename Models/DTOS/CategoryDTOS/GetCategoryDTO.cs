@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace OnlyFriends.Models.DTOS.CategoryDTOS
 {
-    public class GetCategoryDTO
-    {
-        public int Id { get; set; }
-        public required string CategoryName { get; set; }
+   public class GetCategoryDTO
+   {
+      public int Id { get; set; }
+      public required string CategoryName { get; set; }
 
-    }
+   }
 }
