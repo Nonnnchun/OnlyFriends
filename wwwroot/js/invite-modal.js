@@ -123,9 +123,11 @@ function goToStep1() {
 // ── Send Invites (Ajax → ASP.NET Core) ──
 function sendInvites() {
     const selected = [...document.querySelectorAll('#inviteStep1 .guest-item.selected')]
-        .map(el => el.dataset.id);
+        .map(el => el.dataset.id)
+        .filter(id => !String(id).startsWith('email-'))
+        .map(id => parseInt(id, 10));
     const message = document.getElementById('customMessage')?.value || '';
-    const eventId = document.getElementById('editPanel')?.dataset.eventId;
+    const eventId = parseInt(document.getElementById('editPanel')?.dataset.eventId, 10);
 
     fetch('/Event/SendInvites', {
         method: 'POST',
