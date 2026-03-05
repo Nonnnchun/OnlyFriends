@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 // using Microsoft.AspNetCore.Components;
@@ -26,6 +27,7 @@ namespace OnlyFriends.ApiControllers
             _logger = logger;
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> AddEventAsync(CreateEventDTO activityToCreate)
         {
@@ -50,6 +52,7 @@ namespace OnlyFriends.ApiControllers
         //     return Json(new { success = true });
         // }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEventAsync(int id, UpdateEventDTO activityToUpdate)
         {
@@ -74,12 +77,13 @@ namespace OnlyFriends.ApiControllers
             }
         }
 
+         [Authorize]
          [HttpPost("{eventId}/join")]
          public async Task<IActionResult> JoinNow(int eventId, [FromBody] int userId)
          {
              try
              {
-                await _activityService.AddParticipantManualAsync(new AddUserToEventDTO { EventId = eventId, UserId = userId }); 
+                await _activityService.AddUserToEvent(new AddUserToEventDTO { EventId = eventId, UserId = userId });
                 return Ok(new { message = "Accepted immediately" });
              }
                 catch (Exception ex)
@@ -123,6 +127,7 @@ namespace OnlyFriends.ApiControllers
             }
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {

@@ -15,6 +15,7 @@ public interface IUserService
     Task<IEnumerable<GetUserDTO>> GetUsersAsync();
     Task SendFriendRequestAsync(int requesterId, int addresseeId);
     Task RemoveFriendAsync(int userId, int friendId);
+    Task<bool> AcceptFriendRequestAsync(int requesterId, int addresseeId);
 }
 
 public sealed class UserService : IUserService
@@ -29,6 +30,7 @@ public sealed class UserService : IUserService
     public async Task<GetUserDTO> AddUserAsync(CreateUserDTO userToCreate)
     {
         User user = userToCreate.Adapt<User>();
+        user.Password = BCrypt.Net.BCrypt.HashPassword(userToCreate.Password);
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         return user.Adapt<GetUserDTO>();
@@ -73,6 +75,12 @@ public sealed class UserService : IUserService
         // 2. Map the basic text fields (FirstName, LastName, Bio, Username)
         userToUpdate.Adapt(user);
 
+        // Hash the new password if one was provided
+        if (!string.IsNullOrEmpty(userToUpdate.Password))
+        {
+            user.Password = BCrypt.Net.BCrypt.HashPassword(userToUpdate.Password);
+        }
+
         // 3. Manually handle the Profile Picture URL
         // We only update the database if a new URL was actually generated in the controller
         if (!string.IsNullOrEmpty(userToUpdate.ProfilePictureUrl))
@@ -100,6 +108,21 @@ public sealed class UserService : IUserService
             Status = FriendshipStatus.Pending
         });
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> AcceptFriendRequestAsync(int requesterId, int addresseeId)
+    {
+        var friendship = await _context.Friendships
+            .FirstOrDefaultAsync(f =>
+                f.RequesterId == requesterId &&
+                f.AddresseeId == addresseeId &&
+                f.Status == FriendshipStatus.Pending);
+
+        if (friendship == null) return false;
+
+        friendship.Status = FriendshipStatus.Accepted;
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public async Task RemoveFriendAsync(int userId, int friendId)

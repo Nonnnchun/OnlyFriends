@@ -53,8 +53,7 @@ namespace OnlyFriends.Controllers
                 LastName = user.LastName,
                 Bio = user.Bio,
                 ProfilePictureUrl = user.ProfilePictureUrl,
-                Email = user.Email ?? "", 
-                Password = "" 
+                Email = user.Email ?? ""
             };
 
             // Fetch Events owned by this user

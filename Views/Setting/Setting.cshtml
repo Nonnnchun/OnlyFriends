@@ -153,20 +153,6 @@
         background: #333;
     }
 
-    .danger-btn {
-        background: #fff;
-        color: #e53935;
-        border: 1px solid #e53935;
-        padding: 10px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-    }
-
-    .danger-btn:hover {
-        background: #fff5f5;
-    }
-
     .item-box {
         background: #f9f9f9;
         border-radius: 10px;
@@ -251,20 +237,41 @@
 
     <div class="section-title">Account Security</div>
     <div class="section-box">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <div style="font-weight: 600;">Password</div>
-                <div style="font-size: 13px; color: #777;">Last changed 3 months ago</div>
+        @if (TempData["PasswordError"] != null)
+        {
+            <div style="color: #e53935; font-size: 13px; margin-bottom: 12px;">@TempData["PasswordError"]</div>
+        }
+        @if (TempData["PasswordSuccess"] != null)
+        {
+            <div style="color: #2e7d32; font-size: 13px; margin-bottom: 12px;">@TempData["PasswordSuccess"]</div>
+        }
+        <form asp-action="ChangePassword" asp-controller="Setting" method="post">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="font-weight: 600; margin-bottom: 8px;">Password</div>
+                    <div class="form-group" style="margin-top: 0;">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="currentPassword" placeholder="Current password" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="newPassword" placeholder="New password" required />
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="custom-file-upload">Update</button>
+                </div>
             </div>
-            <button class="custom-file-upload">Update</button>
-        </div>
+        </form>
     </div>
 
     <div class="section-title" style="color: #e53935;">Danger Zone</div>
     <div class="section-box" style="border-color: #ffcdd2;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="font-size: 14px; color: #777;">Permanently delete your account and all data.</div>
-            <button class="danger-btn">Delete Account</button>
+            <form asp-action="DeleteAccount" asp-controller="Setting" method="post">
+                <button type="submit" class="danger-btn" onclick="return confirm('Are you sure? This cannot be undone.')">Delete Account</button>
+            </form>
         </div>
     </div>
 </div>

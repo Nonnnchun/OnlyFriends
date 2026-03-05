@@ -36,8 +36,8 @@ namespace OnlyFriends.Controllers
         public async Task<IActionResult> Index(string identifier, string password)
         {
             var id = identifier;
-            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => (u.Email == id || u.Username == id) && u.Password == password);
-            if (user == null)
+            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == id || u.Username == id);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
                 ViewData["HideNavbar"] = true;
                 ModelState.AddModelError("", "อีเมลหรือรหัสผ่านไม่ถูกต้อง");

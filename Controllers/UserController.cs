@@ -33,5 +33,18 @@ namespace OnlyFriends.Controllers
             await _userService.RemoveFriendAsync(userId, targetId);
             return Ok();
         }
+
+        [Authorize]
+        [HttpPatch("/user/friends/{requesterId}/accept")]
+        public async Task<IActionResult> AcceptFriendRequest(int requesterId)
+        {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            if (currentUserId == requesterId) return BadRequest("Cannot accept a friend request from yourself.");
+
+            var accepted = await _userService.AcceptFriendRequestAsync(requesterId, currentUserId);
+            if (!accepted) return NotFound("No pending friend request found.");
+
+            return Ok();
+        }
     }
 }

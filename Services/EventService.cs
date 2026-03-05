@@ -15,7 +15,6 @@ public interface IEventService
     Task<GetEventDTO?> FindEventByIdAsync(int id);
     Task<IEnumerable<GetEventDTO>> GetEventsAsync();
     Task AddUserToEvent(AddUserToEventDTO userEventToAdd);
-    Task AddParticipantManualAsync(AddUserToEventDTO userEventToAdd);
     Task CancelJoinEvent(int userId, int eventId);
 }
 public sealed class EventService : IEventService
@@ -109,28 +108,6 @@ public sealed class EventService : IEventService
             _context.UserEvents.Remove(ue);
             await _context.SaveChangesAsync();
         }
-    }
-
-    public async Task AddParticipantManualAsync(AddUserToEventDTO userEventToAdd)
-    {
-        var ue = await _context.UserEvents
-        .FirstOrDefaultAsync(x => x.EventId == userEventToAdd.EventId && x.UserId == userEventToAdd.UserId);
-
-        if (ue == null)
-        {
-            _context.UserEvents.Add(new UserEvent
-            {
-                EventId = userEventToAdd.EventId,
-                UserId = userEventToAdd.UserId,
-                RequestStatus = EnumRequestStatus.Pending
-            });
-        }
-        else
-        {
-            ue.RequestStatus = EnumRequestStatus.Pending;
-        }
-
-        await _context.SaveChangesAsync();
     }
 
 }

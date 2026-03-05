@@ -8,18 +8,22 @@ using System.IO;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using OnlyFriends.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace OnlyFriends.Controllers
 {
-    [Route("setting")] 
+    [Route("setting")]
     public class SettingController : Controller
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _config;
-        public SettingController(IUserService userService, IConfiguration config)
+        private readonly ApplicationDbContext _context;
+        public SettingController(IUserService userService, IConfiguration config, ApplicationDbContext context)
         {
             _userService = userService;
             _config = config;
+            _context = context;
         }
 
         [Authorize] 
@@ -140,6 +144,74 @@ namespace OnlyFriends.Controllers
                 }
 
                 return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim)) return Redirect("/login");
+
+                var userId = Int32.Parse(userIdClaim);
+                var user = await _context.Users.FindAsync(userId);
+
+                if (user == null) return Redirect("/login");
+
+                if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.Password))
+                {
+                    TempData["PasswordError"] = "Current password is incorrect";
+                    return RedirectToAction("Index");
+                }
+
+                var dto = new UpdateUserDTO
+                {
+                    Id = userId,
+                    Username = user.Username,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Bio = user.Bio,
+                    Email = user.Email,
+                    Password = newPassword
+                };
+
+                await _userService.UpdateUserAsync(dto);
+
+                TempData["PasswordSuccess"] = "Password updated successfully";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("delete-account")]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim)) return Redirect("/login");
+
+                var userId = Int32.Parse(userIdClaim);
+                var user = await _context.Users.FindAsync(userId);
+
+                if (user == null) return Redirect("/login");
+
+                await _userService.DeleteUserAsync(user);
+
+                Response.Cookies.Delete("AuthToken");
+
+                return Redirect("/login");
             }
             catch (Exception ex)
             {

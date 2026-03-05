@@ -26,39 +26,6 @@
     var attended = 3;
     bool hasEvents = true;
 
-    var mockEvents = new[]
-    {
-        new {
-            Title = "Late Night Board Game Bash",
-            Description = "Bring your favorite board games! Snacks provided. All skill levels welcome.",
-            Date = "Saturday, March 8, 2026",
-            Time = "8:00 PM",
-            Location = "DemonineZ's Place, Bangkok",
-            Attendees = 5,
-            Tag = "Social",
-            Image = "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=800&q=80"
-        },
-        new {
-            Title = "Indie Film Night 🎬",
-            Description = "We're watching two indie films back-to-back. Discussion session after each one.",
-            Date = "Friday, March 14, 2026",
-            Time = "7:30 PM",
-            Location = "The Projector Lounge",
-            Attendees = 12,
-            Tag = "Culture",
-            Image = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80"
-        },
-        new {
-            Title = "Morning Hike at Khao Yai",
-            Description = "Easy 5km trail, great views. Carpool leaving from BTS Mo Chit at 6am.",
-            Date = "Sunday, March 22, 2026",
-            Time = "6:00 AM",
-            Location = "Khao Yai National Park",
-            Attendees = 8,
-            Tag = "Outdoor",
-            Image = "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&q=80"
-        }
-    };
 }
 
 <style>
@@ -176,22 +143,6 @@
     }
 
     .event-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .event-card-image {
-        width: 200px;
-        min-height: 140px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        margin-bottom: 20px;
-        overflow: hidden;
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
-        display: flex;
-        flex-direction: row;
-    }
-
-    .event-card:hover {
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
         transform: translateY(-2px);
     }
@@ -209,15 +160,6 @@
     }
 
     .event-card-body {
-        padding: 20px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        display: block;
-    }
-
-    .event-card-body {
         padding: 20px 24px;
         display: flex;
         flex-direction: column;
@@ -229,8 +171,6 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        align-items: flex-start;
-        justify-content: space-between;
         gap: 12px;
         flex-wrap: wrap;
         margin-bottom: 8px;
@@ -271,15 +211,6 @@
         border-radius: 12px;
         color: #888;
         font-style: italic;
-    }
-
-    @@media (max-width: 600px) {
-        .event-card { flex-direction: column; }
-        .event-card-image { width: 100%; height: 150px; }
-        .profile-header { flex-direction: column; text-align: center; }
-        .profile-info { text-align: center; }
-        .profile-stats { justify-content: center; }
-        color: #1a1a1a;
     }
 
     .event-card p {
