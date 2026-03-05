@@ -1,12 +1,12 @@
-<div class="d-flex align-items-center gap-3">
+<div class="notif-shell">
     <div class="notif-bell dropdown">
-        <button class="btn btn-link position-relative" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="notif-toggle" id="notifBell" aria-expanded="false" onclick="toggleNotifMenu(event)">
             <span class="notif-icon">🔔</span>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" id="notifCount">0</span>
+            <span class="notif-count" id="notifCount">0</span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end p-0 notif-dropdown" aria-labelledby="notifBell">
-            <li class="p-3 text-muted" id="notifEmpty">ยังไม่มีการแจ้งเตือน</li>
-            <div id="notifList"></div>
+        <ul class="notif-dropdown" id="notifMenu" aria-labelledby="notifBell">
+            <li class="notif-empty" id="notifEmpty">ยังไม่มีการแจ้งเตือน</li>
+            <li class="notif-list-wrap"><ul id="notifList" class="notif-list"></ul></li>
         </ul>
     </div>
 </div>

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - OnlyFriends</title>
     <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
     @RenderSection("Styles", required: false)
@@ -32,15 +31,6 @@
                         <div class="filter-item">
                             <input type="checkbox" id="catEdu"> <label for="catEdu">ท่องเที่ยว</label>
                         </div>
-                        <hr>
-                        <div class="filter-item">
-                            <input type="checkbox" id="statusOpen" checked> <label
-                            for="statusOpen">กิจกรรมที่เปิดรับสมัคร</label>
-                        </div>
-                        <div class="filter-item">
-                            <input type="checkbox" id="myJoinedEvents">
-                            <label for="myJoinedEvents">กิจกรรมที่เข้าร่วม</label>
-                        </div>
                         <button class="btn-apply" onclick="applyFilter()">นำไปใช้</button>
                     </div>
                 </div>
@@ -57,8 +47,8 @@
                         <hr>
                         @if (User.Identity?.IsAuthenticated ?? false) {
 
-                        <form asp-controller="Login" asp-action="Logout" method="post"class="d-inline">
-                            <button type="submit" class="btn btn-link p-0 m-0 align-baseline" style="color:red">Log Out</button>
+                        <form asp-controller="Login" asp-action="Logout" method="post" class="inline-form">
+                            <button type="submit" class="logout-btn">Log Out</button>
                         </form>
                         } 
                         else {
@@ -69,18 +59,16 @@
             </nav>
         </header>
         <div class="container">
-            <main role="main" class="pb-3">
+            <main role="main" class="main-content">
                 @RenderBody()
             </main>
         </div>
 
-        <footer class="border-top footer text-muted">
+        <footer class="border-top footer muted-text">
             <div class="container">
                 &copy; 2569 - OnlyFriends - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
             </div>
         </footer>
-        <script src="~/lib/jquery/dist/jquery.min.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
         @RenderSection("Scripts", required: false)
     </body>

@@ -23,6 +23,35 @@ body {
     min-height: 100vh;
 }
 
+.container {
+    width: min(1200px, calc(100% - 32px));
+    margin: 0 auto;
+}
+
+.main-content {
+    padding-bottom: 1rem;
+}
+
+.muted-text {
+    color: #6c757d;
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+}
+
+.logout-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    color: #cc0000;
+    cursor: pointer;
+    font: inherit;
+    line-height: inherit;
+}
+
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -244,13 +273,80 @@ input[type="email"]::placeholder {
 }
 
 /* Notification bell */
+.notif-shell {
+  display: flex;
+  align-items: center;
+}
+.notif-bell {
+  position: relative;
+}
+.notif-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+}
 .notif-icon {
   font-size: 20px;
 }
+.notif-count {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #222;
+  color: #fff;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  box-sizing: border-box;
+}
 .notif-dropdown {
+  display: none;
+  position: absolute;
+  top: 40px;
+  right: 0;
   min-width: 260px;
   max-height: 360px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
   overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+}
+.notif-dropdown.show {
+  display: block;
+}
+.notif-empty {
+  padding: 12px;
+  color: var(--link-color);
+}
+.notif-list-wrap {
+  padding: 0;
+}
+.notif-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.notif-item {
+  padding: 12px;
+  border-bottom: 1px solid var(--card-border);
+}
+.notif-item:last-child {
+  border-bottom: none;
 }
 
 /* OF Navbar */
@@ -346,6 +442,17 @@ input[type="email"]::placeholder {
   background: #ffffff;
   color: #2f2f2f !important;
   box-shadow: 0 2px 7px rgba(0, 0, 0, 0.14);
+}
+
+/* Homepage cards: force no underline inside event info card links */
+.home-page a.card-link,
+.home-page a.card-link:link,
+.home-page a.card-link:visited,
+.home-page a.card-link:hover,
+.home-page a.card-link:focus,
+.home-page a.card-link:active {
+  text-decoration: none !important;
+  color: inherit;
 }
 
 /* Homepage fallback styles (non-isolated) */

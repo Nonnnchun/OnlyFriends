@@ -2,10 +2,6 @@
     ViewData["Title"] = "สร้างกิจกรรม";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-}
-
 <div class="create-container">
     <div class="left-col">
         <div class="poster-preview">
@@ -60,7 +56,7 @@
 
         <div class="input-group" style="display: flex; gap: 10px; align-items: center;">
             <span>📍</span>
-            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่..." style="flex: 1; border: none; outline: none; background: transparent;">
+            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงาน..." style="flex: 1; border: none; outline: none; background: transparent;">
             <button type="button" id="btnSearchLocation" class="btn-search-loc" onclick="searchOSMLocation()">ค้นหา</button>
         </div>
 
@@ -68,7 +64,11 @@
         <input type="hidden" id="Longitude" name="Longitude">
 
         <div id="mapContainer" style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block;">
-            <div id="map" style="width: 100%; height: 100%;"></div>
+            <iframe id="mapFrame"
+                    title="Event map preview"
+                    style="width: 100%; height: 100%; border: 0;"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
         <div class="input-group">
             <span>📝</span>
@@ -137,8 +137,6 @@
 </div>
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
     <script>
         const EnumEventType = { Online: 1, Offline: 2 };
         const EnumEventStatus = { Draft: 1, Published: 2 };
@@ -171,42 +169,25 @@
             }
         }
 
-        // ================= JS สำหรับแผนที่ OpenStreetMap (ฟรี 100%) =================
-        let map;
-        let marker;
+        // ================= JS สำหรับแผนที่ (ไม่ใช้ library ภายนอก) =================
+        const defaultLat = 13.7563;
+        const defaultLng = 100.5018;
 
         function initMap() {
-            // ค่าเริ่มต้นพิกัด (กรุงเทพมหานคร)
-            const defaultLat = 13.7563;
-            const defaultLng = 100.5018;
-
-            // สร้างแผนที่และตั้งค่ามุมมองเริ่มต้น
-            map = L.map('map').setView([defaultLat, defaultLng], 13);
-
-            // ดึงภาพแผนที่จาก OpenStreetMap
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-            // สร้างหมุด (Marker) แบบให้ลากได้
-            marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
-
-            // อีเวนต์เมื่อผู้ใช้ลากหมุดเสร็จ
-            marker.on('dragend', function (e) {
-                const position = marker.getLatLng();
-                updateLatLngFields(position.lat, position.lng);
-            });
-
-            // อีเวนต์เมื่อผู้ใช้คลิกบนแผนที่ (ให้หมุดย้ายตามไปเลย)
-            map.on('click', function(e) {
-                marker.setLatLng(e.latlng);
-                updateLatLngFields(e.latlng.lat, e.latlng.lng);
-            });
+            setMapLocation(defaultLat, defaultLng);
+            updateLatLngFields(defaultLat, defaultLng);
         }
 
         function updateLatLngFields(lat, lng) {
             document.getElementById("Latitude").value = lat;
             document.getElementById("Longitude").value = lng;
+        }
+
+        function setMapLocation(lat, lng) {
+            const mapFrame = document.getElementById("mapFrame");
+            if (!mapFrame) return;
+            const query = encodeURIComponent(`${lat},${lng}`);
+            mapFrame.src = `https://www.google.com/maps?q=${query}&z=15&output=embed`;
         }
 
         // ฟังก์ชันค้นหาสถานที่ (ใช้ Nominatim API ฟรีของ OpenStreetMap)
@@ -228,13 +209,12 @@
                     // เจอสถานที่ ดึงค่า Lat/Lng ตัวแรกที่เจอ
                     const lat = parseFloat(data[0].lat);
                     const lon = parseFloat(data[0].lon);
-                    
-                    // เลื่อนแผนที่ไปจุดนั้นและย้ายหมุด
-                    map.setView([lat, lon], 16);
-                    marker.setLatLng([lat, lon]);
+
+                    // อัปเดตพรีวิวแผนที่และพิกัด
+                    setMapLocation(lat, lon);
                     updateLatLngFields(lat, lon);
                 } else {
-                    alert('ไม่พบสถานที่ ลองพิมพ์ชื่อให้กว้างขึ้น หรือคลิกเพื่อปักหมุดบนแผนที่เองได้เลยครับ');
+                    alert('ไม่พบสถานที่ ลองพิมพ์ชื่อให้กว้างขึ้น');
                 }
             } catch (error) {
                 console.error('Error searching location:', error);
@@ -258,14 +238,9 @@
                 document.getElementById("Latitude").value = ""; 
                 document.getElementById("Longitude").value = "";
             } else {
-                locationInput.placeholder = "ค้นหาสถานที่จัดงาน หรือลากหมุดบนแผนที่...";
+                locationInput.placeholder = "ค้นหาสถานที่จัดงาน...";
                 mapContainer.style.display = 'block'; // โชว์แผนที่
                 btnSearch.style.display = 'block'; // โชว์ปุ่มค้นหา
-                
-                // คำสั่งสำคัญของ Leaflet: ให้แผนที่วาดตัวเองใหม่เมื่อสลับกลับมาโชว์
-                if (map) {
-                    setTimeout(() => { map.invalidateSize(); }, 100);
-                }
             }
         }
 
