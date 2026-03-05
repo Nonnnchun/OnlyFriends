@@ -17,6 +17,10 @@ public interface IEventService
     Task AddUserToEvent(AddUserToEventDTO userEventToAdd);
     Task AcceptJoinRequest(int eventId, int userId);
     Task CancelJoinEvent(int userId, int eventId);
+    Task ToggleRegistrationAsync(int eventId, bool isOpen);
+    Task UpdateVisibilityAsync(int eventId, bool isPublic);
+    Task UpdateParticipantStatusAsync(int eventId, int userId, EnumRequestStatus status);
+    Task SendEventInvitesAsync(int eventId, List<int> userIds);
 }
 public sealed class EventService : IEventService
 {
@@ -120,6 +124,54 @@ public sealed class EventService : IEventService
             _context.UserEvents.Remove(ue);
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task ToggleRegistrationAsync(int eventId, bool isOpen)
+    {
+        var ev = await _context.Events.FindAsync(eventId)
+            ?? throw new KeyNotFoundException($"Event {eventId} not found");
+        ev.EventStatus = isOpen ? EnumEventStatus.Open : EnumEventStatus.Closed;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateVisibilityAsync(int eventId, bool isPublic)
+    {
+        var ev = await _context.Events.FindAsync(eventId)
+            ?? throw new KeyNotFoundException($"Event {eventId} not found");
+        ev.JointType = isPublic ? EnumJointType.Public : EnumJointType.Private;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateParticipantStatusAsync(int eventId, int userId, EnumRequestStatus status)
+    {
+        var ue = await _context.UserEvents
+            .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId)
+            ?? throw new KeyNotFoundException($"No UserEvent found for user {userId} in event {eventId}");
+        ue.RequestStatus = status;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task SendEventInvitesAsync(int eventId, List<int> userIds)
+    {
+        foreach (var userId in userIds)
+        {
+            var ue = await _context.UserEvents
+                .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId);
+            if (ue == null)
+            {
+                _context.UserEvents.Add(new UserEvent
+                {
+                    EventId = eventId,
+                    UserId = userId,
+                    RequestStatus = EnumRequestStatus.Accepted
+                });
+            }
+            else
+            {
+                ue.RequestStatus = EnumRequestStatus.Accepted;
+            }
+        }
+        await _context.SaveChangesAsync();
     }
 
 }

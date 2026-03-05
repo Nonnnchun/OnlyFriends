@@ -16,6 +16,7 @@ public interface IUserService
     Task SendFriendRequestAsync(int requesterId, int addresseeId);
     Task RemoveFriendAsync(int userId, int friendId);
     Task<bool> AcceptFriendRequestAsync(int requesterId, int addresseeId);
+    Task<IEnumerable<GetUserDTO>> GetFriendsAsync(int userId);
 }
 
 public sealed class UserService : IUserService
@@ -137,5 +138,23 @@ public sealed class UserService : IUserService
             _context.Friendships.Remove(friendship);
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task<IEnumerable<GetUserDTO>> GetFriendsAsync(int userId)
+    {
+        var friendships = await _context.Friendships
+            .Where(f =>
+                (f.RequesterId == userId || f.AddresseeId == userId) &&
+                f.Status == FriendshipStatus.Accepted)
+            .Include(f => f.Requester)
+            .Include(f => f.Addressee)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return friendships.Select(f =>
+        {
+            var friend = f.RequesterId == userId ? f.Addressee : f.Requester;
+            return friend.Adapt<GetUserDTO>();
+        });
     }
 }

@@ -1042,7 +1042,7 @@ async function persistParticipantStatus(eventId, userId, status) {
             eventId,
             userId,
             status,
-            requestStatus: status
+            // requestStatus: status
         })
     });
 

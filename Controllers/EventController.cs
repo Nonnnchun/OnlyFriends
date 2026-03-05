@@ -21,13 +21,15 @@ namespace OnlyFriends.Controllers
         private readonly IEventService _activityService;
         private readonly ICategoryService _categoryService;
         private readonly INotificationService _notificationService;
+        private readonly IUserService _userService;
         private readonly ILogger<EventController> _logger;
 
-        public EventController(IEventService activityService, ICategoryService categoryService, INotificationService notificationService, ILogger<EventController> logger)
+        public EventController(IEventService activityService, ICategoryService categoryService, INotificationService notificationService, IUserService userService, ILogger<EventController> logger)
         {
             _activityService = activityService;
             _categoryService = categoryService;
             _notificationService = notificationService;
+            _userService = userService;
             _logger = logger;
         }
 
@@ -54,6 +56,8 @@ namespace OnlyFriends.Controllers
                 {
                     return Unauthorized("Only owner can edit this event!");
                 }
+                var friends = await _userService.GetFriendsAsync(userId);
+                ViewData["Friends"] = friends;
                 return View("ManageDetails", activity);
             }
             catch (Exception ex)
@@ -193,11 +197,113 @@ namespace OnlyFriends.Controllers
 
                 return View("Homepage", "Home");
             }
-            // catch (KeyNotFoundException ex)
-            // {
+        }
 
-            //     return View("Login");
-            // }
+        [Authorize]
+        [HttpPost("/Event/ToggleRegistration")]
+        public async Task<IActionResult> ToggleRegistration([FromBody] ToggleRegistrationDTO dto)
+        {
+            try
+            {
+                var activity = await _activityService.FindEventByIdAsync(dto.Id);
+                if (activity == null) return NotFound("Event not found");
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                if (userId != activity.Owner.Id) return Unauthorized("Only the event owner can do this");
+                await _activityService.ToggleRegistrationAsync(dto.Id, dto.IsOpen);
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("/Event/UpdateVisibility")]
+        public async Task<IActionResult> UpdateVisibility([FromBody] UpdateVisibilityDTO dto)
+        {
+            try
+            {
+                var activity = await _activityService.FindEventByIdAsync(dto.EventId);
+                if (activity == null) return NotFound("Event not found");
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                if (userId != activity.Owner.Id) return Unauthorized("Only the event owner can do this");
+                await _activityService.UpdateVisibilityAsync(dto.EventId, dto.IsPublic);
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("/Event/UpdateParticipantStatus")]
+        public async Task<IActionResult> UpdateParticipantStatus([FromBody] UpdateParticipantStatusDTO dto)
+        {
+            try
+            {
+                var activity = await _activityService.FindEventByIdAsync(dto.EventId);
+                if (activity == null) return NotFound("Event not found");
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                if (userId != activity.Owner.Id) return Unauthorized("Only the event owner can do this");
+
+                var status = dto.Status switch
+                {
+                    "Accepted" => EnumRequestStatus.Accepted,
+                    "Rejected" => EnumRequestStatus.Rejected,
+                    _ => EnumRequestStatus.Pending
+                };
+                await _activityService.UpdateParticipantStatusAsync(dto.EventId, dto.UserId, status);
+                return Ok(new { success = true });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("/Event/SendInvites")]
+        public async Task<IActionResult> SendInvites([FromBody] SendInvitesDTO dto)
+        {
+            try
+            {
+                var activity = await _activityService.FindEventByIdAsync(dto.EventId);
+                if (activity == null) return NotFound("Event not found");
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                if (userId != activity.Owner.Id) return Unauthorized("Only the event owner can do this");
+
+                await _activityService.SendEventInvitesAsync(dto.EventId, dto.UserIds);
+
+                var inviterUsername = User.FindFirst(ClaimTypes.Name)?.Value ?? $"User#{userId}";
+                foreach (var invitedUserId in dto.UserIds)
+                {
+                    await _notificationService.AddEventInviteNotificationAsync(
+                        invitedUserId, userId, inviterUsername, activity.Title);
+                }
+
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("/Event/AddHost")]
+        public IActionResult AddHost()
+        {
+            return StatusCode(501, new { message = "Host feature coming soon" });
         }
 
     }
