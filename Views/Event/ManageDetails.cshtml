@@ -8,22 +8,22 @@
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/manage-details.css"  />
-    <link rel="stylesheet" href="~/css/invite-modal.css"  />
-    <link rel="stylesheet" href="~/css/add-host-modal.css"  />
+    <link rel="stylesheet" href="~/css/manage-details.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/invite-modal.css" asp-append-version="true" />
 }
 
     @section Scripts {
-      <script src="~/js/manage-details.js" ></script>
-      <script src="~/js/invite-modal.js" ></script>
-      <script src="~/js/add-host-modal.js" ></script>
+      <script src="~/js/manage-details.js" asp-append-version="true"></script>
+      <script src="~/js/invite-modal.js" asp-append-version="true"></script>
 }
   @Html.AntiForgeryToken()
   @await Html.PartialAsync("_InviteModal", Model)
-  @await Html.PartialAsync("_AddHostModal", Model)
 
 @{
     var eventPageUrl = Url.Action("View", "Event", new { id = Model.Id }, Context.Request.Scheme) ?? "";
+    var defaultAvatar = "/images/avatar-placeholder.svg";
+    var hostAvatarIsDefault = string.IsNullOrWhiteSpace(Model.Owner.ProfilePictureUrl);
+    var hostAvatar = hostAvatarIsDefault ? defaultAvatar : Model.Owner.ProfilePictureUrl;
 }
   
   <div class="app-body">
@@ -33,7 +33,7 @@
       
           @* Breadcrumb *@
           <div class="breadcrumb">
-              <a asp-controller="Calendar" asp-action="Index">@Model.Owner.FirstName @Model.Owner.LastName</a>
+              <a href="/user/@Model.Owner.Username" >@Model.Owner.FirstName @Model.Owner.LastName</a>
                <span>&rsaquo;</span>
           </div>
   
@@ -158,7 +158,6 @@
                                   <div class="loc-note">The address is shown publicly on the event page.</div>
                               </div>
                           </div>
-                          <button class="btn-checkin"><i class="fa-solid fa-qrcode"></i> Check In Guests</button>
                           <div class="edit-btns">
                           <button class="btn-outline" onclick="openPanel()"><i class="fa-solid fa-pen"></i> Edit Event</button>
                           <button class="btn-outline" onclick="openCoverPicker()">
@@ -193,11 +192,13 @@
                       <button class="btn-plus" onclick="switchTab(document.querySelectorAll('.tab')[1])">View All</button>
                   </div>
                   <div class="section-sub">Recent Applicants</div>
-                  <div class="registrant-list">
-                      @foreach (var reg in Model.Users)
-                      {
-                        <div class="registrant-item">
-                            <img class="reg-avatar" src="@reg.ProfilePictureUrl" alt="@reg.Username.Substring(0,1).ToUpper()" />
+                   <div class="registrant-list">
+                       @foreach (var reg in Model.Users)
+                       {
+                         var regAvatarIsDefault = string.IsNullOrWhiteSpace(reg.ProfilePictureUrl);
+                         var regAvatar = regAvatarIsDefault ? defaultAvatar : reg.ProfilePictureUrl;
+                         <div class="registrant-item">
+                            <img class="reg-avatar @(regAvatarIsDefault ? "is-default-avatar" : "")" src="@regAvatar" alt="participant avatar" />
                             <div style="flex:1;">
                                 <div class="reg-name">
                                     @reg.FirstName @reg.LastName 
@@ -233,11 +234,10 @@
               <div class="section">
                   <div class="section-header">
                       <div class="section-title">Hosts</div>
-                      <button class="btn-plus" onclick="openAddHostModal()"><i class="fa-solid fa-plus"></i> Add Host</button>
                   </div>
                   <div style="margin-top:8px">
                       <div class="host-row">
-                          <img class="host-avatar" src="@Model.Owner.ProfilePictureUrl" alt="@Model.Owner.Username.Substring(0,1).ToUpper()" />
+                          <img class="host-avatar @(hostAvatarIsDefault ? "is-default-avatar" : "")" src="@hostAvatar" alt="host avatar" />
                           <div>
                               <span class="host-name">@Model.Owner.Username</span>
                               <span class="host-email">@Model.Owner.Email</span>
@@ -302,7 +302,7 @@
         
                 <div style="padding:20px;display:flex;flex-direction:column;gap:10px">
                 
-                    <div class="confighost-option @(Model.JointType == EnumJointType.Public ? "selected" : "")"data-role="public" onclick="selectVisibility(this)">
+                    <div class="confighost-option @(Model.JointType == EnumJointType.Public ? "selected" : "")" data-role="public" onclick="selectVisibility(this)">
                         <div class="confighost-option-left">
                             <div class="confighost-option-icon">
                                 <i class="fa-solid fa-globe"></i>
@@ -317,7 +317,7 @@
                         </div>
                     </div>
         
-                    <div class="confighost-option @(Model.JointType == EnumJointType.Private ? "selected" : "")"data-role="private" onclick="selectVisibility(this)">
+                    <div class="confighost-option @(Model.JointType == EnumJointType.Private ? "selected" : "")" data-role="private" onclick="selectVisibility(this)">
                         <div class="confighost-option-left">
                             <div class="confighost-option-icon">
                                 <i class="fa-solid fa-lock"></i>
@@ -363,15 +363,16 @@
                             {
                                 var userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);
                                 var statusText = userEvent?.RequestStatus.ToString() ?? "Pending";
+                                var regAvatarIsDefault = string.IsNullOrWhiteSpace(reg.ProfilePictureUrl);
+                                var regAvatar = regAvatarIsDefault ? defaultAvatar : reg.ProfilePictureUrl;
                                 <div class="registrant-item"
                                      data-user-id="@reg.Id"
                                      data-name="@reg.FirstName @reg.LastName"
                                      data-email="@reg.Email"
                                      data-status="@statusText">
-                                    <img class="reg-avatar"
-                                         src="@reg.ProfilePictureUrl"
-                                         alt="@reg.Username.Substring(0,1).ToUpper()"
-                                         onerror="this.style.display='none'" />
+                                    <img class="reg-avatar @(regAvatarIsDefault ? "is-default-avatar" : "")"
+                                         src="@regAvatar"
+                                         alt="participant avatar" />
                                     <div style="flex:1;">
                                         <div class="reg-name">
                                             @reg.FirstName @reg.LastName
@@ -412,8 +413,21 @@
                       </div>
                       <div class="toggle @(Model.EventStatus == EnumEventStatus.Open ? "on" : "")" id="regToggle2" onclick="toggleRegistration()"></div>
                   </div>
+              </div>
+
+              <div class="section">
+                  <div class="section-title" style="margin-bottom:16px">Event Settings</div>
+                  <div class="danger-zone">
+                      <div>
+                          <div class="toggle-label">Delete Event</div>
+                          <div class="toggle-sub">Permanently delete this event and all registrations. This action cannot be undone.</div>
+                      </div>
+                      <button type="button" class="btn-danger-outline" id="deleteEventBtn" onclick="deleteEvent()">
+                          <i class="fa-regular fa-trash-can"></i> Delete Event
+                      </button>
                   </div>
               </div>
+          </div>
 
       </main>
   
