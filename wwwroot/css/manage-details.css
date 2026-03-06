@@ -1812,6 +1812,10 @@ footer a:hover { color: white; }
       align-items: center;
       justify-content: center;
     }
+    .host-avatar.is-default-avatar {
+      border: 1px solid #d1d5db;
+      background: #e5e7eb;
+    }
     .host-name { font-size: 13.5px; font-weight: 600; }
     .host-email { font-size: 12px; color: var(--text-secondary); }
     .badge-creator {
@@ -1874,6 +1878,10 @@ footer a:hover { color: white; }
       object-fit: cover;
       align-items: center;
       justify-content: center;
+    }
+    .reg-avatar.is-default-avatar {
+      border: 1px solid #d1d5db;
+      background: #e5e7eb;
     }
     .reg-name { font-size: 13px; font-weight: 600; }
     .reg-Email {font-size: 13px; font-weight: 400; color: var(--text-muted); }
@@ -2092,6 +2100,44 @@ footer a:hover { color: white; }
     }
     .toggle.on::after { left: 21px; }
 
+    .danger-zone {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      border: 1px dashed #fca5a5;
+      background: #fff7f7;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .btn-danger-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border: 1px solid #fca5a5;
+      border-radius: var(--radius-sm);
+      background: #fff;
+      color: #b91c1c;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .btn-danger-outline:hover {
+      background: #fef2f2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+    .btn-danger-outline:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     /* panel footer */
     .panel-footer {
       padding: 14px 20px;
@@ -2107,6 +2153,85 @@ footer a:hover { color: white; }
     }
     .btn-update:hover { background: #333; transform: translateY(-1px); box-shadow: var(--shadow-md); }
     .btn-update:active { transform: translateY(0); }
+
+    /* Change Visibility modal options */
+    #visibilityOverlay .confighost-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    #visibilityOverlay .confighost-option:hover {
+      border-color: var(--border2);
+      background: var(--surface2);
+    }
+    #visibilityOverlay .confighost-option.selected {
+      border-color: var(--text-primary);
+      background: var(--surface2);
+    }
+    #visibilityOverlay .confighost-option-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #visibilityOverlay .confighost-option-icon {
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    #visibilityOverlay .confighost-option-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    #visibilityOverlay .confighost-option-desc {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    #visibilityOverlay .confighost-option-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--text-primary);
+      color: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    #visibilityOverlay .confighost-option.selected .confighost-option-check {
+      display: inline-flex;
+    }
+    #visibilityOverlay .confighost-send-btn {
+      width: 100%;
+      padding: 11px;
+      background: var(--text-primary);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    #visibilityOverlay .confighost-send-btn:hover {
+      background: #333;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    #visibilityOverlay .confighost-send-btn:active {
+      transform: translateY(0);
+    }
 
     /* toast */
     .toast {
@@ -2145,6 +2270,8 @@ footer a:hover { color: white; }
       .tab { white-space: nowrap; }
       .stats-row { grid-template-columns: 1fr; }
       .edit-panel { width: 100%; }
+      .danger-zone { flex-direction: column; align-items: flex-start; }
+      .btn-danger-outline { width: 100%; justify-content: center; }
     }
 
 
