@@ -57,7 +57,9 @@ namespace OnlyFriends.Controllers.Api
             try
             {
                 await _userService.AddUserAsync(userToCreate);
-                return RedirectToAction("Index", "Login");
+                ViewBag.RegisterSuccess = true;
+                ModelState.Clear();
+                return View("Register", new CreateUserDTO { Username = "", Email = "", Password = "", FirstName = "", LastName = "" });
             } 
             catch (UniqueConstraintException ex)
             {

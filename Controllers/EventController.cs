@@ -257,6 +257,12 @@ namespace OnlyFriends.Controllers
                     _ => EnumRequestStatus.Pending
                 };
                 await _activityService.UpdateParticipantStatusAsync(dto.EventId, dto.UserId, status);
+                
+                if (status == EnumRequestStatus.Accepted || status == EnumRequestStatus.Rejected)
+                {
+                    await _notificationService.AddParticipantStatusNotificationAsync(dto.UserId, activity.Title, status.ToString());
+                }
+
                 return Ok(new { success = true });
             }
             catch (KeyNotFoundException ex)

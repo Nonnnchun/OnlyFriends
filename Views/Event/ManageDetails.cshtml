@@ -24,6 +24,8 @@
     var defaultAvatar = "/images/avatar-placeholder.svg";
     var hostAvatarIsDefault = string.IsNullOrWhiteSpace(Model.Owner.ProfilePictureUrl);
     var hostAvatar = hostAvatarIsDefault ? defaultAvatar : Model.Owner.ProfilePictureUrl;
+    var hasPoster = !string.IsNullOrWhiteSpace(Model.PosterUrl);
+    var emptyCoverDataUrl = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
 }
   
   <div class="app-body">
@@ -63,7 +65,16 @@
                       <div>
                           <div class="event-card">
                               <div class="event-card-cover">
-                                  <img class="event-card-cover-emoji" id="eventCoverImage" src="@Model.PosterUrl" alt="event cover"></img>
+                                  <img
+                                      class="event-card-cover-emoji @(hasPoster ? "" : "is-empty")"
+                                      id="eventCoverImage"
+                                      src="@(hasPoster ? Model.PosterUrl : emptyCoverDataUrl)"
+                                      alt="Event cover image"
+                                      onerror="handleCoverImageError()" />
+                                  <div class="event-card-cover-placeholder @(hasPoster ? "is-hidden" : "")" id="eventCoverPlaceholder" aria-hidden="true">
+                                      <i class="fa-regular fa-image"></i>
+                                      <span>No Image</span>
+                                  </div>
                                   <button class="change-cover-btn" onclick="openCoverPicker()">
                                       <i class="fa-solid fa-image"></i> Change
                                   </button>
@@ -160,11 +171,11 @@
                           </div>
                           <div class="edit-btns">
                           <button class="btn-outline" onclick="openPanel()"><i class="fa-solid fa-pen"></i> Edit Event</button>
-                          <button class="btn-outline" onclick="openCoverPicker()">
-                              <i class="fa-solid fa-image"></i>
-                              <span>Change Photo</span>
-                          </button>
+                          <button class="btn-outline" onclick="openCoverPicker()"><i class="fa-solid fa-image"></i><span> Change Photo</span></button>
                       </div>
+                        <div class="edit-btns" style="margin-top:8px">
+                            <button class= "btn-outline" onclick="updateEvent()"><i class="fa-solid fa-save"></i><span> Update Event</span></button>
+                        </div>
                       </div>
                   </div>
               </div>
@@ -218,16 +229,9 @@
               <div class="section">
                   <div class="section-header">
                       <div class="section-title">Invites</div>
-                      <button class="btn-plus" onclick="openInviteModal()"><i class="fa-solid fa-plus"></i>Invite Guests</button>
+                      <button class="btn-plus" onclick="openInviteModal()"><i class="fa-solid fa-plus"></i>Invite Friends</button>
                   </div>
-                  <div class="section-sub">Invite subscribers, contacts and past guests via email or SMS.</div>
-                  <div class="empty-state">
-                      <div class="empty-icon"><i class="fa-regular fa-envelope"></i></div>
-                      <div>
-                          <div class="empty-title">Invites Sent</div>
-                          <div class="empty-sub">You can invite subscribers, contacts and past guests to the event.</div>
-                      </div>
-                  </div>
+                  <div class="section-sub">Invite friends from your network who have not joined this event yet.</div>
               </div>
   
               @* Hosts *@
@@ -401,7 +405,6 @@
                         </div>
               </div>
           </div>
-  
           @* ══ TAB: REGISTRATION ══ *@
           <div id="tab-Registration" style="display:none">
               <div class="section">
@@ -480,9 +483,11 @@
 
 
               <div class="form-group">
-                  <label class="form-label">CATEGORY</label>
-                  <select class="form-select" id="inputCategory" data-selected-id="@Model.Category.Id">
-                      <option value="@Model.Category.Id">@Model.Category.CategoryName</option>
+                  <label class="form-label">CATEGORIES</label>
+                  <select class="form-select" id="inputCategory" data-selected-id="@string.Join(",", Model.Categories.Select(c => c.Id))">
+                      @foreach (var cat in Model.Categories) {
+                          <option value="@cat.Id">@cat.CategoryName</option>
+                      }
                   </select>
               </div>
   
