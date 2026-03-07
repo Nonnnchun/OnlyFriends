@@ -4,6 +4,8 @@
   --text-main: #111827;
   --text-muted: #6b7280;
   --border-color: #e5e7eb;
+  --avatar-border: #ffffff;
+  --modal-overlay: rgba(17, 24, 39, 0.45);
 }
 
 
@@ -150,12 +152,18 @@ body {
 }
 
 .ev-host-avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: #e5e7eb;
   display: block;
   object-fit: cover;
+}
+
+.ev-host-avatar.is-default-avatar {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d1d5db;
 }
 
 .ev-going {
@@ -249,6 +257,11 @@ body {
   display: block;
 }
 
+.ev-icon-register {
+  width: 35px;
+  height: 35px;
+  display: block;
+}
 .ev-cal {
   text-align: center;
   width: 100%;
@@ -298,6 +311,36 @@ body {
   border-radius: 14px;
   background: rgba(255,255,255,.70);
   overflow: hidden;
+}
+
+/* registration card typography - smaller, cleaner minimal tone */
+.ev-join-card .ev-panel-title{
+  font-size: 13px;
+}
+
+.ev-join-card .ev-join-welcome{
+  font-size: 13px;
+}
+
+.ev-join-card .ev-user-name{
+  font-size: 13px;
+}
+
+.ev-join-card .ev-reg-title{
+  font-size: 15px;
+}
+
+.ev-join-card .ev-reg-desc{
+  font-size: 13px;
+}
+
+.ev-join-card .ev-muted{
+  font-size: 12px;
+}
+
+.ev-join-card .ev-btn-wide{
+  height: 38px;
+  font-size: 13px;
 }
 
 /* top bar "Registration" */
@@ -363,11 +406,17 @@ body {
 }
 
 .ev-user-avatar{
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
+}
+
+.ev-user-avatar.is-default-avatar{
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d1d5db;
 }
 
 .ev-user-name{
@@ -578,15 +627,201 @@ body {
   padding-left: 2px; 
   padding-top: 2px;
   padding-bottom: 2px;
+  cursor: pointer;
+  user-select: none;
 }
 
  .avatar-img {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--avatar-border);
   margin-left: -1px; 
   position: relative;
+}
+
+.avatar-img.is-default-avatar {
+  width: 30px;
+  height: 30px;
+  border-width: 1px;
+  border-color: #d1d5db;
+}
+
+.ev-participant-trigger:focus-visible {
+  outline: 2px solid #9ca3af;
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+.avatar-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  margin-left: 4px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+body.ev-modal-open {
+  overflow: hidden;
+}
+
+.ev-participant-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--modal-overlay);
+}
+
+.ev-participant-modal-overlay.is-open {
+  display: flex;
+}
+
+.ev-participant-modal {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: min(82vh, 640px);
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+  padding: 22px 20px 16px;
+}
+
+.ev-participant-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ev-participant-modal-close:hover {
+  background: #e5e7eb;
+}
+
+.ev-participant-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-right: 36px;
+}
+
+.ev-participant-modal-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #4b5563;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.ev-participant-modal-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #111827;
+}
+
+.ev-participant-modal-subtitle {
+  margin-top: 6px;
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.ev-participant-modal-list {
+  max-height: calc(82vh - 210px);
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.ev-participant-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 2px;
+}
+
+.ev-participant-link {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 10px;
+}
+
+.ev-participant-link:hover {
+  background: #f9fafb;
+}
+
+.ev-participant-link:focus-visible {
+  outline: 2px solid #9ca3af;
+  outline-offset: 2px;
+}
+
+.ev-participant-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+}
+
+.ev-participant-avatar.is-default-avatar {
+  width: 28px;
+  height: 28px;
+  border-color: #d1d5db;
+}
+
+.ev-participant-name {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.ev-participant-empty {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.45;
+  padding: 10px 2px;
+}
+
+@media (max-width: 640px) {
+  .ev-participant-modal {
+    padding: 18px 14px 14px;
+    border-radius: 14px;
+  }
+
+  .ev-participant-modal-title {
+    font-size: 26px;
+  }
+
+  .ev-participant-name {
+    font-size: 16px;
+  }
 
 }

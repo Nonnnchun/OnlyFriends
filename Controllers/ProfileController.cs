@@ -24,27 +24,15 @@ namespace OnlyFriends.Controllers
         [HttpGet("user/{username}")]
         public async Task<IActionResult> Index(string username)
         {
-            if (string.IsNullOrEmpty(username))
-            {
-                return RedirectToAction("Homepage", "Home");
-            }
+            if (string.IsNullOrEmpty(username)) return RedirectToAction("Homepage", "Home");
 
-            // Allow both "username" and "@username" slugs
-            if (username.StartsWith("@"))
-            {
-                username = username[1..];
-            }
+            if (username.StartsWith("@")) username = username[1..];
 
-            // Find user by Username (case-insensitive)
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
 
-            if (user == null)
-            {
-                return NotFound("User not found");
-            }
+            if (user == null) return NotFound("User not found");
 
-            // Mapping to DTO
             var userDTO = new GetUserDTO
             {
                 Id = user.Id,
@@ -56,12 +44,10 @@ namespace OnlyFriends.Controllers
                 Email = user.Email ?? ""
             };
 
-            // Fetch Events owned by this user
             userDTO.CreatedEvents = await _context.Events
                 .Where(e => e.OwnerId == user.Id)
                 .ToListAsync();
 
-            // Fetch Events this user joined
             var joinedEvents = await _context.UserEvents
                 .Where(ue => ue.UserId == user.Id)
                 .Select(ue => ue.Event)
@@ -69,10 +55,20 @@ namespace OnlyFriends.Controllers
 
             ViewBag.JoinedEvents = joinedEvents;
 
+            // --- NEW CODE: Fetch Accepted Friends ---
+            var friends = await _context.Friendships
+                .Where(f => (f.RequesterId == user.Id || f.AddresseeId == user.Id) 
+                            && f.Status == FriendshipStatus.Accepted) // Fixed CS0019
+                .Select(f => f.RequesterId == user.Id ? f.Addressee : f.Requester)
+                .ToListAsync();
+
+            // 2. Ensure the list isn't null to satisfy the compiler
+            ViewBag.Friends = friends ?? new List<OnlyFriends.Models.User>();
+            // ----------------------------------------
+
             var currentUserIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             ViewData["CurrentUserId"] = int.TryParse(currentUserIdStr, out var currentUserId) ? currentUserId : 0;
 
-            // Check friendship status between current user and profile user
             if (currentUserId != 0 && currentUserId != user.Id)
             {
                 var friendship = await _context.Friendships.FirstOrDefaultAsync(f =>
@@ -81,10 +77,6 @@ namespace OnlyFriends.Controllers
 
                 ViewData["FriendshipStatus"] = friendship?.Status.ToString() ?? "None";
                 ViewData["FriendshipRequesterId"] = friendship?.RequesterId;
-            }
-            else
-            {
-                ViewData["FriendshipStatus"] = "None";
             }
 
             return View("Profile", userDTO);

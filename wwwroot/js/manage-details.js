@@ -792,6 +792,61 @@ function toggleRegistration() {
         });
 }
 
+async function deleteEvent() {
+    const eventId = parseInt(document.getElementById('editPanel')?.dataset.eventId, 10);
+    if (Number.isNaN(eventId)) {
+        showToast('Could not find event ID.');
+        return;
+    }
+
+    const confirmed = window.confirm('Delete this event permanently? This action cannot be undone.');
+    if (!confirmed) return;
+
+    const deleteBtn = document.getElementById('deleteEventBtn');
+    const originalContent = deleteBtn?.innerHTML;
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+    }
+
+    try {
+        const response = await fetch(`/api/event/${eventId}`, {
+            method: 'DELETE',
+            credentials: 'same-origin',
+            headers: {
+                RequestVerificationToken: getAntiForgeryToken()
+            }
+        });
+
+        if (response.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+
+        if (response.status === 403) {
+            showToast('You are not allowed to delete this event.');
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`Delete failed (${response.status})`);
+        }
+
+        showToast('Event deleted successfully.');
+        setTimeout(() => {
+            window.location.href = '/Calendar';
+        }, 700);
+    } catch (error) {
+        console.error(error);
+        showToast('Could not delete event. Please try again.');
+    } finally {
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = originalContent || '<i class="fa-regular fa-trash-can"></i> Delete Event';
+        }
+    }
+}
+
 function toIsoUtc(localDateTime) {
     if (!localDateTime) return null;
     const d = new Date(localDateTime);
