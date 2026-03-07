@@ -139,10 +139,11 @@
         font-size: 0.88rem;
         font-weight: 600;
         cursor: pointer;
-        transition: background 0.15s, opacity 0.15s;
+        transition: background 0.15s, opacity 0.15s, color 0.15s;
+        min-width: 140px;
     }
 
-    .btn:disabled { opacity: 0.55; cursor: default; }
+    .btn:disabled:not(.btn-unfriend) { opacity: 0.55; cursor: default; }
 
     /* Dark = login button style */
     .btn-dark { background: #1f2937; color: #fff; }
@@ -154,6 +155,20 @@
     /* Blue accent = accept (matches OnlyFriends blue) */
     .btn-blue { background: #1a56db; color: #fff; }
     .btn-blue:hover:not(:disabled) { background: #1648c0; }
+
+    /* ── Unfriend Hover Logic ── */
+    .btn-unfriend .unfriend-text { display: none; }
+    
+    .btn-unfriend:hover {
+        background: #fee2e2 !important; /* light red */
+        color: #ef4444 !important;    /* red text */
+        border: 1px solid #fca5a5 !important;
+        cursor: pointer;
+        opacity: 1 !important;
+    }
+
+    .btn-unfriend:hover .friends-text { display: none; }
+    .btn-unfriend:hover .unfriend-text { display: inline; }
 
     /* ── Section header ── */
     .section-header {
@@ -349,10 +364,8 @@
 <div class="profile-page">
     <div class="page-grid">
 
-        <!-- MAIN CONTENT -->
         <div>
 
-            <!-- Header -->
             <div class="profile-header">
                 <div class="profile-avatar">
                     <img src="@avatarUrl" alt="@username" />
@@ -391,7 +404,10 @@
 
                         if (friendStatus == "Accepted")
                         {
-                            <button class="btn btn-muted" disabled>Friends ✓</button>
+                            <button id="btnAddFriend" class="btn btn-muted btn-unfriend" data-user-id="@Model.Id" data-action="unfriend">
+                                <span class="friends-text">Friends ✓</span>
+                                <span class="unfriend-text">Unfriend</span>
+                            </button>
                         }
                         else if (friendStatus == "Pending" && friendRequesterId == currentUserId)
                         {
@@ -403,13 +419,12 @@
                         }
                         else
                         {
-                            <button id="btnAddFriend" class="btn btn-dark" data-user-id="@Model.Id">Add Friend</button>
+                            <button id="btnAddFriend" class="btn btn-dark" data-user-id="@Model.Id" data-action="add">Add Friend</button>
                         }
                     }
                 </div>
             </div>
 
-            <!-- Hosted Events -->
             <div class="events-section">
                 <div class="section-header">
                     <span class="section-title">@firstName's Hosted Events</span>
@@ -444,7 +459,6 @@
                 }
             </div>
 
-            <!-- Joined Events -->
             <div class="events-section">
                 <div class="section-header">
                     <span class="section-title">Events @firstName Joined</span>
@@ -481,7 +495,6 @@
 
         </div>
 
-        <!-- SIDEBAR -->
         <aside class="profile-sidebar">
             <div class="sidebar-card">
                 <div class="sidebar-header">
@@ -525,34 +538,66 @@
         btn.addEventListener('click', async function () {
             const targetId = btn.dataset.userId;
             const action = btn.dataset.action;
+            
+            // UI Feedback
             btn.disabled = true;
-            btn.innerText = action === 'accept' ? 'Accepting...' : 'Sending...';
+            if (action === 'accept') btn.innerText = 'Accepting...';
+            else if (action === 'unfriend') btn.innerText = 'Removing...';
+            else btn.innerText = 'Sending...';
 
             try {
                 let res;
                 if (action === 'accept') {
                     res = await fetch(`/user/friends/${targetId}/accept`, { method: 'PATCH' });
+                } else if (action === 'unfriend') {
+                    // Logic for unfriend
+                    res = await fetch(`/user/friends/${targetId}`, { method: 'DELETE' });
                 } else {
                     res = await fetch(`/user/friends/${targetId}`, { method: 'POST' });
                 }
 
                 if (res.ok) {
-                    btn.innerText = action === 'accept' ? 'Friends ✓' : 'Request Sent';
-                    btn.disabled = true;
-                    btn.className = 'btn btn-muted';
+                    // Success: Reload page or update UI state
+                    if (action === 'unfriend') {
+                        btn.innerText = 'Add Friend';
+                        btn.className = 'btn btn-dark';
+                        btn.dataset.action = 'add';
+                        btn.disabled = false;
+                    } else if (action === 'accept') {
+                        btn.innerHTML = '<span class="friends-text">Friends ✓</span><span class="unfriend-text">Unfriend</span>';
+                        btn.className = 'btn btn-muted btn-unfriend';
+                        btn.dataset.action = 'unfriend';
+                        btn.disabled = false;
+                    } else {
+                        btn.innerText = 'Request Sent';
+                        btn.className = 'btn btn-muted';
+                        btn.disabled = true;
+                    }
+                    
+                    // Optional: refresh to update friend list/count
+                    window.location.reload();
+
                 } else if (res.status === 401) {
                     window.location.href = '/Login';
                 } else {
                     btn.disabled = false;
-                    btn.innerText = action === 'accept' ? 'Accept Request' : 'Add Friend';
+                    resetBtnText(btn, action);
                     alert('Something went wrong.');
                 }
             } catch {
                 btn.disabled = false;
-                btn.innerText = action === 'accept' ? 'Accept Request' : 'Add Friend';
+                resetBtnText(btn, action);
                 alert('Network error.');
             }
         });
+    }
+
+    function resetBtnText(button, action) {
+        if (action === 'accept') button.innerText = 'Accept Request';
+        else if (action === 'unfriend') {
+             button.innerHTML = '<span class="friends-text">Friends ✓</span><span class="unfriend-text">Unfriend</span>';
+        }
+        else button.innerText = 'Add Friend';
     }
 </script>
 }
