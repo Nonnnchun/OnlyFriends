@@ -2138,6 +2138,92 @@ footer a:hover { color: white; }
       transform: none;
     }
 
+    .btn-danger-solid {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border: 1px solid #dc2626;
+      border-radius: var(--radius-sm);
+      background: #dc2626;
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .btn-danger-solid:hover { background: #b91c1c; border-color: #b91c1c; }
+    .btn-danger-solid:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #deleteConfirmOverlay {
+      background: rgba(17, 24, 39, 0.32);
+    }
+    #deleteConfirmOverlay .invite-modal.delete-confirm-modal {
+      width: 360px;
+      max-width: 92vw;
+      height: auto;
+      max-height: none;
+      display: block;
+      border-radius: 14px;
+      box-shadow: 0 14px 34px rgba(17, 24, 39, 0.16);
+    }
+    #deleteConfirmOverlay .invite-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    #deleteConfirmOverlay .invite-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+    #deleteConfirmOverlay .modal-close {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      font-size: 12px;
+    }
+    #deleteConfirmOverlay .delete-confirm-body {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    #deleteConfirmOverlay .delete-confirm-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      line-height: 1.45;
+    }
+    #deleteConfirmOverlay .delete-confirm-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    #deleteConfirmOverlay .delete-confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: 10px 16px 14px;
+    }
+    #deleteConfirmOverlay .delete-confirm-actions .btn-outline {
+      flex: 0 0 auto;
+      width: auto;
+      min-width: 92px;
+      padding: 7px 12px;
+      font-size: 12px;
+    }
+    #deleteConfirmOverlay .delete-confirm-actions .btn-danger-solid {
+      min-width: 116px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
     /* panel footer */
     .panel-footer {
       padding: 14px 20px;
@@ -2272,6 +2358,9 @@ footer a:hover { color: white; }
       .edit-panel { width: 100%; }
       .danger-zone { flex-direction: column; align-items: flex-start; }
       .btn-danger-outline { width: 100%; justify-content: center; }
+      .delete-confirm-actions { flex-direction: column-reverse; }
+      .delete-confirm-actions .btn-outline,
+      .delete-confirm-actions .btn-danger-solid { width: 100%; justify-content: center; }
     }
 
 

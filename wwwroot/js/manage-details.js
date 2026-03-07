@@ -799,14 +799,14 @@ async function deleteEvent() {
         return;
     }
 
-    const confirmed = window.confirm('Delete this event permanently? This action cannot be undone.');
-    if (!confirmed) return;
-
     const deleteBtn = document.getElementById('deleteEventBtn');
-    const originalContent = deleteBtn?.innerHTML;
-    if (deleteBtn) {
-        deleteBtn.disabled = true;
-        deleteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+    const confirmBtn = document.getElementById('deleteConfirmBtn');
+    const originalConfirmContent = confirmBtn?.innerHTML;
+
+    if (deleteBtn) deleteBtn.disabled = true;
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
     }
 
     try {
@@ -832,6 +832,7 @@ async function deleteEvent() {
             throw new Error(`Delete failed (${response.status})`);
         }
 
+        closeDeleteConfirmModal();
         showToast('Event deleted successfully.');
         setTimeout(() => {
             window.location.href = '/Calendar';
@@ -840,11 +841,23 @@ async function deleteEvent() {
         console.error(error);
         showToast('Could not delete event. Please try again.');
     } finally {
-        if (deleteBtn) {
-            deleteBtn.disabled = false;
-            deleteBtn.innerHTML = originalContent || '<i class="fa-regular fa-trash-can"></i> Delete Event';
+        if (deleteBtn) deleteBtn.disabled = false;
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalConfirmContent || 'Confirm Delete';
         }
     }
+}
+
+function openDeleteConfirmModal() {
+    document.getElementById('deleteConfirmOverlay')?.classList.add('open');
+}
+
+function closeDeleteConfirmModal(e) {
+    const overlay = document.getElementById('deleteConfirmOverlay');
+    if (!overlay) return;
+    if (e && e.target !== overlay) return;
+    overlay.classList.remove('open');
 }
 
 function toIsoUtc(localDateTime) {
