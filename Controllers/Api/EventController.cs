@@ -167,11 +167,12 @@ namespace OnlyFriends.ApiControllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetEventsAsync()
+        public async Task<IActionResult> GetEventsAsync([FromQuery] string? categoryIds = null)
         {
             try
             {
-                IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
+                var ids = ParseCategoryIds(categoryIds);
+                IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync(ids.Count > 0 ? ids : null);
                 return Ok(activities);
             }
             catch (Exception ex)
@@ -179,6 +180,18 @@ namespace OnlyFriends.ApiControllers
                 _logger.LogError(ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
+        }
+
+        private static List<int> ParseCategoryIds(string? categoryIds)
+        {
+            if (string.IsNullOrWhiteSpace(categoryIds)) return new List<int>();
+            return categoryIds
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(s => int.TryParse(s, out int id) ? id : (int?)null)
+                .Where(id => id.HasValue)
+                .Select(id => id!.Value)
+                .Distinct()
+                .ToList();
         }
 
         [Authorize]

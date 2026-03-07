@@ -2,191 +2,369 @@
 @{
     Layout = null;
 }
-
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account – OnlyFriends</title>
     <link rel="stylesheet" href="~/css/site.css">
     <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-color: #f8f9fa;
-            --error-color: #dc3545;
-            --input-bg: #f1f3f5;
-        body { background-color: var(--bg-color); }
-        .registration-wrapper {
-            display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
         }
-        .registration-card {
-            background: white; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            width: 100%; max-width: 450px;
-        }
-        .reg-header { text-align: center; margin-bottom: 2rem; }
-        .form-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; text-align: left; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-group input {
-            padding: 12px; border-radius: 6px; border: 1px solid #ddd;
-            background: var(--input-bg); font-size: 1rem;
-        }
-        .form-group input:focus { outline: none; border-color: var(--primary-color); background: #fff; }
-        .password-wrapper { display: flex; position: relative; }
-        .password-wrapper input { width: 100%; }
-        .toggle-pw-btn {
-            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; cursor: pointer; font-size: 1rem;
-        }
-        .error-text { color: var(--error-color); font-size: 0.75rem; margin-top: 4px; }
-        .validation-summary-errors { color: var(--error-color); font-size: 0.85rem; margin-bottom: 1rem; padding: 8px; background: #fff5f5; border-radius: 6px; }
-        .btn-submit {
-            width: 100%; padding: 14px; background: var(--primary-color); color: white;
-            border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px;
-        }
-        .btn-submit:hover { background: var(--primary-hover); }
-        .footer-link { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; }
-        .footer-link a { color: var(--primary-color); font-weight: 700; text-decoration: none; }
 
-        /* Popup หลังสมัครสำเร็จ */
+        /* ── Shared page-slide transition ── */
+        .auth-page { animation: auth-fade-in 0.32s cubic-bezier(.4,0,.2,1) both; }
+        @@keyframes auth-fade-in {
+            from { opacity: 0; transform: translateX(-24px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .auth-page.is-leaving { animation: auth-fade-out 0.28s cubic-bezier(.4,0,.2,1) both; }
+        @@keyframes auth-fade-out {
+            from { opacity: 1; transform: translateX(0); }
+            to   { opacity: 0; transform: translateX(24px); }
+        }
+
+        /* ── Navbar ── */
+        .auth-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 36px; height: 64px;
+            background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+            border-bottom: 1px solid #e8edf5; position: sticky; top: 0; z-index: 10;
+        }
+        .auth-nav-right { display: flex; align-items: center; gap: 20px; }
+        .auth-nav-explore {
+            font-size: 13px; font-weight: 500; color: #555; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 6px; transition: color 0.15s;
+        }
+        .auth-nav-explore:hover { color: #00AFF0; }
+        .auth-nav-cta {
+            font-size: 13px; font-weight: 600; padding: 8px 18px;
+            border-radius: 99px; border: 1.5px solid #0f1523; color: #0f1523;
+            text-decoration: none; transition: background 0.15s, color 0.15s;
+        }
+        .auth-nav-cta:hover { background: #0f1523; color: #fff; }
+
+        /* ── Split layout ── */
+        .auth-shell {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 480px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* ── Left decorative panel ── */
+        .auth-panel {
+            background:
+                radial-gradient(ellipse 700px 500px at 90% -10%, rgba(124,58,237,0.15) 0%, transparent 55%),
+                radial-gradient(ellipse 600px 400px at -10% 110%, rgba(0,175,240,0.10) 0%, transparent 55%),
+                linear-gradient(160deg, #f5f0ff 0%, #eef2ff 55%, #f0f7ff 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+            padding: 60px 64px; overflow: hidden; position: relative;
+        }
+        .auth-panel::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: none;
+        }
+        .auth-panel-brand {
+            position: relative; z-index: 1;
+            display: inline-flex; align-items: center; gap: 10px;
+            margin-bottom: 52px; text-decoration: none;
+        }
+        .auth-panel-logo-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: linear-gradient(135deg, #00AFF0, #0077b6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 14px; color: #fff; letter-spacing: -0.5px;
+        }
+        .auth-panel-logo-text {
+            font-size: 22px; font-weight: 800; color: #0f1523; letter-spacing: -0.04em;
+        }
+        .auth-panel-logo-text span { color: #00AFF0; }
+        .auth-panel-headline {
+            position: relative; z-index: 1;
+            font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+            font-weight: 900; color: #0f1523; letter-spacing: -0.04em; line-height: 1.18;
+            margin-bottom: 16px;
+        }
+        .auth-panel-headline em {
+            font-style: normal;
+            background: linear-gradient(125deg, #7c3aed, #00AFF0 70%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .auth-panel-sub {
+            position: relative; z-index: 1;
+            font-size: 14px; color: #4b5563; line-height: 1.7; max-width: 36ch;
+            margin-bottom: 40px;
+        }
+        .auth-panel-pills {
+            position: relative; z-index: 1;
+            display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .auth-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 99px;
+            background: rgba(255,255,255,0.75); border: 1px solid rgba(124,58,237,0.22);
+            font-size: 12px; font-weight: 600; color: #374151;
+            backdrop-filter: blur(4px);
+        }
+        .auth-pill i { font-size: 11px; color: #a78bfa; }
+
+        /* ── Right form panel ── */
+        .auth-form-panel {
+            background: #fff;
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 40px 52px;
+            position: relative;
+            overflow-y: auto;
+        }
+        .auth-form-inner { width: 100%; max-width: 360px; margin: 0 auto; }
+
+        .auth-form-title {
+            font-size: 1.75rem; font-weight: 800; color: #0f1523; letter-spacing: -0.035em;
+            margin-bottom: 6px;
+        }
+        .auth-form-sub {
+            font-size: 14px; color: #6b7280; margin-bottom: 28px; line-height: 1.5;
+        }
+
+        /* Fields */
+        .auth-input-group { margin-bottom: 16px; }
+        .auth-input-group label {
+            display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px;
+        }
+        .auth-input-group input {
+            width: 100%; padding: 11px 14px; border-radius: 10px;
+            border: 1.5px solid #e5e7eb; background: #f9fafb;
+            font-size: 14px; font-family: 'Inter', system-ui, sans-serif;
+            color: #0f1523; transition: border-color 0.15s, background 0.15s; outline: none;
+        }
+        .auth-input-group input:focus {
+            border-color: #00AFF0; background: #fff;
+            box-shadow: 0 0 0 3px rgba(0,175,240,0.12);
+        }
+        .auth-input-group input::placeholder { color: #9ca3af; }
+
+        .auth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .auth-input-wrap { position: relative; }
+        .auth-input-wrap input { padding-right: 44px; }
+        .auth-toggle-eye {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 15px;
+            transition: color 0.15s; padding: 4px;
+        }
+        .auth-toggle-eye:hover { color: #374151; }
+
+        .auth-field-error { font-size: 12px; color: #dc2626; margin-top: 4px; }
+        .auth-error-box {
+            font-size: 13px; color: #dc2626; background: #fff5f5;
+            border: 1px solid #fecaca; border-radius: 8px;
+            padding: 10px 14px; margin-bottom: 18px;
+        }
+
+        .auth-submit {
+            width: 100%; padding: 13px; margin-top: 6px;
+            background: linear-gradient(90deg, #7c3aed, #5b21b6);
+            color: #fff; font-size: 15px; font-weight: 700;
+            border: none; border-radius: 12px; cursor: pointer; font-family: inherit;
+            transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 16px rgba(124,58,237,0.35);
+        }
+        .auth-submit:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 22px rgba(124,58,237,0.45); }
+        .auth-submit:active { opacity: 1; transform: translateY(0); }
+
+        .auth-footer-link {
+            text-align: center; margin-top: 20px;
+            font-size: 13px; color: #6b7280;
+        }
+        .auth-footer-link a {
+            color: #0f1523; font-weight: 700; text-decoration: none; transition: color 0.15s;
+        }
+        .auth-footer-link a:hover { color: #7c3aed; }
+
+        @@media (max-width: 820px) {
+            .auth-shell { grid-template-columns: 1fr; }
+            .auth-panel { display: none; }
+            .auth-form-panel { padding: 40px 28px; }
+        }
+
+        /* ── Success modal ── */
         .register-modal-backdrop {
             position: fixed; inset: 0; background: rgba(0,0,0,0.45);
             display: flex; align-items: center; justify-content: center; z-index: 1000;
         }
         .register-modal {
-            background: #fff; border-radius: 14px; padding: 24px 20px 18px;
-            max-width: 360px; width: 90%; box-shadow: 0 18px 40px rgba(15,23,42,0.25);
+            background: #fff; border-radius: 20px; padding: 32px 28px 26px;
+            max-width: 360px; width: 90%; box-shadow: 0 24px 60px rgba(15,23,42,0.25);
             text-align: center;
         }
-        .register-modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
-        .register-modal-text { font-size: 0.9rem; color: #555; margin-bottom: 16px; }
-        .register-modal-actions { display: flex; justify-content: center; gap: 10px; }
-        .register-modal-btn {
-            border-radius: 999px; border: 1px solid #ddd; padding: 8px 18px;
-            font-size: 0.9rem; cursor: pointer; background: #fff;
+        .register-modal-icon {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed22, #00AFF022);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-size: 1.5rem; color: #7c3aed;
         }
-        .register-modal-btn-primary { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+        .register-modal-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 8px; color: #0f1523; }
+        .register-modal-text  { font-size: 0.9rem; color: #6b7280; margin-bottom: 20px; line-height: 1.6; }
+        .register-modal-btn {
+            display: inline-block; padding: 10px 28px; border-radius: 99px;
+            border: none; background: linear-gradient(90deg, #00AFF0, #0077b6);
+            color: #fff; font-size: 14px; font-weight: 700; cursor: pointer;
+            font-family: inherit; transition: opacity 0.15s, transform 0.15s;
+            box-shadow: 0 4px 14px rgba(0,175,240,0.35);
+        }
+        .register-modal-btn:hover { opacity: 0.9; transform: translateY(-1px); }
     </style>
 </head>
-<body>
-    <header class="main-header">
-        <nav class="landing-nav">
-            <div class="nav-left">
-                <a href="/" class="of-brand-logo">
-                    <div class="of-logo-icon">OF</div>
-                    <div class="of-logo-text">Only<span>Friends</span></div>
-                </a>
-            </div>
-            <div class="nav-right">
-               <a href="/Home/Homepage">Explore Events <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-               <a href="@Url.Action("Index", "Login")" class="sign-in-link">Sign In</a>
-            </div>
-        </nav>
-    </header>
+<body class="auth-page">
 
-    <main class="login-container">
-        <div class="registration-wrapper">
-            <div class="registration-card">
-                <div class="reg-header">
-                    <h1 style="margin: 0 0 10px 0; font-size: 24px; font-weight: 600;">Create Account</h1>
-                    <p class="subtitle" style="margin: 0 0 30px 0; color: var(--link-color); font-size: 14px;">Join our community today.</p>
-                </div>
+    <!-- Navbar -->
+    <nav class="auth-nav">
+        <a href="/" class="of-brand-logo">
+            <div class="of-logo-icon">OF</div>
+            <div class="of-logo-text">Only<span>Friends</span></div>
+        </a>
+        <div class="auth-nav-right">
+            <a href="/Home/Homepage" class="auth-nav-explore">
+                Explore Events <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+            <a href="@Url.Action("Index", "Login")" class="auth-nav-cta" id="goLogin">Sign In</a>
+        </div>
+    </nav>
+
+    <!-- Shell -->
+    <div class="auth-shell">
+
+        <!-- Left decorative panel -->
+        <div class="auth-panel">
+            <a href="/" class="auth-panel-brand">
+                <div class="auth-panel-logo-icon">OF</div>
+                <div class="auth-panel-logo-text">Only<span>Friends</span></div>
+            </a>
+
+            <h2 class="auth-panel-headline">
+                Join hundreds of<br>
+                people making <em>great memories</em>
+            </h2>
+            <p class="auth-panel-sub">
+                Create your free account and start organising events, meeting new friends, and building your community.
+            </p>
+            <div class="auth-panel-pills">
+                <span class="auth-pill"><i class="fa-solid fa-bolt"></i> Free forever</span>
+                <span class="auth-pill"><i class="fa-solid fa-shield-halved"></i> Private & secure</span>
+                <span class="auth-pill"><i class="fa-solid fa-face-smile"></i> Easy to use</span>
+            </div>
+        </div>
+
+        <!-- Right form panel -->
+        <div class="auth-form-panel">
+            <div class="auth-form-inner">
+                <h1 class="auth-form-title">Create account</h1>
+                <p class="auth-form-sub">Join the OnlyFriends community today.</p>
 
                 <form asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
 
-                    <div class="input-group" style="text-align: left; margin-bottom: 20px;">
-                        <div class="label-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 500;">
-                            <label asp-for="Username">Username</label>
-                        </div>
-                        <input asp-for="Username" placeholder="johndoe" />
-                        <span asp-validation-for="Username" class="error-text"></span>
+                    <div class="auth-input-group">
+                        <label asp-for="Username">Username</label>
+                        <input asp-for="Username" placeholder="johndoe" autocomplete="username" />
+                        <span asp-validation-for="Username" class="auth-field-error"></span>
                     </div>
 
-                    <div class="form-row">
-                        <div class="input-group" style="text-align: left; margin-bottom: 20px;">
-                            <div class="label-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 500;">
-                                <label asp-for="FirstName">First name</label>
-                            </div>
+                    <div class="auth-row">
+                        <div class="auth-input-group">
+                            <label asp-for="FirstName">First name</label>
                             <input asp-for="FirstName" placeholder="John" />
-                            <span asp-validation-for="FirstName" class="error-text"></span>
+                            <span asp-validation-for="FirstName" class="auth-field-error"></span>
                         </div>
-                        <div class="input-group" style="text-align: left; margin-bottom: 20px;">
-                            <div class="label-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 500;">
-                                <label asp-for="LastName">Last name</label>
-                            </div>
+                        <div class="auth-input-group">
+                            <label asp-for="LastName">Last name</label>
                             <input asp-for="LastName" placeholder="Doe" />
-                            <span asp-validation-for="LastName" class="error-text"></span>
+                            <span asp-validation-for="LastName" class="auth-field-error"></span>
                         </div>
                     </div>
 
-                    <div class="input-group" style="text-align: left; margin-bottom: 20px;">
-                        <div class="label-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 500;">
-                            <label asp-for="Email">Email</label>
-                        </div>
-                        <input asp-for="Email" placeholder="name@example.com" />
-                        <span asp-validation-for="Email" class="error-text"></span>
+                    <div class="auth-input-group">
+                        <label asp-for="Email">Email</label>
+                        <input asp-for="Email" placeholder="name@example.com" autocomplete="email" />
+                        <span asp-validation-for="Email" class="auth-field-error"></span>
                     </div>
 
-                    <div class="input-group" style="text-align: left; margin-bottom: 20px;">
-                        <div class="label-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 500;">
-                            <label asp-for="Password">Password</label>
-                        </div>
-                        <div class="password-wrapper">
-                            <input asp-for="Password" id="passwordField" type="password" placeholder="••••••••" />
-                            <button type="button" class="toggle-pw-btn" id="togglePassword" aria-label="toggle password">
+                    <div class="auth-input-group">
+                        <label asp-for="Password">Password</label>
+                        <div class="auth-input-wrap">
+                            <input asp-for="Password" id="passwordField" type="password"
+                                   placeholder="••••••••" autocomplete="new-password" />
+                            <button type="button" class="auth-toggle-eye" aria-label="toggle password" data-target="passwordField">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
                         </div>
-                        <span asp-validation-for="Password" class="error-text"></span>
+                        <span asp-validation-for="Password" class="auth-field-error"></span>
                     </div>
 
-                    <button type="submit" class="btn-submit">Register</button>
+                    <button type="submit" class="auth-submit">Create account</button>
                 </form>
 
-                <div class="footer-link">
-                    <span>Already have an account? </span>
-                    <a asp-controller="Login" asp-action="Index">Login</a>
+                <div class="auth-footer-link">
+                    Already have an account? <a asp-controller="Login" asp-action="Index" id="goLoginLink">Sign in</a>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     @if (ViewBag.RegisterSuccess == true)
     {
         <div class="register-modal-backdrop" id="registerSuccessModal">
             <div class="register-modal">
-                <div class="register-modal-title">Registration successful</div>
-                <div class="register-modal-text">Click the button below to return to the login page.</div>
-                <div class="register-modal-actions">
-                    <button type="button" class="register-modal-btn register-modal-btn-primary" id="registerGoLogin">Go to Login</button>
-                </div>
+                <div class="register-modal-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="register-modal-title">You're all set!</div>
+                <div class="register-modal-text">Your account has been created successfully. Sign in to start connecting.</div>
+                <button type="button" class="register-modal-btn" id="registerGoLogin">Go to Sign In</button>
             </div>
         </div>
     }
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var toggleBtn = document.getElementById('togglePassword');
-            var pwdInput = document.getElementById('passwordField');
-            if (toggleBtn && pwdInput) {
-                toggleBtn.addEventListener('click', function () {
-                    var isPwd = pwdInput.type === 'password';
-                    pwdInput.type = isPwd ? 'text' : 'password';
-                    var icon = toggleBtn.querySelector('i');
-                    if (isPwd) {
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
-                    } else {
-                        icon.classList.remove('fa-eye-slash');
-                        icon.classList.add('fa-eye');
-                    }
-                });
-            }
-            var goLoginBtn = document.getElementById('registerGoLogin');
-            if (goLoginBtn) {
-                goLoginBtn.addEventListener('click', function () { window.location.href = '/login'; });
-            }
+        // Toggle password visibility
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.auth-toggle-eye');
+            if (!btn) return;
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+            const isPwd = input.type === 'password';
+            input.type = isPwd ? 'text' : 'password';
+            const icon = btn.querySelector('i');
+            icon.classList.toggle('fa-eye', !isPwd);
+            icon.classList.toggle('fa-eye-slash', isPwd);
+        });
+
+        // Smooth transitions
+        function navigateWithTransition(url) {
+            document.body.classList.add('is-leaving');
+            setTimeout(() => { window.location.href = url; }, 260);
+        }
+        document.getElementById('goLoginLink')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            navigateWithTransition(this.href);
+        });
+        document.getElementById('goLogin')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            navigateWithTransition(this.href);
+        });
+        document.getElementById('registerGoLogin')?.addEventListener('click', function () {
+            navigateWithTransition('/login');
         });
     </script>
 </body>
