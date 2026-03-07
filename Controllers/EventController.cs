@@ -189,8 +189,10 @@ namespace OnlyFriends.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var categories = await _categoryService.GetCategoriesAsync();
+            ViewData["Categories"] = categories;
             return View();
         }
 
@@ -218,6 +220,10 @@ namespace OnlyFriends.Controllers
                     if (activityToCreate.RegistrationDeadline.Value < DateTime.UtcNow)
                     {
                         return BadRequest("Registration deadline cannot be in the past");
+                    }
+                    if (activityToCreate.RegistrationDeadline.Value > activityToCreate.StartAt)
+                    {
+                        return BadRequest("Registration deadline must be before or equal to start time");
                     }
                 }
                 activityToCreate.OwnerId = userId;
