@@ -1,20 +1,9 @@
 @using OnlyFriends.Models.DTOS.EventDTOS
+@using OnlyFriends.Models.DTOS.CategoryDTOS
 @model CreateEventDTO
 @{
     ViewData["Title"] = "Create Activity";
-    var presetCategories = new[]
-    {
-        "Sports",
-        "Games",
-        "Travel",
-        "Music",
-        "Learning",
-        "Technology",
-        "Food",
-        "Movies",
-        "Hobbies",
-        "Volunteering"
-    };
+    var categories = (ViewData["Categories"] as IEnumerable<GetCategoryDTO>)?.ToList() ?? new List<GetCategoryDTO>();
 }
 
 @section Styles {
@@ -174,9 +163,9 @@
                     <select class="eventCategorySelect"
                             style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px; height:42px;">
                         <option value="">Select a category</option>
-                        @foreach (var categoryName in presetCategories)
+                        @foreach (var category in categories)
                         {
-                            <option value="@categoryName">@categoryName</option>
+                            <option value="@category.CategoryName">@category.CategoryName</option>
                         }
                     </select>
                     <button type="button"
@@ -237,6 +226,46 @@
         const defaultLng = 100.5018;
 
         let posterDataUrl = null;
+
+        function parseDateTime(dateValue, timeValue) {
+            if (!dateValue || !timeValue) return null;
+            return new Date(`${dateValue}T${timeValue}:00`);
+        }
+
+        function validateRegistrationDeadlineRange(showAlert = false) {
+            const startDate = document.getElementById('startDate')?.value;
+            const startTime = document.getElementById('startTime')?.value;
+            const deadlineDate = document.getElementById('registrationDeadlineDate')?.value;
+            const deadlineTime = document.getElementById('registrationDeadlineTime')?.value;
+            const deadlineDateInput = document.getElementById('registrationDeadlineDate');
+
+            if (deadlineDateInput) {
+                deadlineDateInput.min = new Date().toISOString().split('T')[0];
+                deadlineDateInput.max = startDate || '';
+            }
+
+            if (!deadlineDate || !deadlineTime || !startDate || !startTime) {
+                return true;
+            }
+
+            const now = new Date();
+            const startAt = parseDateTime(startDate, startTime);
+            const deadlineAt = parseDateTime(deadlineDate, deadlineTime);
+
+            if (!startAt || !deadlineAt) return true;
+
+            if (deadlineAt < now) {
+                if (showAlert) alert("❌ Registration deadline must be from now onward");
+                return false;
+            }
+
+            if (deadlineAt > startAt) {
+                if (showAlert) alert("❌ Registration deadline must be before or equal to Start time");
+                return false;
+            }
+
+            return true;
+        }
 
         function setRemovePosterButtonVisible(isVisible) {
             const btn = document.getElementById('removePosterBtn');
@@ -301,6 +330,12 @@
             startSelect.value = "16:30";
             endSelect.value = "17:30";
             registrationDeadlineSelect.value = "15:30";
+
+            document.getElementById('startDate')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            document.getElementById('startTime')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            document.getElementById('registrationDeadlineDate')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            document.getElementById('registrationDeadlineTime')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            validateRegistrationDeadlineRange(false);
 
             // Bind click to the whole box instead of the small generic button
             document.getElementById('posterPreviewBox').closest('.poster-upload-box').addEventListener('click', () => {
@@ -573,6 +608,10 @@
                         return;
                     }
                 }
+            }
+
+            if (!validateRegistrationDeadlineRange(true)) {
+                return;
             }
 
             eventToSubmit = {

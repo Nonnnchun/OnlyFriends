@@ -176,16 +176,17 @@
                         @if (((User?.Identity?.IsAuthenticated) ?? false) && !string.IsNullOrEmpty(uname))
                         {
                             <a href="/user/@profileSlug">View Profile</a>
+                            <a href="/setting">Settings</a>
                         }
                         else
                         {
                             <a href="/login">Sign In</a>
+                            <a href="/login" class="requires-auth" data-auth-action="settings">Settings</a>
                         }
-                        <a href="/setting">Settings</a>
                     </div>
                     <div class="app-footer-column">
                         <div class="app-footer-title">Info</div>
-                        <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <a asp-controller="Home" asp-action="About">About</a>
                         <span class="app-footer-badge">Sample Project</span>
                     </div>
                 </div>
@@ -198,6 +199,31 @@
     </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js"></script>
+    <script>
+        (function () {
+            const guardedLinks = document.querySelectorAll('a.requires-auth');
+            if (!guardedLinks.length) return;
+
+            guardedLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const heroLoginModal = document.getElementById('heroLoginPrompt');
+                    if (heroLoginModal) {
+                        e.preventDefault();
+                        const action = link.getAttribute('data-auth-action') || 'default';
+                        if (typeof window.showHeroLoginPrompt === 'function') {
+                            window.showHeroLoginPrompt(action);
+                        } else {
+                            heroLoginModal.classList.remove('is-hidden');
+                        }
+                        return;
+                    }
+                    // Fallback for pages without hero modal
+                    e.preventDefault();
+                    window.location.href = '/login';
+                });
+            });
+        })();
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 
