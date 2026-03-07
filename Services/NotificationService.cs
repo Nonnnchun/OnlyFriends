@@ -22,7 +22,7 @@ namespace OnlyFriends.Services
       Task AddJoinRequestNotificationAsync(int ownerId, int fromUserId, string requesterUsername, string eventTitle);
 
       // Event invite notifications
-      Task AddEventInviteNotificationAsync(int toUserId, int fromUserId, string inviterUsername, string eventTitle);
+      Task AddEventInviteNotificationAsync(int toUserId, int fromUserId, string inviterUsername, string eventTitle, int eventId);
 
       // Participant status updates
       Task AddParticipantStatusNotificationAsync(int toUserId, string eventTitle, string status);
@@ -151,14 +151,21 @@ namespace OnlyFriends.Services
          await _context.SaveChangesAsync();
       }
 
-      public async Task AddEventInviteNotificationAsync(int toUserId, int fromUserId, string inviterUsername, string eventTitle)
+      public async Task AddEventInviteNotificationAsync(int toUserId, int fromUserId, string inviterUsername, string eventTitle, int eventId)
       {
+         var exists = await _context.Notifications.AnyAsync(n =>
+            n.Type == "EventInvite" &&
+            n.ToUserId == toUserId &&
+            n.EventId == eventId);
+         if (exists) return;
+
          var notification = new Notification
          {
             Type = "EventInvite",
             ToUserId = toUserId,
             FromUserId = fromUserId,
             EventName = eventTitle,
+            EventId = eventId,
             Message = $"{inviterUsername} invited you to \"{eventTitle}\"",
             CreatedAt = DateTime.UtcNow
          };

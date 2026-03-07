@@ -568,6 +568,10 @@
                         alert("❌ Registration deadline cannot be in the past");
                         return;
                     }
+                    if (startAtStr && deadlineFull > new Date(startAtStr)) {
+                        alert("❌ Registration deadline cannot be after the event starts");
+                        return;
+                    }
                 }
             }
 
