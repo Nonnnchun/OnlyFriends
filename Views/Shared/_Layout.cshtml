@@ -110,16 +110,18 @@
                     @if (isHomePage)
                     {
                         <div class="dropdown" id="filterDropdown">
-                            <button class="nav-btn" onclick="toggleFilter()" style="display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #ced4da; padding:6px 16px; border-radius:99px; color:#212529; font-weight:600; cursor:pointer; font-size:0.95rem; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
-                                <i class="fa-solid fa-filter"></i> Filter Content
+                            <button class="filter-btn" onclick="toggleFilter()">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Filter</span>
                             </button>
-                            <div class="dropdown-content" id="filterMenu" style="width:280px; padding:15px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); border:1px solid #eee;">
-                                <div style="font-weight:700; margin-bottom:12px; font-size:1.1rem;">Activity Categories</div>
-                                <div id="filterCategoryList">
-                                    <div class="filter-item" style="padding:8px 0; color:#6c757d;">Loading categories...</div>
+                            <div class="dropdown-content filter-menu-panel" id="filterMenu">
+                                <div class="filter-menu-header">
+                                    <span class="filter-menu-title">Activity Categories</span>
+                                    <button class="filter-reset-inline" onclick="resetFilter()">Reset</button>
                                 </div>
-                                <button class="btn-apply" onclick="applyFilter()" style="width:100%; margin-top:15px; background:#111; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">Apply</button>
-                                <button class="btn-apply" onclick="resetFilter()" style="width:100%; margin-top:8px; background:#fff; color:#111; border:1px solid #ced4da; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">Reset Filter</button>
+                                <div id="filterCategoryList">
+                                    <div class="filter-item filter-loading">Loading categories...</div>
+                                </div>
                             </div>
                         </div>
                     }
@@ -176,16 +178,17 @@
                         @if (((User?.Identity?.IsAuthenticated) ?? false) && !string.IsNullOrEmpty(uname))
                         {
                             <a href="/user/@profileSlug">View Profile</a>
+                            <a href="/setting">Settings</a>
                         }
                         else
                         {
                             <a href="/login">Sign In</a>
+                            <a href="/register">Sign Up</a>
                         }
-                        <a href="/setting">Settings</a>
                     </div>
                     <div class="app-footer-column">
                         <div class="app-footer-title">Info</div>
-                        <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <a asp-controller="Home" asp-action="About">About us</a>
                         <span class="app-footer-badge">Sample Project</span>
                     </div>
                 </div>
@@ -198,6 +201,31 @@
     </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js"></script>
+    <script>
+        (function () {
+            const guardedLinks = document.querySelectorAll('a.requires-auth');
+            if (!guardedLinks.length) return;
+
+            guardedLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const heroLoginModal = document.getElementById('heroLoginPrompt');
+                    if (heroLoginModal) {
+                        e.preventDefault();
+                        const action = link.getAttribute('data-auth-action') || 'default';
+                        if (typeof window.showHeroLoginPrompt === 'function') {
+                            window.showHeroLoginPrompt(action);
+                        } else {
+                            heroLoginModal.classList.remove('is-hidden');
+                        }
+                        return;
+                    }
+                    // Fallback for pages without hero modal
+                    e.preventDefault();
+                    window.location.href = '/login';
+                });
+            });
+        })();
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 

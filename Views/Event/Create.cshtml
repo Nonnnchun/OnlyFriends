@@ -1,20 +1,9 @@
 @using OnlyFriends.Models.DTOS.EventDTOS
+@using OnlyFriends.Models.DTOS.CategoryDTOS
 @model CreateEventDTO
 @{
     ViewData["Title"] = "Create Activity";
-    var presetCategories = new[]
-    {
-        "Sports",
-        "Games",
-        "Travel",
-        "Music",
-        "Learning",
-        "Technology",
-        "Food",
-        "Movies",
-        "Hobbies",
-        "Volunteering"
-    };
+    var categories = (ViewData["Categories"] as IEnumerable<GetCategoryDTO>)?.ToList() ?? new List<GetCategoryDTO>();
 }
 
 @section Styles {
@@ -166,26 +155,19 @@
             <span>📝</span>
             <input type="text" id="eventInfo" placeholder="Add description">
         </div>
-        <div class="input-group" style="flex-direction: column; align-items: stretch;">
-            <span style="margin-bottom:5px;">🏷️ Activity categories</span>
-    
-            <div id="categoryContainer">
-                <div class="category-row" style="display:flex; gap:10px; margin-bottom:8px;">
-                    <select class="eventCategorySelect"
-                            style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px; height:42px;">
-                        <option value="">Select a category</option>
-                        @foreach (var categoryName in presetCategories)
-                        {
-                            <option value="@categoryName">@categoryName</option>
-                        }
-                    </select>
+        <div class="input-group" style="flex-direction: column; align-items: stretch; gap: 10px;">
+            <span>🏷️ Activity categories</span>
+            <div id="categoryContainer" class="category-pills-wrap">
+                @foreach (var category in categories)
+                {
                     <button type="button"
-                            class="category-row-btn"
-                            onclick="onCategoryRowAction(this)"
-                            style="width:42px; min-width:42px; border:1px solid #ced4da; border-radius:8px; background:#fff; cursor:pointer; font-size:1.1rem; font-weight:700;">
-                        +
+                            class="create-category-pill"
+                            data-cat-name="@category.CategoryName"
+                            onclick="toggleCreateCategoryPill(this)">
+                        <span class="create-pill-check">✓</span>
+                        @category.CategoryName
                     </button>
-                </div>
+                }
             </div>
         </div>
         <div class="section-title">Activity options</div>
@@ -237,6 +219,46 @@
         const defaultLng = 100.5018;
 
         let posterDataUrl = null;
+
+        function parseDateTime(dateValue, timeValue) {
+            if (!dateValue || !timeValue) return null;
+            return new Date(`${dateValue}T${timeValue}:00`);
+        }
+
+        function validateRegistrationDeadlineRange(showAlert = false) {
+            const startDate = document.getElementById('startDate')?.value;
+            const startTime = document.getElementById('startTime')?.value;
+            const deadlineDate = document.getElementById('registrationDeadlineDate')?.value;
+            const deadlineTime = document.getElementById('registrationDeadlineTime')?.value;
+            const deadlineDateInput = document.getElementById('registrationDeadlineDate');
+
+            if (deadlineDateInput) {
+                deadlineDateInput.min = new Date().toISOString().split('T')[0];
+                deadlineDateInput.max = startDate || '';
+            }
+
+            if (!deadlineDate || !deadlineTime || !startDate || !startTime) {
+                return true;
+            }
+
+            const now = new Date();
+            const startAt = parseDateTime(startDate, startTime);
+            const deadlineAt = parseDateTime(deadlineDate, deadlineTime);
+
+            if (!startAt || !deadlineAt) return true;
+
+            if (deadlineAt < now) {
+                if (showAlert) alert("❌ Registration deadline must be from now onward");
+                return false;
+            }
+
+            if (deadlineAt > startAt) {
+                if (showAlert) alert("❌ Registration deadline must be before or equal to Start time");
+                return false;
+            }
+
+            return true;
+        }
 
         function setRemovePosterButtonVisible(isVisible) {
             const btn = document.getElementById('removePosterBtn');
@@ -301,6 +323,12 @@
             startSelect.value = "16:30";
             endSelect.value = "17:30";
             registrationDeadlineSelect.value = "15:30";
+
+            document.getElementById('startDate')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            document.getElementById('startTime')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            document.getElementById('registrationDeadlineDate')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            document.getElementById('registrationDeadlineTime')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            validateRegistrationDeadlineRange(false);
 
             // Bind click to the whole box instead of the small generic button
             document.getElementById('posterPreviewBox').closest('.poster-upload-box').addEventListener('click', () => {
@@ -453,49 +481,14 @@
 
         let eventToSubmit = null;
 
-        function createCategoryRow(optionsHtml) {
-            const row = document.createElement('div');
-            row.className = 'category-row';
-            row.style.cssText = 'display:flex; gap:10px; margin-bottom:8px;';
-            row.innerHTML = `
-                <select class="eventCategorySelect" style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px; height:42px;">
-                    ${optionsHtml}
-                </select>
-                <button type="button"
-                        class="category-row-btn"
-                        onclick="onCategoryRowAction(this)"
-                        style="width:42px; min-width:42px; border:1px solid #ced4da; border-radius:8px; background:#fff; cursor:pointer; font-size:1.1rem; font-weight:700;">
-                    +
-                </button>`;
-            return row;
+        function toggleCreateCategoryPill(btn) {
+            btn.classList.toggle('selected');
         }
 
-        function refreshCategoryRowButtons() {
-            const rows = [...document.querySelectorAll('#categoryContainer .category-row')];
-            rows.forEach((row, index) => {
-                const btn = row.querySelector('.category-row-btn');
-                if (!btn) return;
-                btn.textContent = index === rows.length - 1 ? '+' : '-';
-                btn.title = index === rows.length - 1 ? 'Add category' : 'Remove this category';
-            });
-        }
-
-        function onCategoryRowAction(button) {
-            const rows = [...document.querySelectorAll('#categoryContainer .category-row')];
-            const isLastRow = rows.length > 0 && button.closest('.category-row') === rows[rows.length - 1];
-            const container = document.getElementById('categoryContainer');
-            if (!container) return;
-
-            if (isLastRow) {
-                const optionsHtml = rows[0]?.querySelector('.eventCategorySelect')?.innerHTML || '<option value=\"\">Select a category</option>';
-                const newRow = createCategoryRow(optionsHtml);
-                container.appendChild(newRow);
-            } else {
-                button.closest('.category-row')?.remove();
-            }
-
-            refreshCategoryRowButtons();
-        }
+        // Legacy stubs (no longer used)
+        function createCategoryRow() {}
+        function refreshCategoryRowButtons() {}
+        function onCategoryRowAction() {}
 
         function submitEvent() {
             const title = document.getElementById('eventTitle').value;
@@ -535,8 +528,8 @@
             const selectedEventType = document.getElementById('eventType').value;
             const eventTypeEnum = selectedEventType === 'online' ? EnumEventType.Online : EnumEventType.Offline;
 
-            const categoryNames = [...document.querySelectorAll('.eventCategorySelect')]
-                .map(select => String(select.value || '').trim())
+            const categoryNames = [...document.querySelectorAll('#categoryContainer .create-category-pill.selected')]
+                .map(btn => String(btn.dataset.catName || '').trim())
                 .filter(Boolean);
             const uniqueCategoryNames = [...new Set(categoryNames)];
 
@@ -573,6 +566,10 @@
                         return;
                     }
                 }
+            }
+
+            if (!validateRegistrationDeadlineRange(true)) {
+                return;
             }
 
             eventToSubmit = {

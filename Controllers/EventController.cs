@@ -195,8 +195,10 @@ namespace OnlyFriends.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var categories = await _categoryService.GetCategoriesAsync();
+            ViewData["Categories"] = categories;
             return View();
         }
 

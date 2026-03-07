@@ -341,3 +341,7 @@ body {
 .app-header .custom-navbar .guest-explore-link:hover {
     color: var(--primary-color) !important;
 }
+
+.app-shell > .container > main[role="main"] {
+    padding-top: 16px;
+}

@@ -1,40 +1,467 @@
-/* ====================================================
-   1. ส่วนคลุมทั้งหน้า (บังคับกว้าง-สูงเต็มจอ พื้นขาวล้วน)
-   ==================================================== */
-.landing-wrapper {
-    font-family: 'Prompt', sans-serif;
-    background-color: #ffffff;
+/* ────────────────────────────────────────────
 
-    /* ให้กินพื้นที่เต็มจอ แต่ไม่ทับ footer */
+/* ────────────────────────────────────────────
+   BREAK OUT OF .container Bootstrap constraint
+──────────────────────────────────────────── */
+.container:has(.landing-wrapper),
+main:has(.landing-wrapper) {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* ─────────────────────────────────────────────
+   1. WRAPPER
+───────────────────────────────────────────── */
+.landing-wrapper {
+    font-family: 'Inter', 'Prompt', system-ui, sans-serif;
+    background:
+        radial-gradient(ellipse 900px 540px at 70% -10%, rgba(0, 175, 240, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 700px 400px at 10% 60%, rgba(124, 58, 237, 0.08) 0%, transparent 55%),
+        linear-gradient(180deg, #f8fafe 0%, #ffffff 100%);
     width: 100%;
     min-height: 100vh;
-
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
 }
 
-/* ====================================================
-   2. Navbar (ปรับให้ชิดขอบซ้าย-ขวามากขึ้น)
-   ==================================================== */
+/* ─────────────────────────────────────────────
+   2. HERO SECTION
+─────────────────────────────────────────────*/
+.hero-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    max-width: 1200px;
+    width: 92%;
+    margin: 0 auto;
+    padding: 60px 20px 70px;
+    gap: 40px;
+    flex: 1;
+    position: relative;
+}
+
+/* ── Left col ── */
+.hero-content {
+    flex: 1;
+    max-width: 560px;
+}
+
+/* Badge pill */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 175, 240, 0.1);
+    border: 1px solid rgba(0, 175, 240, 0.25);
+    color: #0077a8;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 99px;
+    margin-bottom: 24px;
+    letter-spacing: 0.01em;
+}
+.hero-badge-dot {
+    width: 7px;
+    height: 7px;
+    background: #00AFF0;
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+}
+
+/* Headline */
+.hero-title {
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 900;
+    line-height: 1.15;
+    color: #0f1523;
+    letter-spacing: -0.04em;
+    margin: 0 0 20px;
+}
+.hero-title-gradient {
+    background: linear-gradient(125deg, #00AFF0 0%, #7c3aed 55%, #ff5eb1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline;
+}
+
+/* Subtitle */
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: #4b5563;
+    line-height: 1.75;
+    margin-bottom: 36px;
+    max-width: 46ch;
+}
+
+/* CTA row */
+.hero-cta-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+}
+
+.hero-cta-main {
+    font-size: 15px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 18px rgba(0, 175, 240, 0.35);
+    transition: transform 0.18s, box-shadow 0.18s;
+}
+.hero-cta-main:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0, 175, 240, 0.45);
+}
+
+.hero-cta-ghost {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s, gap 0.15s;
+}
+.hero-cta-ghost:hover {
+    color: #00AFF0;
+    gap: 10px;
+}
+
+/* Social proof */
+.hero-social-proof {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.proof-avatars {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+.proof-avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    margin-left: -8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.proof-avatars .proof-avatar:first-child { margin-left: 0; }
+.proof-text {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ── Right col ── */
+.hero-image-container {
+    flex: 1.1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.hero-image-glow {
+    position: absolute;
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(0,175,240,0.18) 0%, rgba(124,58,237,0.10) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: glow-pulse 4s ease-in-out infinite;
+    z-index: 0;
+}
+@keyframes glow-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+
+.hero-image {
+    position: relative;
+    z-index: 1;
+    width: min(420px, 90%);
+    height: auto;
+    border-radius: 50%;
+    border: 10px solid #ffffff;
+    box-shadow: 0 30px 70px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(0,0,0,0.04);
+    animation: float-hero 6s ease-in-out infinite;
+}
+@keyframes float-hero {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-14px); }
+}
+
+/* Floating notification cards */
+.float-card {
+    position: absolute;
+    z-index: 2;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 14px;
+    padding: 10px 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+    white-space: nowrap;
+}
+.float-card span { display: block; font-weight: 700; font-size: 13px; }
+.float-card small { display: block; font-weight: 400; font-size: 11px; color: #6b7280; }
+.float-card i { font-size: 18px; }
+
+.float-card-top {
+    top: 4%;
+    left: -2%;
+    animation: float-card-up 5s ease-in-out infinite;
+}
+.float-card-bottom {
+    bottom: 8%;
+    right: -4%;
+    animation: float-card-up 5s ease-in-out infinite 1.5s;
+}
+@keyframes float-card-up {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* ──────────────────────────────────────────────
+   3. FEATURE CARDS SECTION
+────────────────────────────────────────────── */
+.hero-highlights,
+.hero-steps {
+    max-width: 1200px;
+    width: 92%;
+    margin: 0 auto 56px;
+}
+
+.section-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    color: #00AFF0;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+}
+
+.hero-highlights h2,
+.hero-steps h2 {
+    margin: 0 0 28px;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    color: #0f1523;
+    letter-spacing: -0.025em;
+}
+
+.highlight-grid,
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+/* ── Card base (scroll reveal) ── */
+.highlight-card,
+.step-card {
+    background: #ffffff;
+    border: 1px solid #e8edf5;
+    border-radius: 20px;
+    padding: 24px 22px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease,
+                opacity 0.5s ease, translate 0.5s ease;
+    opacity: 0;
+    translate: 0 24px;
+}
+.highlight-card.revealed,
+.step-card.revealed {
+    opacity: 1;
+    translate: 0 0;
+}
+
+.highlight-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 175, 240, 0.3);
+    box-shadow: 0 12px 36px rgba(0, 175, 240, 0.12);
+}
+.step-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(124, 58, 237, 0.3);
+    box-shadow: 0 12px 36px rgba(124, 58, 237, 0.10);
+}
+
+/* Icons */
+.highlight-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+}
+.icon-blue   { background: rgba(0,175,240,0.12);  color: #0099d6; }
+.icon-purple { background: rgba(124,58,237,0.12); color: #7c3aed; }
+.icon-teal   { background: rgba(20,184,166,0.12); color: #0f9d8d; }
+
+.highlight-card h3,
+.step-card h3 {
+    margin: 0 0 8px;
+    color: #0f1523;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+.highlight-card p,
+.step-card p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.6;
+    font-size: 0.93rem;
+}
+
+/* Step number */
+.step-no {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #7c3aed22, #00AFF022);
+    color: #6d28d9;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
+}
+
+/* ──────────────────────────────────────────────
+   4. CTA BANNER
+────────────────────────────────────────────── */
+.hero-cta-banner {
+    background: linear-gradient(135deg, #0f1523 0%, #1a2240 100%) !important;
+    border-radius: 24px;
+    padding: 56px 40px;
+    text-align: center;
+    max-width: 1200px;
+    width: 92%;
+    margin: 0 auto 72px;
+    position: relative;
+    overflow: hidden;
+}
+.hero-cta-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 600px 300px at 50% -20%, rgba(0,175,240,0.20) 0%, transparent 60%);
+}
+.hero-cta-banner h2 {
+    color: #ffffff;
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin: 0 0 10px;
+    position: relative;
+}
+.hero-cta-banner p {
+    color: rgba(255,255,255,0.7);
+    font-size: 1rem;
+    margin: 0 0 28px;
+    position: relative;
+}
+.hero-cta-banner .of-btn-primary {
+    position: relative;
+    font-size: 15px;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(0,175,240,0.4);
+    transition: transform 0.18s, box-shadow 0.18s;
+}
+.hero-cta-banner .of-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,175,240,0.5);
+}
+
+/* ──────────────────────────────────────────────
+   5. RESPONSIVE
+────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .hero-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 20px 50px;
+        gap: 40px;
+    }
+    .hero-content { max-width: 100%; }
+    .hero-badge { margin: 0 auto 24px; }
+    .hero-cta-row { justify-content: center; }
+    .hero-social-proof { justify-content: center; }
+    .hero-subtitle { max-width: 100%; }
+
+    .hero-image-container { width: 100%; }
+    .hero-image { width: min(320px, 80%); }
+    .hero-image-glow { width: 320px; height: 320px; }
+
+    .float-card-top  { top:  2%; left: 2%; }
+    .float-card-bottom { bottom: 2%; right: 2%; }
+
+    .highlight-grid,
+    .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .hero-cta-banner {
+        border-radius: 16px;
+        padding: 40px 24px;
+    }
+}
+
+/* ──────────────────────────────────────────────
+   6. LEGACY LANDING NAV (keep existing nav styles)
+────────────────────────────────────────────── */
 .landing-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
-    /* 👇 ปรับให้กว้าง 92% และ max-width 1600px เท่ากับส่วน hero-section 👇 */
-    max-width: 1600px; 
-    width: 92%;        
-    margin: 0 auto;    
-    padding: 30px 20px; /* ลด padding ซ้ายขวาลง และเว้นขอบบนล่างให้ดูโปร่งขึ้น */
-    box-sizing: border-box; /* ป้องกันไม่ให้ขอบล้นจอ */
+    max-width: 1200px;
+    width: 92%;
+    margin: 0 auto;
+    padding: 24px 20px;
+    box-sizing: border-box;
 }
-
-.icon-star {
-    font-size: 24px;
-    color: #a0a0a0;
-}
-
 .nav-right {
     display: flex;
     align-items: center;
@@ -42,182 +469,24 @@
     font-size: 14px;
     color: #666;
 }
-
-.nav-link {
-    color: #666;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.nav-link:hover {
-    color: #000;
-}
-
+.nav-link { color: #666; text-decoration: none; transition: color 0.2s; }
+.nav-link:hover { color: #000; }
 .btn-login {
     background-color: #f0f0f0;
     color: #333;
     border: none;
-    
-    /* 👇 ปรับ 2 ค่านี้เพื่อให้ปุ่มใหญ่ขึ้น 👇 */
-    padding: 10px 20px;  /* จากเดิม 8px 16px (12px คือความสูงบนล่าง, 24px คือความกว้างซ้ายขวา) */
-    font-size: 14px;     /* เพิ่มขนาดตัวอักษรให้พอดีกับปุ่ม */
-    
-    border-radius: 30px; /* ปรับความโค้งให้รับกับขนาดปุ่มที่ใหญ่ขึ้น (ถ้าชอบโค้งน้อยๆ ใช้ 20px เท่าเดิมได้ครับ) */
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 30px;
     font-family: inherit;
     font-weight: 600;
     cursor: pointer;
 }
-
-/* เพิ่มลูกเล่นตอนเอาเมาส์ชี้และตอนคลิกให้ดูมีมิติขึ้น */
-.btn-login:hover {
-    background-color: #e4e4e4;
-}
-
-
-/* ====================================================
-   3. เนื้อหาหลัก (ให้อยู่กึ่งกลางจอพอดี)
-   ==================================================== */
-.hero-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1600px; /* 👈 ขยายจากเดิม 1200px เป็น 1600px */
-    width: 92%;        /* 👈 บังคับให้กางออกไปใช้พื้นที่ 92% ของหน้าจอ */
-    margin: 0 auto;    
-    padding: 20px;
-    flex: 1;
-}
-
-/* ฝั่งซ้าย */
-/* ฝั่งซ้าย */
-.hero-content {
-    flex: 1;
-    max-width: 500px;
-    padding-right: 40px;
-    
-    /* 👇 เพิ่มบรรทัดนี้เพื่อดันข้อความไปทางขวา (ปรับตัวเลข 80px ได้ตามต้องการ) 👇 */
-    margin-left: 80px; 
-    margin-top: -60px;
-}
-
-.brand-logo {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #333;
-    display: flex;
-    align-items: center;
-}
-
-.icon-star-small {
-    font-size: 16px;
-    margin-left: 5px;
-    color: #ccc;
-}
-
-.hero-title {
-    font-size: 3.5rem; 
-    font-weight: 700;
-    line-height: 1.3;
-    margin-bottom: 24px;
-    color: #111;
-    letter-spacing: -1px;
-}
-
-/* ไฮไลท์: สี Gradient สำหรับตัวอักษรบรรทัดสุดท้าย */
-.text-gradient {
-    background: linear-gradient(90deg, #5b5bff, #ff5eb1, #ff9b5e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: inline-block;
-    padding-top: 8px; 
-}
-
-.hero-subtitle {
-    font-size: 1.1rem;
-    color: #555;
-    line-height: 1.5;
-    margin-bottom: 40px;
-}
-
-/* ปุ่ม "สร้างกิจกรรมแรกของคุณ" */
-.btn-primary {
-    background-color: #222222;
-    color: #ffffff;
-    border: none;
-    padding: 14px 28px;
-    border-radius: 12px; 
-    font-size: 16px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-.btn-primary:active {
-    transform: translateY(0);
-}
-
-/* ฝั่งขวา (รูปภาพ) */
-/* ฝั่งขวา (รูปภาพ) */
-.hero-image-container {
-    flex: 1.2; 
-    display: flex;
-    justify-content: center; /* 👈 (แก้เป็น center ตามขั้นตอนก่อนหน้า) */
-    align-items: center;
-    
-    /* 👇 เพิ่มบรรทัดนี้เพื่อดึงรูปขึ้นไปด้านบน (เลขติดลบยิ่งเยอะ ยิ่งขึ้นไปสูง) 👇 */
-    margin-top: -80px; 
-}
-
-.hero-image {
-    max-width: 80%;
-    height: auto;
-    border-radius: 50%; 
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-}
-
-/* รองรับมือถือ (Responsive) */
-@media (max-width: 900px) {
-    .hero-section {
-        flex-direction: column;
-        text-align: center;
-        padding: 20px;
-    }
-    
-    .hero-content {
-        padding-right: 0;
-        margin-left: 0;
-        margin-top: 0;
-        margin-bottom: 40px;
-    }
-    
-    .brand-logo {
-        justify-content: center;
-    }
-    
-    .hero-title {
-        font-size: 2.5rem;
-    }
-    
-    .hero-image-container {
-        justify-content: center;
-        margin-top: 0;
-    }
-}
-
+.btn-login:hover { background-color: #e4e4e4; }
 .landing-brand {
     font-size: 24px;
     font-weight: 700;
     color: #111;
-    text-decoration: none; /* เอาขีดเส้นใต้ออก */
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    text-decoration: none;
 }
-
-.landing-brand:hover {
-    color: #555; /* เปลี่ยนสีนิดหน่อยตอนเอาเมาส์ชี้ */
-}
+.landing-brand:hover { color: #555; }
