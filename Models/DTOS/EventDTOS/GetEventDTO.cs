@@ -19,6 +19,7 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
         // Time
         public DateTime? StartAt { get; set; }
         public DateTime? EndAt { get; set; }
+        public DateTime? RegistrationDeadline { get; set; }
         public string? TimeZone { get; set; }
         // Map pin
         public double? Latitude { get; set; }
@@ -26,7 +27,7 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
         public List<User> Users { get; set; } = [];
         public List<UserEvent> UserEvents { get; set; } = [];
         public required GetUserDTO Owner { get; set; }
-        public required GetCategoryDTO Category { get; set; }
+        public List<GetCategoryDTO> Categories { get; set; } = new List<GetCategoryDTO>();
 
     }
 }

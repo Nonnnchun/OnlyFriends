@@ -23,6 +23,9 @@ namespace OnlyFriends.Services
 
       // Event invite notifications
       Task AddEventInviteNotificationAsync(int toUserId, int fromUserId, string inviterUsername, string eventTitle);
+
+      // Participant status updates
+      Task AddParticipantStatusNotificationAsync(int toUserId, string eventTitle, string status);
    }
 
    public sealed class NotificationService : INotificationService
@@ -157,6 +160,25 @@ namespace OnlyFriends.Services
             FromUserId = fromUserId,
             EventName = eventTitle,
             Message = $"{inviterUsername} invited you to \"{eventTitle}\"",
+            CreatedAt = DateTime.UtcNow
+         };
+         _context.Notifications.Add(notification);
+         await _context.SaveChangesAsync();
+      }
+
+      public async Task AddParticipantStatusNotificationAsync(int toUserId, string eventTitle, string status)
+      {
+         var message = status == "Accepted" 
+            ? $"Your request to join \"{eventTitle}\" was accepted!"
+            : $"Your request to join \"{eventTitle}\" was rejected.";
+
+         var notification = new Notification
+         {
+            Type = "ParticipantStatus",
+            ToUserId = toUserId,
+            FromUserId = 0,
+            EventName = eventTitle,
+            Message = message,
             CreatedAt = DateTime.UtcNow
          };
          _context.Notifications.Add(notification);

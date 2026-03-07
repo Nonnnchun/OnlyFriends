@@ -119,7 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="notif-btn notif-btn-decline" onclick="declineFriendRequest(${n.fromUserId}, ${n.id})">Decline</button>
           </div>`;
       } else {
-        li.innerHTML = `<div class="notif-msg">🔔 ${escapeHtml(n.message || n.name)}</div>`;
+        const linkHtml = n.eventId ? `<a href="/event/view/${n.eventId}" style="text-decoration:none; color:inherit; display:block;">` : `<div style="display:block;">`;
+        const endLinkHtml = n.eventId ? `</a>` : `</div>`;
+        li.innerHTML = `${linkHtml}<div class="notif-msg">🔔 ${escapeHtml(n.message || n.name)}</div>${endLinkHtml}`;
+        if (n.eventId) {
+            li.style.cursor = 'pointer';
+            li.onmouseover = () => li.style.background = '#f8f9fa';
+            li.onmouseleave = () => li.style.background = '';
+        }
       }
       list.appendChild(li);
     });

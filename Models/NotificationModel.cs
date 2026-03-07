@@ -13,6 +13,9 @@ namespace Notifications.Models
       [Column(TypeName = "varchar(20)")]
       public string EventName { get; set; } = string.Empty;
 
+      // The ID of the event this notification is related to
+      public int? EventId { get; set; }
+
       // Notification type: "FriendRequest", "EventInvite", etc.
       public string Type { get; set; } = string.Empty;
 

@@ -23,15 +23,15 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
         // Time
         public DateTime? StartAt { get; set; }
         public DateTime? EndAt { get; set; }
+        public DateTime? RegistrationDeadline { get; set; }
         public string? TimeZone { get; set; }
         // Map pin
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public List<int>? CategoryIds { get; set; }
         public List<User>? Users { get; set; } = [];
         public List<UserEvent>? UserEvents { get; set; } = [];
         public GetUserDTO? Owner { get; set; }
-        public int? CategoryId { get; set; }
-        public GetCategoryDTO? Category { get; set; }
 
     }
 }

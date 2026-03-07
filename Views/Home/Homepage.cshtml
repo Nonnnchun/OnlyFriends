@@ -8,15 +8,14 @@
     IEnumerable<GetEventDTO> eventsToRender = Model.ActiveTab == "my" ? Model.JoinedEvents : Model.AllEvents;
     bool hasAnyEvents = (Model?.AllEvents?.Any() ?? false) || (Model?.JoinedEvents?.Any() ?? false);
     string lastDate = string.Empty;
+    var currentUserId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    int.TryParse(currentUserId, out int uid);
 }
 
 <div class="main-container home-page">
 
     <div class="page-header">
         <div class="page-title">กิจกรรม</div>
-        <div class="header-actions">
-            <a asp-controller="Home" asp-action="CreateActivity" class="btn-add">Create Activity</a>
-        </div>
     </div>
 
     @if (hasAnyEvents)
@@ -65,7 +64,12 @@
                                     👤 โดย @(item.Owner?.Username ?? "ไม่ระบุ")
                                 </div>
                                 <div class="event-location">📍 @item.Location</div>
-                                <div class="event-tags">
+                                <div class="event-tags" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px;">
+                                    @if(item.Categories != null && item.Categories.Any()) {
+                                        @foreach(var cat in item.Categories) {
+                                            <span class="tag-category" style="background:#f1f3f5; color:#495057; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:600;">@cat.CategoryName</span>
+                                        }
+                                    }
                                     @if (item.EventStatus == EnumEventStatus.Open)
                                     {
                                         <span class="tag-status">เปิดรับสมัคร</span>
@@ -86,6 +90,18 @@
                                         }
                                         +@participantCount
                                     </span>
+                                    @if(Model.ActiveTab == "my")
+                                    {
+                                        var myStatus = item.UserEvents?.FirstOrDefault(ue => ue.UserId == uid)?.RequestStatus;
+                                        if (myStatus != null)
+                                        {
+                                            string statusColor = myStatus == EnumRequestStatus.Pending ? "#fd7e14" : (myStatus == EnumRequestStatus.Accepted ? "#198754" : "#dc3545");
+                                            string statusText = myStatus == EnumRequestStatus.Pending ? "กำลังรออนุมัติ (Pending)" : (myStatus == EnumRequestStatus.Accepted ? "เข้าร่วมแล้ว (Accepted)" : "ถูกปฏิเสธ (Rejected)");
+                                            <span class="tag-my-status" style="background:@(statusColor)15; color:@statusColor; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:700;">
+                                                @(statusText)
+                                            </span>
+                                        }
+                                    }
                                 </div>
                             </div>
                             <div class="event-image">
@@ -129,3 +145,27 @@
     }
 
 </div>
+
+@if (!(User?.Identity?.IsAuthenticated ?? false))
+{
+    <div class="register-modal-backdrop" id="authRequiredModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+        <div class="register-modal" style="background:#fff; border-radius:14px; padding:24px; max-width:360px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+            <div style="font-size:1.2rem; font-weight:700; margin-bottom:10px;">กรุณาเข้าสู่ระบบ</div>
+            <div style="color:#555; margin-bottom:20px;">คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถดูรายละเอียดหรือเข้าร่วมกิจกรรมได้</div>
+            <button onclick="window.location.href='/login'" style="background:#111; color:#fff; border:none; padding:10px 20px; border-radius:99px; cursor:pointer;">ไปหน้า Login</button>
+            <button onclick="document.getElementById('authRequiredModal').style.display='none'; document.body.style.overflow='auto';" style="background:#fff; color:#111; border:1px solid #ddd; padding:10px 20px; border-radius:99px; cursor:pointer; margin-left:10px;">ปิด</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const triggerAuth = (e) => {
+                e.preventDefault();
+                document.getElementById('authRequiredModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+            document.querySelectorAll('a.card-link').forEach(el => el.addEventListener('click', triggerAuth));
+            document.querySelectorAll('.event-tab.my-tab').forEach(el => el.addEventListener('click', triggerAuth));
+            document.querySelectorAll('.events-empty-btn').forEach(el => el.addEventListener('click', triggerAuth));
+        });
+    </script>
+}

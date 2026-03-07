@@ -11,22 +11,28 @@
     
     <link rel="stylesheet" href="~/css/site.css"  />
     <link rel="stylesheet" href="~/OnlyFriends.styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="landing-wrapper">
-        <nav class="landing-nav">
+        <header class="main-header">
+            <nav class="landing-nav">
             <div class="nav-left">
-                <a href="/" class="landing-brand nav-logo-hero">OnlyFriends</a>
+                <a href="/" class="of-brand-logo">
+                    <div class="of-logo-icon">OF</div>
+                    <div class="of-logo-text">Only<span>Friends</span></div>
+                </a>
             </div>
             <div class="nav-right">
                 <span class="live-time" id="clock"></span>
-                <button class="btn-login" onclick="window.location.href='@Url.Action("Index", "Login")'">เข้าสู่ระบบ</button>
+                <a class="sign-in-link" href="@Url.Action("Index", "Login")">เข้าสู่ระบบ</a>
             </div>
         </nav>
+        </header>
 
         <main class="hero-section">
             <div class="hero-content">
-                <div class="brand-logo">
+                <div class="brand-logo" style="display:none;">
                     <strong>OnlyFriends</strong>
                 </div>
                 
@@ -52,7 +58,7 @@
     <footer class="landing-footer">
         <div class="landing-footer-inner">
             <div class="landing-footer-left">
-                <div class="landing-footer-brand">OnlyFriends</div>
+                <div class="landing-footer-brand" style="font-family:'Inter',sans-serif; font-weight:800; color:var(--text-color);">Only<span style="color:var(--primary-color);">Friends</span></div>
                 <p class="landing-footer-text">
                     แพลตฟอร์มนัดทำกิจกรรมและเจอเพื่อนใหม่ ออกแบบมาสำหรับการชวนกันไปสนุกแบบง่าย ๆ
                 </p>

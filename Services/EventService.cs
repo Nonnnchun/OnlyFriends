@@ -35,9 +35,17 @@ public sealed class EventService : IEventService
     {
         Event activity = activityToCreate.Adapt<Event>();
 
-        // Get Category object
-        activity.Category = await _context.Categories.FindAsync(activity.CategoryId)
-        ?? throw new KeyNotFoundException($"Category with ID {activityToCreate.CategoryId} does not exist!");
+        // Get Category objects
+        if (activityToCreate.CategoryIds != null && activityToCreate.CategoryIds.Any())
+        {
+            var categories = await _context.Categories
+                .Where(c => activityToCreate.CategoryIds.Contains(c.Id))
+                .ToListAsync();
+            
+            if (!categories.Any()) throw new KeyNotFoundException("No valid categories found!");
+            
+            activity.Categories = categories;
+        }
 
         _context.Events.Add(activity);
         await _context.SaveChangesAsync();
@@ -53,6 +61,7 @@ public sealed class EventService : IEventService
     public async Task<GetEventDTO?> FindEventByIdAsync(int id)
     {
         var result = await _context.Events
+                .Include(e => e.Categories)
                 .Where(x => x.Id == id)
                 .AsNoTracking()
                 .ProjectToType<GetEventDTO>()
@@ -63,6 +72,7 @@ public sealed class EventService : IEventService
     public async Task<IEnumerable<GetEventDTO>> GetEventsAsync()
     {
         IEnumerable<GetEventDTO> activitys = await _context.Events
+            .Include(e => e.Categories)
             .AsNoTracking()
             .OrderByDescending(e => e.StartAt)
             .ProjectToType<GetEventDTO>()
@@ -72,12 +82,28 @@ public sealed class EventService : IEventService
 
     public async Task UpdateEventAsync(UpdateEventDTO activityToUpdate)
     {
-        var activity = await _context.Events.FindAsync(activityToUpdate.Id);
+        var activity = await _context.Events
+            .Include(e => e.Categories)
+            .FirstOrDefaultAsync(e => e.Id == activityToUpdate.Id);
+            
         if (activity == null)
         {
             return;
         }
         activityToUpdate.Adapt(activity);
+        
+        if (activityToUpdate.CategoryIds != null)
+        {
+            var newCategories = await _context.Categories
+                .Where(c => activityToUpdate.CategoryIds.Contains(c.Id))
+                .ToListAsync();
+            activity.Categories.Clear();
+            foreach (var cat in newCategories)
+            {
+                activity.Categories.Add(cat);
+            }
+        }
+        
         await _context.SaveChangesAsync();
     }
 

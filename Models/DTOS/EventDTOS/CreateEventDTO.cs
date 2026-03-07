@@ -36,9 +36,10 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
         public required string Location { get; set; }
         public required DateTime StartAt { get; set; }
         public required DateTime EndAt { get; set; }
+        public DateTime? RegistrationDeadline { get; set; }
         public string? TimeZone { get; set; }
         public required int Capacity { get; set; }
         public int OwnerId { get; set; }
-        public required int CategoryId { get; set; } // Required foreign key property
+        public List<int> CategoryIds { get; set; } = new List<int>();
     }
 }

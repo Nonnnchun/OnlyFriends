@@ -36,6 +36,7 @@ namespace OnlyFriends.Models
         // Time
         public DateTime? StartAt { get; set; }
         public DateTime? EndAt { get; set; }
+        public DateTime? RegistrationDeadline { get; set; }
         public string? TimeZone { get; set; } 
 
         // Map pin
@@ -49,8 +50,7 @@ namespace OnlyFriends.Models
         public List<User> Users { get; } = [];
         public List<UserEvent> UserEvents { get; } = [];
 
-        // Category
-        public required int CategoryId { get; set; } // Required foreign key property
-        public required Category Category { get; set; } // Required reference navigation to principal 
+        // Categories
+        public List<Category> Categories { get; set; } = new List<Category>(); 
     }
 }
