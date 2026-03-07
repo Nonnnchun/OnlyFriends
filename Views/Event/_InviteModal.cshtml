@@ -5,6 +5,9 @@
     var friends = (ViewData["Friends"] as IEnumerable<GetUserDTO>) ?? [];
     var joinedIds = Model.UserEvents.Select(ue => ue.UserId).ToHashSet();
     var invitableFriends = friends.Where(f => !joinedIds.Contains(f.Id)).ToList();
+    var acceptedCount = Model.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted);
+    var slotsText = Model.Capacity > 0 ? Math.Max(0, Model.Capacity - acceptedCount).ToString() : "∞";
+    var slotsLabel = Model.Capacity > 0 ? "LEFT" : "UNLIMITED";
 }
 
 @* ── OVERLAY ── *@
@@ -18,7 +21,7 @@
                 @* แสดงจำนวน slot ที่เหลือ *@
                 <div class="slots-badge" id="slotsBadge">
                     <i class="fa-solid fa-rotate" style="font-size:11px"></i>
-                    <span id="slotsLeft">@(Model.Capacity - Model.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted))</span> LEFT
+                    <span id="slotsLeft">@slotsText</span> @slotsLabel
                 </div>
                 <button class="modal-close" onclick="document.getElementById('inviteOverlay').classList.remove('open')">
                     <i class="fa-solid fa-xmark"></i>

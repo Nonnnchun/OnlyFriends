@@ -5,7 +5,11 @@
             <span class="notif-count" id="notifCount">0</span>
         </button>
         <ul class="notif-dropdown" id="notifMenu" aria-labelledby="notifBell">
-            <li class="notif-empty" id="notifEmpty">ยังไม่มีการแจ้งเตือน</li>
+            <li class="notif-empty" id="notifEmpty" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 40px 20px; color: #adb5bd;">
+                <i class="fa-regular fa-bell-slash" style="font-size: 2.5rem; margin-bottom: 10px; color: #dee2e6;"></i>
+                <div style="font-weight: 600; font-size: 1rem; color: #495057;">No notifications yet</div>
+                <div style="font-size: 0.85rem; margin-top: 4px;">New updates will appear here</div>
+            </li>
             <li class="notif-list-wrap"><ul id="notifList" class="notif-list"></ul></li>
         </ul>
     </div>

@@ -63,15 +63,13 @@ button.accept-policy {
     color: #0077cc !important; /* เปลี่ยนสีเป็นสีฟ้าเดียวกับธีมหลักเวลาเอาเมาส์ชี้ */
 }
 
-/* ตกแต่งรูปโปรไฟล์ฝั่งขวา */
+/* ตรึง avatar โปรไฟล์ใน navbar ให้คงที่ทุกหน้า (ไม่ขยาย/ไม่ขยับ) */
 #profileDropdown img {
-    border: 2px solid #fff; /* ใส่ขอบสีขาว */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* ใส่เงาเบาๆ ให้รูปเด้งออกมา */
-    transition: transform 0.2s; /* เพิ่มแอนิเมชันเวลาชี้ */
-}
-
-#profileDropdown img:hover {
-    transform: scale(1.05); /* ขยายรูปนิดนึงเวลาเอาเมาส์ชี้ */
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transform: none !important;
+    transition: none !important;
+    box-sizing: border-box;
 }
 
 /* ตกแต่ง Dropdown Menu ให้ดูละมุนขึ้น */
@@ -105,32 +103,41 @@ body {
     background-color: #fafafa; /* เปลี่ยนสีพื้นหลังเว็บให้เป็นสีเทาอ่อนๆ เหมือนแอปทั่วไป */
 }
 /* รูปแบบ Navbar หลัก */
+.app-header {
+    --of-navbar-height: 72px;
+    min-height: var(--of-navbar-height);
+    height: var(--of-navbar-height);
+    box-sizing: border-box;
+}
+
 .custom-navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    height: var(--of-navbar-height);
+    min-height: var(--of-navbar-height);
+    padding: 0 20px;
     background-color: white;
-    border-bottom: 1px solid #ddd;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-bottom: none;
+    box-shadow: none;
     font-family: sans-serif;
+    box-sizing: border-box;
 }
 
 .nav-left, .nav-right {
     display: flex;
     align-items: center;
+    height: 100%;
     gap: 15px; /* ระยะห่างระหว่างปุ่ม */
 }
 
-.brand {
-    font-size: 1.2rem;
-    font-weight: bold;
-    text-decoration: none;
-    color: #333;
-    margin-right: 15px;
-}
+
 
 .nav-link {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    line-height: 1;
     text-decoration: none;
     color: #555;
 }
@@ -142,24 +149,40 @@ body {
     background: none;
     border: none;
     font-size: 1rem;
+    height: 40px;
     cursor: pointer;
     color: #333;
     padding: 8px 12px;
+    box-sizing: border-box;
 }
 
-.profile-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
-
-.profile-btn img {
+#profileDropdown .profile-btn {
     width: 40px;
     height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    flex: 0 0 40px;
+    aspect-ratio: 1 / 1;
+    background: none;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    line-height: 0;
+    box-sizing: border-box;
+}
+
+#profileDropdown .profile-btn img {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid #ccc;
+    transform: none !important;
+    transition: none !important;
+    box-sizing: border-box;
 }
 
 /* --- ระบบ Dropdown --- */
@@ -186,3 +209,135 @@ body {
 .footer {
         position: static !important; 
     }
+
+/* Keep navbar text metrics stable across page-specific stylesheets */
+.app-header .custom-navbar,
+.app-header .custom-navbar * {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+}
+
+/* Do not override Font Awesome icon fonts inside navbar */
+.app-header .custom-navbar .fa-solid,
+.app-header .custom-navbar .fas {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+}
+
+.app-header .custom-navbar .fa-regular,
+.app-header .custom-navbar .far {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 400 !important;
+}
+
+.app-header .custom-navbar .fa-brands,
+.app-header .custom-navbar .fab {
+    font-family: "Font Awesome 6 Brands" !important;
+    font-weight: 400 !important;
+}
+
+.app-header .custom-navbar .nav-link,
+.app-header .custom-navbar .nav-btn,
+.app-header .custom-navbar .sign-in-link,
+.app-header .custom-navbar .dropdown-link {
+    font-size: 14px !important;
+    line-height: 1 !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    transform: none !important;
+}
+
+.app-header .custom-navbar .nav-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 40px !important;
+    padding: 0 10px !important;
+}
+
+.app-header .custom-navbar .nav-btn {
+    height: 40px !important;
+    padding: 0 12px !important;
+}
+
+/* Hard lock: prevent page-level CSS resets from shifting navbar text metrics */
+.app-header .custom-navbar .nav-left,
+.app-header .custom-navbar .nav-right {
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+}
+
+.app-header .custom-navbar .nav-link,
+.app-header .custom-navbar .nav-btn,
+.app-header .custom-navbar .sign-in-link,
+.app-header .custom-navbar .dropdown-link,
+.app-header .custom-navbar .profile-btn {
+    margin: 0 !important;
+    vertical-align: middle !important;
+    font-kerning: normal !important;
+    font-variant-ligatures: none !important;
+    text-rendering: geometricPrecision !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+.app-header .custom-navbar .of-brand-logo,
+.app-header .custom-navbar .of-logo-text,
+.app-header .custom-navbar .of-logo-icon {
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+
+/* Keep Home/Create Activity button shape identical on every page */
+.app-header .custom-navbar .nav-primary-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 132px !important;
+    min-width: 132px !important;
+    height: 40px !important;
+    padding: 0 12px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #555 !important;
+    text-decoration: none !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    box-sizing: border-box;
+}
+
+.app-header .custom-navbar .nav-primary-link:hover {
+    background: transparent !important;
+    color: #0077cc !important;
+}
+
+/* Force separator above logout in profile dropdown on every page */
+.app-header .custom-navbar .profile-menu .profile-separator {
+    display: block !important;
+    width: 100% !important;
+    height: 0 !important;
+    border: 0 !important;
+    border-top: 1px solid #e6ebf0 !important;
+    margin: 8px 0 !important;
+    opacity: 1 !important;
+}
+
+/* Match Explore Events (logged-out) to /login navbar style */
+.app-header .custom-navbar .guest-explore-link {
+    color: #4a5568 !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 !important;
+    height: auto !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.app-header .custom-navbar .guest-explore-link:hover {
+    color: var(--primary-color) !important;
+}

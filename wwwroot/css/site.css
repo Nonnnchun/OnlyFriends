@@ -1,15 +1,17 @@
 :root {
-    --bg-color: #ffffff;
-    --text-color: #333333;
-    --card-bg: #ffffff;
-    --card-border: #eaeaea;
-    --input-bg: #ffffff;
-    --input-border: #cccccc;
-    --primary-btn-bg: #333333;
-    --primary-btn-text: #ffffff;
-    --secondary-btn-bg: #f5f5f5;
-    --secondary-btn-text: #333333;
-    --link-color: #666666;
+    --primary-color: #00AFF0;
+    --primary-hover: #0099D6;
+    --bg-color: #F8F9FA;
+    --text-color: #111827;
+    --card-bg: #FFFFFF;
+    --card-border: #E5E7EB;
+    --input-bg: #FFFFFF;
+    --input-border: #D1D5DB;
+    --primary-btn-bg: #00AFF0;
+    --primary-btn-text: #FFFFFF;
+    --secondary-btn-bg: #F3F4F6;
+    --secondary-btn-text: #374151;
+    --link-color: #00AFF0;
 }
 
 body {
@@ -77,13 +79,14 @@ body {
   box-shadow:0 1px 3px rgba(15,23,42,0.12);
 }
 .of-btn-primary{
-  background:#111111;
+  background: var(--primary-color);
   color:#ffffff;
-  border-color:#111111;
+  border-color: var(--primary-color);
 }
 .of-btn-primary:hover{
-  background:#000000;
-  box-shadow:0 6px 14px rgba(0,0,0,0.25);
+  background: var(--primary-hover);
+  box-shadow:0 6px 14px rgba(0, 175, 240, 0.25);
+  border-color: var(--primary-hover);
 }
 .of-btn-neutral{
   background:#ffffff;
@@ -91,10 +94,8 @@ body {
 }
 
 .main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
+    width: 100%;
+    background: #fff;
 }
 
 .logo {
@@ -386,7 +387,7 @@ input[type="password"]{
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  background: #222;
+  background: var(--primary-color);
   color: #fff;
   font-size: 11px;
   line-height: 18px;
@@ -434,42 +435,68 @@ input[type="password"]{
 }
 
 /* OF Navbar */
-/* Header (light theme, clean) */
-.custom-navbar{
+.app-header {
   position: sticky;
   top: 0;
   z-index: 50;
+  background: #fff;
+  width: 100%;
+  border-bottom: none;
+  box-shadow: none;
+}
+.custom-navbar{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 18px;
-  background: #fff;
-  border-bottom: 1px solid var(--card-border);
-  box-shadow: 0 3px 12px rgba(0,0,0,0.03);
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px;
+  box-sizing: border-box;
   font-family: system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
   font-size:13px;
+  border: none;
+  box-shadow: none;
 }
 .nav-left,.nav-right{
   display:flex;
   align-items:center;
   gap:12px;
 }
-.brand{
+.nav-right a {
+  color: #4a5568;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  transition: color 0.15s;
+}
+.nav-right a:hover {
+  color: var(--primary-color);
+}
+.nav-right a.sign-in-link {
+  color: var(--primary-color) !important;
+}
+.nav-right a.sign-in-link:hover {
+  color: #ffffff !important;
+}
+.brand {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   font-weight: 700;
-  font-size:15px;
-  letter-spacing:-0.01em;
-  color: var(--text-color);
-  text-decoration:none;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  color: var(--primary-color);
+  text-decoration: none;
   margin-right: 6px;
 }
 /* Logo style when not logged in - ดูเหมือน Heropage (ไม่มีสีฟ้า/ขีดเส้นใต้) */
-.nav-logo-hero{
+.nav-logo-hero {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   font-weight: 700;
   font-size: 24px;
-  color: #111;
+  color: var(--primary-color);
   text-decoration: none;
   margin-right: 6px;
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  letter-spacing: -0.02em;
 }
 .nav-logo-hero:hover{
   color: #555;
@@ -509,14 +536,17 @@ input[type="password"]{
 .sign-in-link{
   font-size:13px;
   font-weight:600;
-  color:#111;
+  color: var(--primary-color);
   text-decoration:none;
   padding:6px 12px;
   border-radius:999px;
-  border:1px solid #ddd;
+  border:1px solid var(--primary-color);
+  min-width: 80px;
+  text-align: center;
+  display: inline-block;
 }
 .sign-in-link:hover{
-  background:#111;
+  background: var(--primary-color);
   color:#fff;
 }
 
@@ -583,7 +613,7 @@ input[type="password"]{
   border-radius:12px;
 }
 #notifCount{
-  background:#111; color:#fff; font-size:11px;
+  background: var(--primary-color); color:#fff; font-size:11px;
   padding: 2px 6px;
 }
 .notif-dropdown{
@@ -829,25 +859,69 @@ input[type="password"]{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  max-width:1600px;
-  width:92%;
+  max-width:1200px;
+  width:100%;
   margin:0 auto;
-  padding:30px 20px;
+  height:72px;
+  min-height:72px;
+  padding:0 20px;
   box-sizing:border-box;
 }
 .landing-brand{
   font-size:24px;
   font-weight:700;
-  color:#111;
+  color: var(--primary-color);
   text-decoration:none;
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  font-family: 'Inter', system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
 }
 .landing-brand:hover{
-  color:#555;
+  color: var(--primary-hover);
 }
-.main-header{
-  width:100%;
+
+/* 
+ * ============================================
+ * EXCLUSIVE LOGO COMPONENT
+ * Total isolation from generic anchor tags ('a')
+ * ============================================
+ */
+.of-brand-logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none !important;
+    gap: 8px;
+    margin-right: 15px;
 }
+.of-brand-logo:hover .of-logo-text {
+    color: var(--primary-hover);
+}
+.of-logo-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 3px 8px rgba(0, 175, 240, 0.35);
+}
+.of-logo-text {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-weight: 800;
+    font-size: 24px;
+    color: var(--text-color);
+    letter-spacing: -0.03em;
+    margin: 0;
+    padding: 0;
+    transition: color 0.15s;
+}
+.of-logo-text span {
+    color: var(--primary-color);
+}
+
 .event-tabs {
   display: inline-flex;
   align-items: center;
@@ -883,9 +957,9 @@ input[type="password"]{
 .event-tabs .event-tab.active:hover,
 .event-tabs .event-tab.active:focus,
 .event-tabs .event-tab.active:active {
-  background: #ffffff;
-  color: #2f2f2f !important;
-  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.14);
+  background: var(--primary-color);
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(0, 175, 240, 0.25);
 }
 
 /* Homepage cards: force no underline inside event info card links */
@@ -1013,8 +1087,8 @@ input[type="password"]{
 }
 
 .home-page .tag-status {
-  background-color: #eef2ff;
-  color: #4f46e5;
+  background-color: #e0f2fe;
+  color: var(--primary-color);
   font-size: 13px;
   padding: 6px 12px;
   border-radius: 8px;

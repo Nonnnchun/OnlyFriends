@@ -40,7 +40,7 @@ namespace OnlyFriends.Controllers
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
                 ViewData["HideNavbar"] = true;
-                ModelState.AddModelError("", "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+                ModelState.AddModelError("", "Invalid email/username or password.");
                 return View();
             }
 

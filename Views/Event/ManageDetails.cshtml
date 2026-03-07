@@ -459,9 +459,11 @@
 
 
               <div class="form-group">
-                  <label class="form-label">CATEGORY</label>
-                  <select class="form-select" id="inputCategory" data-selected-id="@Model.Category.Id">
-                      <option value="@Model.Category.Id">@Model.Category.CategoryName</option>
+                  <label class="form-label">CATEGORIES</label>
+                  <select class="form-select" id="inputCategory" data-selected-id="@string.Join(",", Model.Categories.Select(c => c.Id))">
+                      @foreach (var cat in Model.Categories) {
+                          <option value="@cat.Id">@cat.CategoryName</option>
+                      }
                   </select>
               </div>
   

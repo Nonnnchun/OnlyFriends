@@ -140,7 +140,7 @@ function sendInvites() {
     .then(r => { if (!r.ok) throw new Error('Server error'); return r.json(); })
     .then(() => {
         closeInviteModal();
-        showToast('✅ ส่งคำเชิญแล้ว!');
+        showToast('✅ Invitation sent!');
     })
-    .catch(() => showToast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่'));
+    .catch(() => showToast('❌ Something went wrong. Please try again.'));
 }

@@ -1,22 +1,24 @@
 @using OnlyFriends.Models
 @using OnlyFriends.Models.DTOS.EventDTOS
 @using OnlyFriends.Models.ViewModels
+@using System.Linq
+@using System.IdentityModel.Tokens.Jwt
 @model HomepageViewModel
 
 @{
-    ViewData["Title"] = "หน้าแรก";
+    ViewData["Title"] = "Home";
     IEnumerable<GetEventDTO> eventsToRender = Model.ActiveTab == "my" ? Model.JoinedEvents : Model.AllEvents;
     bool hasAnyEvents = (Model?.AllEvents?.Any() ?? false) || (Model?.JoinedEvents?.Any() ?? false);
     string lastDate = string.Empty;
+    var currentUserId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+        ?? User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+    int.TryParse(currentUserId, out int uid);
 }
 
 <div class="main-container home-page">
 
     <div class="page-header">
-        <div class="page-title">กิจกรรม</div>
-        <div class="header-actions">
-            <a asp-controller="Home" asp-action="CreateActivity" class="btn-add">Create Activity</a>
-        </div>
+        <div class="page-title">Activities</div>
     </div>
 
     @if (hasAnyEvents)
@@ -25,16 +27,18 @@
             <a asp-action="Homepage"
                 asp-controller="Home"
                 asp-route-tab="all"
+                asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
                 class="event-tab all-tab @(Model.ActiveTab == "all" ? "active" : "")"
                 aria-current="@(Model.ActiveTab == "all" ? "page" : null)">
-                Event ทั้งหมด
+                All Events
             </a>
             <a asp-action="Homepage"
                 asp-controller="Home"
                 asp-route-tab="my"
+                asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
                 class="event-tab my-tab @(Model.ActiveTab == "my" ? "active" : "")"
                 aria-current="@(Model.ActiveTab == "my" ? "page" : null)">
-                Event ที่สมัครแล้ว
+                Joined Events
             </a>
         </div>
 
@@ -44,7 +48,7 @@
                 @foreach (var item in eventsToRender)
                 {
                     var eventDate = item.StartAt ?? DateTime.Now;
-                    string currentDateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("th-TH"));
+                    string currentDateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("en-US"));
                     var participantCount = item.UserEvents?.Count(ue => ue.RequestStatus != EnumRequestStatus.Rejected) ?? 0;
                     var avatars = (item.Users ?? new List<User>())
                         .Where(u => !string.IsNullOrWhiteSpace(u.ProfilePictureUrl))
@@ -62,17 +66,22 @@
                                 <div class="event-time">@eventDate.ToString("HH:mm")</div>
                                 <div class="event-title">@item.Title</div>
                                 <div class="event-organizer">
-                                    👤 โดย @(item.Owner?.Username ?? "ไม่ระบุ")
+                                    👤 By @(item.Owner?.Username ?? "Unknown")
                                 </div>
                                 <div class="event-location">📍 @item.Location</div>
-                                <div class="event-tags">
+                                <div class="event-tags" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px;">
+                                    @if(item.Categories != null && item.Categories.Any()) {
+                                        @foreach(var cat in item.Categories) {
+                                            <span class="tag-category" style="background:#f1f3f5; color:#495057; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:600;">@cat.CategoryName</span>
+                                        }
+                                    }
                                     @if (item.EventStatus == EnumEventStatus.Open)
                                     {
-                                        <span class="tag-status">เปิดรับสมัคร</span>
+                                        <span class="tag-status">Open</span>
                                     }
                                     else
                                     {
-                                        <span class="tag-status closed">ปิดรับสมัคร</span>
+                                        <span class="tag-status closed">Closed</span>
                                     }
                                     <span class="tag-count">
                                         @if (avatars.Any())
@@ -86,6 +95,28 @@
                                         }
                                         +@participantCount
                                     </span>
+                                    @if(Model.ActiveTab == "my")
+                                    {
+                                        var isHost = item.Owner?.Id == uid;
+                                        if (isHost)
+                                        {
+                                            <span class="tag-my-status" style="background:#0d6efd15; color:#0d6efd; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:700;">
+                                                Host
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            var myStatus = item.UserEvents?.FirstOrDefault(ue => ue.UserId == uid)?.RequestStatus;
+                                            if (myStatus != null)
+                                            {
+                                                string statusColor = myStatus == EnumRequestStatus.Pending ? "#fd7e14" : (myStatus == EnumRequestStatus.Accepted ? "#198754" : "#dc3545");
+                                                string statusText = myStatus == EnumRequestStatus.Pending ? "Pending Approval" : (myStatus == EnumRequestStatus.Accepted ? "Joined" : "Rejected");
+                                                <span class="tag-my-status" style="background:@(statusColor)15; color:@statusColor; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:700;">
+                                                    @(statusText)
+                                                </span>
+                                            }
+                                        }
+                                    }
                                 </div>
                             </div>
                             <div class="event-image">
@@ -100,8 +131,8 @@
             {
                 <div class="empty-state">
                     @(Model.ActiveTab == "my"
-                        ? "คุณยังไม่ได้สมัครเข้าร่วมกิจกรรมใด"
-                        : "ไม่มีกิจกรรมในขณะนี้")
+                        ? "You have not joined any events yet."
+                        : "No events available at the moment.")
                 </div>
             }
         </div>
@@ -116,16 +147,40 @@
                     </div>
                     <span class="events-empty-badge">0</span>
                 </div>
-                <h2 class="events-empty-title">ไม่มีเหตุการณ์ที่จะเกิดขึ้น</h2>
+                <h2 class="events-empty-title">No Upcoming Events</h2>
                 <p class="events-empty-sub">
-                    คุณไม่มีกิจกรรมที่ใกล้จะเกิดขึ้นเร็ว ๆ นี้ ทำไมไม่ลองจัดงานดูสักงานล่ะ?
+                    You do not have any upcoming activities right now. Why not create one?
                 </p>
                 <button type="button" class="of-btn of-btn-neutral events-empty-btn"
                         onclick="window.location.href='@Url.Action("CreateActivity", "Home")'">
-                    + สร้างกิจกรรม
+                    + Create Activity
                 </button>
             </div>
         </section>
     }
 
 </div>
+
+@if (!(User?.Identity?.IsAuthenticated ?? false))
+{
+    <div class="register-modal-backdrop" id="authRequiredModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+        <div class="register-modal" style="background:#fff; border-radius:14px; padding:24px; max-width:360px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+            <div style="font-size:1.2rem; font-weight:700; margin-bottom:10px;">Please sign in</div>
+            <div style="color:#555; margin-bottom:20px;">You need to sign in first to view details or join events.</div>
+            <button onclick="window.location.href='/login'" style="background:#111; color:#fff; border:none; padding:10px 20px; border-radius:99px; cursor:pointer;">Go to Login</button>
+            <button onclick="document.getElementById('authRequiredModal').style.display='none'; document.body.style.overflow='auto';" style="background:#fff; color:#111; border:1px solid #ddd; padding:10px 20px; border-radius:99px; cursor:pointer; margin-left:10px;">Close</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const triggerAuth = (e) => {
+                e.preventDefault();
+                document.getElementById('authRequiredModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+            document.querySelectorAll('a.card-link').forEach(el => el.addEventListener('click', triggerAuth));
+            document.querySelectorAll('.event-tab.my-tab').forEach(el => el.addEventListener('click', triggerAuth));
+            document.querySelectorAll('.events-empty-btn').forEach(el => el.addEventListener('click', triggerAuth));
+        });
+    </script>
+}

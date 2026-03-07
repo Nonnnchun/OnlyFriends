@@ -7,40 +7,46 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>หน้าแรก - OnlyFriends</title>
+    <title>Home - OnlyFriends</title>
     
     <link rel="stylesheet" href="~/css/site.css"  />
     <link rel="stylesheet" href="~/OnlyFriends.styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="landing-wrapper">
-        <nav class="landing-nav">
+        <header class="main-header">
+            <nav class="landing-nav">
             <div class="nav-left">
-                <a href="/" class="landing-brand nav-logo-hero">OnlyFriends</a>
+                <a href="/" class="of-brand-logo">
+                    <div class="of-logo-icon">OF</div>
+                    <div class="of-logo-text">Only<span>Friends</span></div>
+                </a>
             </div>
             <div class="nav-right">
                 <span class="live-time" id="clock"></span>
-                <button class="btn-login" onclick="window.location.href='@Url.Action("Index", "Login")'">เข้าสู่ระบบ</button>
+                <a class="sign-in-link" href="@Url.Action("Index", "Login")">Sign In</a>
             </div>
         </nav>
+        </header>
 
         <main class="hero-section">
             <div class="hero-content">
-                <div class="brand-logo">
+                <div class="brand-logo" style="display:none;">
                     <strong>OnlyFriends</strong>
                 </div>
                 
                 <h1 class="hero-title">
-                    ต้องการหาเพื่อน<br />
-                    เริ่มต้นที่นี่ <br />
-                    <span class="text-gradient">เริ่มต้นที่นี่</span>
+                    Looking for new friends?<br />
+                    Start here <br />
+                    <span class="text-gradient">Start here</span>
                 </h1>
                 
                 <p class="hero-subtitle">
-                    เริ่มต้นกิจกรรมที่คุณสนใจ ชวนเพื่อนใหม่มาร่วมจอย
+                    Start activities you love and invite new friends to join.
                 </p>
                 
-                <button class="of-btn of-btn-primary" id="heroCreateBtn">สร้างกิจกรรมแรกของคุณ</button>
+                <button class="of-btn of-btn-primary" id="heroCreateBtn">Create your first activity</button>
             </div>
 
             <div class="hero-image-container">
@@ -52,39 +58,39 @@
     <footer class="landing-footer">
         <div class="landing-footer-inner">
             <div class="landing-footer-left">
-                <div class="landing-footer-brand">OnlyFriends</div>
+                <div class="landing-footer-brand" style="font-family:'Inter',sans-serif; font-weight:800; color:var(--text-color);">Only<span style="color:var(--primary-color);">Friends</span></div>
                 <p class="landing-footer-text">
-                    แพลตฟอร์มนัดทำกิจกรรมและเจอเพื่อนใหม่ ออกแบบมาสำหรับการชวนกันไปสนุกแบบง่าย ๆ
+                    A platform to host activities and meet new friends, designed for easy social fun.
                 </p>
             </div>
             <div class="landing-footer-links">
                 <div class="landing-footer-column">
-                    <div class="landing-footer-title">เกี่ยวกับเรา</div>
-                    <a href="/Home/Homepage">สำรวจกิจกรรม</a>
-                    <a href="/Home/Privacy">นโยบายความเป็นส่วนตัว</a>
+                    <div class="landing-footer-title">About</div>
+                    <a href="/Home/Homepage">Explore Events</a>
+                    <a href="/Home/Privacy">Privacy Policy</a>
                 </div>
                 <div class="landing-footer-column">
-                    <div class="landing-footer-title">เริ่มต้น</div>
-                    <a href="@Url.Action("Index","Login")">เข้าสู่ระบบ</a>
-                    <a href="/register">สมัครสมาชิก</a>
+                    <div class="landing-footer-title">Get Started</div>
+                    <a href="@Url.Action("Index","Login")">Sign In</a>
+                    <a href="/register">Sign Up</a>
                 </div>
             </div>
         </div>
         <div class="landing-footer-bottom">
             <span>© @DateTime.Now.Year OnlyFriends</span>
-            <span class="landing-footer-meta">สร้างเพื่อการเรียนรู้และทดลองใช้งาน</span>
+            <span class="landing-footer-meta">Built for learning and experimentation.</span>
         </div>
     </footer>
 
     <div id="heroLoginPrompt" class="hero-modal-backdrop is-hidden">
         <div class="hero-modal">
-            <h2 class="hero-modal-title">ต้องเข้าสู่ระบบก่อน</h2>
+            <h2 class="hero-modal-title">Sign-in required</h2>
             <p class="hero-modal-text">
-                เพื่อสร้างกิจกรรมใหม่ กรุณาเข้าสู่ระบบก่อนค่ะ
+                Please sign in to create a new activity.
             </p>
             <div class="hero-modal-actions">
-                <button class="of-btn of-btn-neutral" id="heroModalClose">ปิด</button>
-                <button class="of-btn of-btn-primary" id="heroGoLogin">ไปหน้าเข้าสู่ระบบ</button>
+                <button class="of-btn of-btn-neutral" id="heroModalClose">Close</button>
+                <button class="of-btn of-btn-primary" id="heroGoLogin">Go to Login</button>
             </div>
         </div>
     </div>
@@ -94,7 +100,7 @@
             const now = new Date();
             const hours = now.getHours().toString().padStart(2, '0');
             const minutes = now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock').innerText = `${hours} นาฬิกา ${minutes} นาที GMT+7`;
+            document.getElementById('clock').innerText = `${hours}:${minutes} GMT+7`;
         }
         setInterval(updateClock, 1000);
         updateClock();

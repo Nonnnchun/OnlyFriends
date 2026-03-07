@@ -7,7 +7,7 @@
     ViewData["Title"] = Model.Title ?? "Event Details";
 
     var owner = Model.Owner; 
-    var categoryName = Model.Category.CategoryName ?? "Uncategorized";
+    var categoryName = Model.Categories != null && Model.Categories.Any() ? string.Join(", ", Model.Categories.Select(c => c.CategoryName)) : "Uncategorized";
 
     // Poster
     var poster = string.IsNullOrWhiteSpace(Model.PosterUrl) ? "/images/poster-placeholder.jpg" : Model.PosterUrl;
@@ -57,26 +57,11 @@
 
     string locName = Model?.Location ?? "No Location";
     string locDetail = "";
-
-    if (!string.IsNullOrEmpty(Model?.Location))
-    {
-        int firstDigitIndex = Model.Location.IndexOfAny("0123456789".ToCharArray());
-        if (firstDigitIndex > 0)
-        {
-            locName = Model.Location.Substring(0, firstDigitIndex).Trim(); 
-            locDetail = Model.Location.Substring(firstDigitIndex).Trim(); 
-        }
-        else if (firstDigitIndex == 0)
-        {
-            locName = "Address";
-            locDetail = Model.Location;
-        }
-    }
 }
-
 
 @section Styles {
     <link rel="stylesheet" href="~/css/event-detail.css"  />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 }
 
 <div class="ev-page">
@@ -193,8 +178,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <div class="ev-strong">@locName <span class="ev-open-ext">↗</span></div>
-                                <div class="ev-muted">@locDetail</div>
+                                <div class="ev-strong">@locName</div>
                             </div>
                         </div>
                     </div>
@@ -440,9 +424,9 @@
                 <div class="ev-loc-row">
                     <div class="ev-muted" id="locDetail">@Model?.Location</div>
                 </div>
-                    <div class="ev-map"> 
-                        <iframe src="@mapSrc" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> 
-                    </div>
+                <div class="ev-map" style="height: 300px; width: 100%; border-radius: 12px; overflow: hidden; z-index: 1;"> 
+                    <div id="leafletMapDetail" style="width: 100%; height: 100%;"></div>
+                </div>
             </section>
         </main>
 
@@ -491,5 +475,23 @@
 
 @section Scripts {
     <script src="~/js/event-detail.js" ></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var lat = @(Model?.Latitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "13.7563");
+            var lng = @(Model?.Longitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "100.5018");
+            
+            var map = L.map('leafletMapDetail').setView([lat, lng], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('@(Html.Raw(Model?.Title?.Replace("'", "\\'") ?? ""))')
+                .openPopup();
+                
+            setTimeout(() => { map.invalidateSize(); }, 200);
+        });
+    </script>
 }
 
