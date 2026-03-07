@@ -7,6 +7,7 @@
     var allFriends = friends
         .GroupBy(f => f.Id)
         .Select(g => g.First())
+        .Where(f => f.Id != Model.Owner.Id)
         .OrderBy(f => f.FirstName)
         .ThenBy(f => f.LastName)
         .ToList();
