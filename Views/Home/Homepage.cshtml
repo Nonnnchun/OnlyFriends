@@ -17,6 +17,9 @@
     string currentTab = (Model.ActiveTab ?? "all").ToLower();
     var all = Model.AllEvents ?? Enumerable.Empty<GetEventDTO>();
 
+    // NOTE: Tab filters compare raw DB UTC times against server's DateTime.Now.
+    // This is acceptable for filtering — display times are corrected per-card using ApplyTimezone().
+
     // PENDING: user has a pending request on someone else's event
     var pendingEvents = all.Where(e =>
         uid != 0 &&
@@ -52,6 +55,31 @@
     };
 
     string lastDate = string.Empty;
+
+    // Helper: apply TimeZone offset string (e.g. "GMT+07:00", "GMT-05:00") to a UTC datetime
+    DateTime ApplyTimezone(DateTime? utcTime, string? tzString)
+    {
+        if (utcTime == null) return DateTime.Now;
+        if (string.IsNullOrWhiteSpace(tzString)) return utcTime.Value;
+        try
+        {
+            // Strip "GMT" or "UTC" prefix, leaving e.g. "+07:00" or "-05:00"
+            var raw = tzString.Replace("UTC", "").Replace("GMT", "").Trim();
+
+            // TrimStart('+') so TimeSpan.TryParse can handle it,
+            // but we detect the sign ourselves first
+            bool isNegative = raw.StartsWith("-");
+            if (TimeSpan.TryParse(raw.TrimStart('+').TrimStart('-'), out var offset))
+            {
+                // Apply correct direction — TimeSpan.TryParse loses sign when we strip it
+                return isNegative
+                    ? utcTime.Value - offset
+                    : utcTime.Value + offset;
+            }
+        }
+        catch { }
+        return utcTime.Value;
+    }
 }
 
 <style>
@@ -299,9 +327,9 @@
         {
             @foreach (var item in eventsToRender)
             {
-                var eventDate     = item.StartAt ?? DateTime.Now;
-                var isExpired     = (item.EndAt ?? item.StartAt?.AddHours(12) ?? DateTime.MinValue) < now
-                                    || item.EventStatus == EnumEventStatus.Closed;
+                var eventDate     = ApplyTimezone(item.StartAt, item.TimeZone);
+                var eventEnd      = ApplyTimezone(item.EndAt ?? item.StartAt?.AddHours(12), item.TimeZone);
+                var isExpired     = eventEnd < now || item.EventStatus == EnumEventStatus.Closed;
                 var isOwner       = uid != 0 && item.Owner?.Id == uid;
                 var isPending     = uid != 0 && (item.UserEvents?.Any(ue => ue.UserId == uid && ue.RequestStatus == EnumRequestStatus.Pending) ?? false);
                 var isAccepted    = uid != 0 && (item.UserEvents?.Any(ue => ue.UserId == uid && ue.RequestStatus == EnumRequestStatus.Accepted) ?? false);

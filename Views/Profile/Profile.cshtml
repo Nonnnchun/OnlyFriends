@@ -18,6 +18,36 @@
         : Model.ProfilePictureUrl;
 
     const int PageSize = 5;
+
+    // Helper: parse description from "Location: xxx | Description: yyy" stored format
+    Func<string, string> ParseDesc = (info) => {
+        if (string.IsNullOrWhiteSpace(info)) return "";
+        var idx = info.IndexOf("| Description:");
+        if (idx >= 0) return info.Substring(idx + "| Description:".Length).Trim();
+        if (info.StartsWith("Description:")) return info.Substring("Description:".Length).Trim();
+        return info.Trim();
+    };
+
+    // Helper: apply TimeZone offset string (e.g. "GMT+07:00", "GMT-05:00") to a UTC datetime
+    Func<DateTime?, string?, DateTime?> ApplyTimezone = (utcTime, tzString) => {
+        if (utcTime == null) return null;
+        if (string.IsNullOrWhiteSpace(tzString)) return utcTime;
+        try
+        {
+            // Strip "GMT" or "UTC" prefix, leaving e.g. "+07:00" or "-05:00"
+            var raw = tzString.Replace("UTC", "").Replace("GMT", "").Trim();
+
+            bool isNegative = raw.StartsWith("-");
+            if (TimeSpan.TryParse(raw.TrimStart('+').TrimStart('-'), out var offset))
+            {
+                return isNegative
+                    ? utcTime.Value - offset
+                    : utcTime.Value + offset;
+            }
+        }
+        catch { }
+        return utcTime;
+    };
 }
 
 <style>
@@ -235,17 +265,20 @@
 
     .event-card-img {
         width: 130px;
+        height: 130px;
         flex-shrink: 0;
         background: #f3f4f6;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
     }
 
     .event-card-img img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
         display: block;
     }
 
@@ -469,19 +502,14 @@
                 @if (Model.CreatedEvents != null && Model.CreatedEvents.Any())
                 {
                     var hostedList = Model.CreatedEvents.ToList();
-                    for (int i = 0; i < hostedList.Count; i++)
+                    for (int hi = 0; hi < hostedList.Count; hi++)
                     {
-                        var evt = hostedList[i];
+                        var evt = hostedList[hi];
                         var hasImg = !string.IsNullOrWhiteSpace(evt.PosterUrl);
+                        var descText = ParseDesc(evt.Info ?? "");
+                        var evtStart = ApplyTimezone(evt.StartAt, evt.TimeZone);
 
-                        // Parse description from Info field
-                        var rawInfo = evt.Info ?? "";
-                        var pipeIdx = rawInfo.IndexOf("| Description:");
-                        var descText = pipeIdx >= 0
-                            ? rawInfo.Substring(pipeIdx + "| Description:".Length).Trim()
-                            : rawInfo.Trim();
-
-                        <a href="/event/view/@evt.Id" class="event-card @(i >= PageSize ? "hidden-card" : "")" data-section="hosted">
+                        <a href="/event/view/@evt.Id" class="event-card @(hi >= PageSize ? "hidden-card" : "")" data-section="hosted">
                             @if (hasImg)
                             {
                                 <div class="event-card-img">
@@ -499,7 +527,7 @@
                                     <div class="event-info">@descText</div>
                                 }
                                 <div class="event-meta">
-                                    <span>📅 @(evt.StartAt?.ToString("dd MMM yyyy") ?? "TBA")</span>
+                                    <span>📅 @(evtStart?.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("en-US")) ?? "TBA")</span>
                                     <span>📍 @evt.Location</span>
                                 </div>
                             </div>
@@ -531,18 +559,14 @@
 
                 @if (joinedEvents.Any())
                 {
-                    for (int i = 0; i < joinedEvents.Count; i++)
+                    for (int ji = 0; ji < joinedEvents.Count; ji++)
                     {
-                        var evt = joinedEvents[i];
+                        var evt = joinedEvents[ji];
                         var hasImg = !string.IsNullOrWhiteSpace(evt.PosterUrl);
+                        var descText = ParseDesc(evt.Info ?? "");
+                        var evtStart = ApplyTimezone(evt.StartAt, evt.TimeZone);
 
-                        var rawInfo = evt.Info ?? "";
-                        var pipeIdx = rawInfo.IndexOf("| Description:");
-                        var descText = pipeIdx >= 0
-                            ? rawInfo.Substring(pipeIdx + "| Description:".Length).Trim()
-                            : rawInfo.Trim();
-
-                        <a href="/event/view/@evt.Id" class="event-card @(i >= PageSize ? "hidden-card" : "")" data-section="joined">
+                        <a href="/event/view/@evt.Id" class="event-card @(ji >= PageSize ? "hidden-card" : "")" data-section="joined">
                             @if (hasImg)
                             {
                                 <div class="event-card-img">
@@ -560,7 +584,7 @@
                                     <div class="event-info">@descText</div>
                                 }
                                 <div class="event-meta">
-                                    <span>📅 @(evt.StartAt?.ToString("dd MMM yyyy") ?? "TBA")</span>
+                                    <span>📅 @(evtStart?.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("en-US")) ?? "TBA")</span>
                                     <span>📍 @evt.Location</span>
                                 </div>
                             </div>
