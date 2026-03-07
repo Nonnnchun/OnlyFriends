@@ -23,9 +23,11 @@ namespace OnlyFriends.Controllers
             return RedirectToAction("Create", "Event");
         }
 
-        public async Task<IActionResult> Homepage(string tab = "all")
+        public async Task<IActionResult> Homepage(string tab = "all", string? categoryIds = null)
         {
-            IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
+            List<int> selectedCategoryIds = ParseCategoryIds(categoryIds);
+            IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync(selectedCategoryIds);
+
             int? currentUserId = GetCurrentUserId();
             string activeTab = tab.Equals("my", StringComparison.OrdinalIgnoreCase) ? "my" : "all";
 
@@ -34,14 +36,16 @@ namespace OnlyFriends.Controllers
             {
                 joinedEvents = activities.Where(e => e.UserEvents.Any(ue =>
                     ue.UserId == currentUserId.Value &&
-                    ue.RequestStatus != EnumRequestStatus.Rejected));
+                    ue.RequestStatus != EnumRequestStatus.Rejected)
+                    || e.Owner.Id == currentUserId.Value);
             }
 
             var vm = new HomepageViewModel
             {
                 AllEvents = activities,
                 JoinedEvents = joinedEvents,
-                ActiveTab = activeTab
+                ActiveTab = activeTab,
+                SelectedCategoryIds = selectedCategoryIds
             };
 
             return View(vm);
@@ -64,5 +68,22 @@ namespace OnlyFriends.Controllers
 
             return null;
         }
+
+        private static List<int> ParseCategoryIds(string? categoryIds)
+        {
+            if (string.IsNullOrWhiteSpace(categoryIds))
+            {
+                return [];
+            }
+
+            return categoryIds
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(idText => int.TryParse(idText, out int id) ? id : (int?)null)
+                .Where(id => id.HasValue)
+                .Select(id => id!.Value)
+                .Distinct()
+                .ToList();
+        }
+
     }
 }

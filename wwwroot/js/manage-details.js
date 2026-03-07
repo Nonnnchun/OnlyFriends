@@ -204,33 +204,33 @@ function initJoinButtons() {
 
       this.disabled = true;
       const originalHtml = this.innerHTML;
-      this.innerHTML = '<span class="spinner"></span> กำลังดำเนินการ...';
+      this.innerHTML = '<span class="spinner"></span> Processing...';
 
       try {
         const result = await Api.post(`/Posts/${action}`, { postId });
 
         if (result.success) {
-          Toast.success(result.message || (action === 'join' ? 'สมัครเข้าร่วมสำเร็จ!' : 'ยกเลิกการเข้าร่วมสำเร็จ'));
+          Toast.success(result.message || (action === 'join' ? 'Successfully joined!' : 'Left successfully'));
 
           // Toggle button state
           if (action === 'join') {
             this.dataset.action = 'leave';
-            this.textContent = 'ยกเลิกการเข้าร่วม';
+            this.textContent = 'Leave';
             this.classList.replace('btn-success', 'btn-secondary');
           } else {
             this.dataset.action = 'join';
-            this.textContent = 'สมัครเข้าร่วม';
+            this.textContent = 'Join';
             this.classList.replace('btn-secondary', 'btn-success');
           }
 
           // Update count display
           updateApplicantCount(postId, result.currentCount, result.maxCount);
         } else {
-          Toast.error(result.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+          Toast.error(result.message || 'An error occurred. Please try again.');
           this.innerHTML = originalHtml;
         }
       } catch (err) {
-        Toast.error('ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่');
+        Toast.error('Unable to connect. Please try again.');
         this.innerHTML = originalHtml;
       } finally {
         this.disabled = false;
@@ -272,7 +272,7 @@ function initClosePost() {
   if (!btn) return;
 
   btn.addEventListener('click', async function () {
-    if (!confirm('ต้องการปิดรับสมัครโพสต์นี้ใช่หรือไม่?')) return;
+    if (!confirm('Are you sure you want to close this post?')) return;
 
     const postId = this.dataset.postId;
     this.disabled = true;
@@ -281,17 +281,17 @@ function initClosePost() {
     try {
       const result = await Api.post('/Posts/Close', { postId });
       if (result.success) {
-        Toast.success('ปิดรับสมัครเรียบร้อยแล้ว');
+        Toast.success('Registration has been closed.');
         setTimeout(() => location.reload(), 1000);
       } else {
-        Toast.error(result.message || 'เกิดข้อผิดพลาด');
+        Toast.error(result.message || 'Error occurred');
         this.disabled = false;
-        this.innerHTML = 'ปิดรับสมัคร';
+        this.innerHTML = 'Close Registration';
       }
     } catch {
-      Toast.error('ไม่สามารถเชื่อมต่อได้');
+      Toast.error('Unable to connect.');
       this.disabled = false;
-      this.innerHTML = 'ปิดรับสมัคร';
+      this.innerHTML = 'Close Registration';
     }
   });
 }
@@ -351,7 +351,7 @@ async function fetchPosts(params) {
     const data = await Api.get(`/Posts/Search?${query}`);
     renderPosts(data, postsGrid);
   } catch {
-    postsGrid.innerHTML = '<p class="text-muted text-center" style="grid-column:1/-1;padding:3rem">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
+    postsGrid.innerHTML = '<p class="text-muted text-center" style="grid-column:1/-1;padding:3rem">Failed to load data</p>';
   }
 }
 
@@ -360,8 +360,8 @@ function renderPosts(posts, container) {
     container.innerHTML = `
       <div class="empty-state" style="grid-column:1/-1">
         <div class="empty-icon">🔍</div>
-        <div class="empty-title">ไม่พบโพสต์ที่ค้นหา</div>
-        <div class="empty-text">ลองเปลี่ยนคำค้นหาหรือตัวกรอง</div>
+        <div class="empty-title">No matching posts found</div>
+        <div class="empty-text">Try a different keyword or filter</div>
       </div>`;
     return;
   }
@@ -370,10 +370,10 @@ function renderPosts(posts, container) {
     const pct = Math.min((p.applicantCount / p.maxMembers) * 100, 100);
     const barClass = pct >= 100 ? 'full' : pct >= 75 ? 'near-full' : '';
     const statusBadge = p.isClosed
-      ? '<span class="badge badge-closed">ปิดรับสมัคร</span>'
+      ? '<span class="badge badge-closed">Closed</span>'
       : p.applicantCount >= p.maxMembers
-        ? '<span class="badge badge-danger">เต็มแล้ว</span>'
-        : '<span class="badge badge-success">รับสมัคร</span>';
+        ? '<span class="badge badge-danger">Full</span>'
+        : '<span class="badge badge-success">Open</span>';
 
     return `
       <div class="post-card">
@@ -396,8 +396,8 @@ function renderPosts(posts, container) {
             </div>
             <span class="progress-text" data-post-count="${p.id}">${p.applicantCount}/${p.maxMembers}</span>
           </div>
-          ${p.expiresAt ? `<span class="text-xs text-muted"><i class="bi bi-calendar-event"></i> หมดอายุ ${p.expiresAt}</span>` : ''}
-          <a href="/Posts/Detail/${p.id}" class="btn btn-primary btn-sm">ดูรายละเอียด</a>
+          ${p.expiresAt ? `<span class="text-xs text-muted"><i class="bi bi-calendar-event"></i> Expires ${p.expiresAt}</span>` : ''}
+          <a href="/Posts/Detail/${p.id}" class="btn btn-primary btn-sm">View details</a>
         </div>
       </div>`;
   }).join('');
@@ -416,7 +416,7 @@ function initFormValidation() {
         const errorEl = form.querySelector(`[data-error="${field.name}"]`);
         if (!field.value.trim()) {
           field.classList.add('is-invalid');
-          if (errorEl) errorEl.textContent = 'กรุณากรอกข้อมูลในช่องนี้';
+          if (errorEl) errorEl.textContent = 'Please fill in this field';
           valid = false;
         } else {
           field.classList.remove('is-invalid');
@@ -429,7 +429,7 @@ function initFormValidation() {
       if (maxField && parseInt(maxField.value) < 1) {
         maxField.classList.add('is-invalid');
         const err = form.querySelector('[data-error="MaxMembers"]');
-        if (err) err.textContent = 'จำนวนสมาชิกต้องมากกว่า 0';
+        if (err) err.textContent = 'Member count must be greater than 0';
         valid = false;
       }
 
@@ -440,7 +440,7 @@ function initFormValidation() {
         if (expiry <= new Date()) {
           expiryField.classList.add('is-invalid');
           const err = form.querySelector('[data-error="ExpiresAt"]');
-          if (err) err.textContent = 'วันหมดอายุต้องเป็นวันในอนาคต';
+          if (err) err.textContent = 'Expiry date must be in the future';
           valid = false;
         }
       }
@@ -493,22 +493,22 @@ function initWinnerSelection() {
       const postId = container.dataset.postId;
 
       confirmBtn.disabled = true;
-      confirmBtn.innerHTML = '<span class="spinner"></span> กำลังบันทึก...';
+      confirmBtn.innerHTML = '<span class="spinner"></span> Saving...';
 
       try {
         const result = await Api.post('/Posts/SelectWinners', { postId, selectedUserIds: selected });
         if (result.success) {
-          Toast.success('ประกาศผลเรียบร้อยแล้ว!');
+          Toast.success('Selection announced successfully!');
           setTimeout(() => location.reload(), 1200);
         } else {
-          Toast.error(result.message || 'เกิดข้อผิดพลาด');
+          Toast.error(result.message || 'Error occurred');
           confirmBtn.disabled = false;
-          confirmBtn.textContent = 'ยืนยันการเลือก';
+          confirmBtn.textContent = 'Confirm selection';
         }
       } catch {
-        Toast.error('ไม่สามารถเชื่อมต่อได้');
+        Toast.error('Unable to connect.');
         confirmBtn.disabled = false;
-        confirmBtn.textContent = 'ยืนยันการเลือก';
+        confirmBtn.textContent = 'Confirm selection';
       }
     });
   }
@@ -520,13 +520,13 @@ function initWinnerSelection() {
 function initDeletePost() {
   document.querySelectorAll('.btn-delete-post').forEach(btn => {
     btn.addEventListener('click', async function () {
-      if (!confirm('ต้องการลบโพสต์นี้ใช่หรือไม่? การลบไม่สามารถย้อนกลับได้')) return;
+      if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) return;
 
       const postId = this.dataset.postId;
       try {
         const result = await Api.post('/Posts/Delete', { postId });
         if (result.success) {
-          Toast.success('ลบโพสต์เรียบร้อยแล้ว');
+          Toast.success('Post deleted successfully');
           // Remove card from DOM or redirect
           const card = this.closest('.post-card');
           if (card) {
@@ -537,10 +537,10 @@ function initDeletePost() {
             setTimeout(() => window.location.href = '/Posts', 800);
           }
         } else {
-          Toast.error(result.message || 'เกิดข้อผิดพลาด');
+          Toast.error(result.message || 'Error occurred');
         }
       } catch {
-        Toast.error('ไม่สามารถเชื่อมต่อได้');
+        Toast.error('Unable to connect.');
       }
     });
   });

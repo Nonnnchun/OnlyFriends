@@ -1,9 +1,20 @@
 @using OnlyFriends.Models.DTOS.EventDTOS
-@using OnlyFriends.Models.DTOS.CategoryDTOS
 @model CreateEventDTO
 @{
-    ViewData["Title"] = "สร้างกิจกรรม";
-    var categories = ViewData["Categories"] as IEnumerable<GetCategoryDTO>;
+    ViewData["Title"] = "Create Activity";
+    var presetCategories = new[]
+    {
+        "Sports",
+        "Games",
+        "Travel",
+        "Music",
+        "Learning",
+        "Technology",
+        "Food",
+        "Movies",
+        "Hobbies",
+        "Volunteering"
+    };
 }
 
 @section Styles {
@@ -35,9 +46,9 @@
     {
         <div class="register-modal-backdrop" id="authRequiredModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:9999;">
             <div class="register-modal" style="background:#fff; border-radius:14px; padding:24px; max-width:360px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-                <div style="font-size:1.2rem; font-weight:700; margin-bottom:10px;">กรุณาเข้าสู่ระบบ</div>
-                <div style="color:#555; margin-bottom:20px;">คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถสร้างกิจกรรมได้</div>
-                <button onclick="window.location.href='/login'" style="background:#111; color:#fff; border:none; padding:10px 20px; border-radius:99px; cursor:pointer;">ไปหน้า Login</button>
+                <div style="font-size:1.2rem; font-weight:700; margin-bottom:10px;">Please sign in</div>
+                <div style="color:#555; margin-bottom:20px;">You need to sign in before creating an activity.</div>
+                <button onclick="window.location.href='/login'" style="background:#111; color:#fff; border:none; padding:10px 20px; border-radius:99px; cursor:pointer;">Go to Login</button>
             </div>
         </div>
         <style>body { overflow: hidden; }</style>
@@ -46,10 +57,16 @@
         <div class="poster-upload-box">
             <div class="poster-preview" id="posterPreviewBox" style="text-align: center; color: #888; width: 320px; height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa;">
                 <i class="fa-regular fa-image" style="font-size: 3.5rem; color: #adb5bd; margin-bottom: 12px;"></i>
-                <div style="font-size: 0.95rem; font-weight: 500; color: #6c757d;">คลิกเพื่ออัปโหลดรูปภาพ</div>
-                <div style="font-size: 0.75rem; color: #adb5bd; margin-top: 4px;">รองรับ JPG, PNG (อัตราส่วน 1:1)</div>
+                <div style="font-size: 0.95rem; font-weight: 500; color: #6c757d;">Click to upload an image</div>
+                <div style="font-size: 0.75rem; color: #adb5bd; margin-top: 4px;">Supports JPG, PNG (1:1 ratio)</div>
             </div>
             <input type="file" id="posterInput" style="display: none;" accept="image/*">
+            <button type="button"
+                    id="removePosterBtn"
+                    onclick="removePoster(event)"
+                    style="display:none; margin-top:10px; width:320px; padding:10px 12px; border:1px solid #ced4da; border-radius:8px; background:#fff; color:#dc3545; font-weight:600; cursor:pointer;">
+                Remove uploaded image
+            </button>
         </div>
     </div>
 
@@ -61,7 +78,7 @@
             </select>
         </div>
 
-        <input type="text" id="eventTitle" class="title-input" placeholder="ชื่อกิจกรรม">
+        <input type="text" id="eventTitle" class="title-input" placeholder="Event title">
 
         <div class="schedule-wrapper">
             <div class="datetime-block">
@@ -70,7 +87,7 @@
                 <div class="dt-row">
                     <div class="dt-label">
                         <div class="dot-solid"></div>
-                        เริ่ม
+                        Start
                     </div>
                     <div class="dt-input-group">
                         <input type="date" id="startDate" class="flatpickr-date">
@@ -81,13 +98,14 @@
                 <div class="dt-row">
                     <div class="dt-label">
                         <div class="dot-outline"></div>
-                        จบ
+                        End
                     </div>
                     <div class="dt-input-group">
                         <input type="date" id="endDate" class="flatpickr-date">
                         <select id="endTime" class="time-select"></select>
                     </div>
                 </div>
+
             </div>
 
             <div class="timezone-block">
@@ -123,9 +141,18 @@
             </div>
         </div>
 
+        <div class="input-group" style="display:flex; gap:10px; align-items:center;">
+            <span>⏳</span>
+            <span style="min-width:170px; color:#495057; font-weight:600;">Registration Deadline</span>
+            <div style="display:flex; gap:10px; flex:1;">
+                <input type="date" id="registrationDeadlineDate" class="flatpickr-date" style="flex:1;">
+                <select id="registrationDeadlineTime" class="time-select" style="flex:1;"></select>
+            </div>
+        </div>
+
         <div class="input-group" style="display: flex; gap: 10px; align-items: center; position: relative;">
             <span>📍</span>
-            <input type="text" id="eventLocation" placeholder="ค้นหาสถานที่จัดงานพิมพ์ที่นี่..." style="flex: 1; border: none; outline: none; background: transparent; padding: 10px 0;" autocomplete="off">
+            <input type="text" id="eventLocation" placeholder="Search event location here..." style="flex: 1; border: none; outline: none; background: transparent; padding: 10px 0;" autocomplete="off">
             <div id="searchDropdown" style="display: none; position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: white; border: 1px solid #ced4da; border-radius: 8px; z-index: 1000; max-height: 250px; overflow-y: auto; box-shadow: 0 8px 16px rgba(0,0,0,0.1);"></div>
         </div>
 
@@ -137,41 +164,44 @@
         </div>
         <div class="input-group">
             <span>📝</span>
-            <input type="text" id="eventInfo" placeholder="เพิ่มคำอธิบาย">
+            <input type="text" id="eventInfo" placeholder="Add description">
         </div>
         <div class="input-group" style="flex-direction: column; align-items: stretch;">
-            <span style="margin-bottom:5px;">🏷️ หมวดหมู่กิจกรรม</span>
-
+            <span style="margin-bottom:5px;">🏷️ Activity categories</span>
+    
             <div id="categoryContainer">
                 <div class="category-row" style="display:flex; gap:10px; margin-bottom:8px;">
                     <select class="eventCategorySelect"
-                            style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px;">
-                        <option value="">เลือกหมวดหมู่</option>
-                        @if (categories != null) {
-                            @foreach (var category in categories) 
-                            {
-                                <option value="@category.Id">@category.CategoryName</option>
-                            }
+                            style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px; height:42px;">
+                        <option value="">Select a category</option>
+                        @foreach (var categoryName in presetCategories)
+                        {
+                            <option value="@categoryName">@categoryName</option>
                         }
                     </select>
-
+                    <button type="button"
+                            class="category-row-btn"
+                            onclick="onCategoryRowAction(this)"
+                            style="width:42px; min-width:42px; border:1px solid #ced4da; border-radius:8px; background:#fff; cursor:pointer; font-size:1.1rem; font-weight:700;">
+                        +
+                    </button>
                 </div>
             </div>
         </div>
-        <div class="section-title">ตัวเลือกกิจกรรม</div>
+        <div class="section-title">Activity options</div>
         <div class="form-section">
             <div class="option-row">
-                <span>💻 รูปแบบการจัดงาน</span>
+                <span>💻 Event format</span>
                 <select id="eventType" onchange="updateLocationPlaceholder()" style="border: none; background: transparent; color: var(--primary-color); font-weight: bold; cursor: pointer; outline: none; text-align: right;">
-                    <option value="offline">ออฟไลน์ (สถานที่จริง)</option>
-                    <option value="online">ออนไลน์ (Virtual)</option>
+                    <option value="offline">Offline (On-site)</option>
+                    <option value="online">Online (Virtual)</option>
                 </select>
             </div>
 
             <div class="option-row">
-                <span>👥 จำนวนผู้เข้าร่วม</span>
+                <span>👥 Participant limit</span>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="number" id="eventCapacity" placeholder="ไม่จำกัด" min="0" style="width: 100px;" 
+                    <input type="number" id="eventCapacity" placeholder="Unlimited" min="0" style="width: 100px;" 
                            onkeydown="if(event.key === '-' || event.key === 'e') event.preventDefault();"
                            oninput="if(this.value < 0) this.value = Math.abs(this.value);" autocomplete="off">
                     <span style="color: var(--text-muted); cursor: pointer;">✎</span>
@@ -180,18 +210,18 @@
         </div>
 
         <button class="submit-btn" onclick="submitEvent()">
-            สร้างกิจกรรม
+            Create Activity
         </button>
     </div>
 </div>
 
 <div class="custom-confirm-overlay" id="submitConfirmModal">
     <div class="custom-confirm-box">
-        <h3 style="margin-top:0; margin-bottom:10px; font-size:1.2rem;">ยืนยันสร้างกิจกรรม</h3>
-        <p style="color:#555; font-size:0.95rem; margin-bottom:0;">ยืนยันที่จะสร้างกิจกรรมนี้หรือไม่?</p>
+        <h3 style="margin-top:0; margin-bottom:10px; font-size:1.2rem;">Confirm activity creation</h3>
+        <p style="color:#555; font-size:0.95rem; margin-bottom:0;">Do you want to create this activity?</p>
         <div class="confirm-btn-group">
-            <button class="confirm-btn confirm-no" onclick="closeConfirmModal()">ยกเลิก</button>
-            <button class="confirm-btn confirm-yes" id="btnConfirmPublish" onclick="executeSubmit()">สร้างเลย</button>
+            <button class="confirm-btn confirm-no" onclick="closeConfirmModal()">Cancel</button>
+            <button class="confirm-btn confirm-yes" id="btnConfirmPublish" onclick="executeSubmit()">Create now</button>
         </div>
     </div>
 </div>
@@ -208,10 +238,27 @@
 
         let posterDataUrl = null;
 
+        function setRemovePosterButtonVisible(isVisible) {
+            const btn = document.getElementById('removePosterBtn');
+            if (btn) btn.style.display = isVisible ? 'block' : 'none';
+        }
+
+        function removePoster(event) {
+            event?.stopPropagation();
+            posterDataUrl = null;
+            const input = document.getElementById('posterInput');
+            if (input) input.value = '';
+            const preview = document.getElementById('posterPreviewBox');
+            const posterImg = preview?.querySelector('img.poster-img');
+            if (posterImg) posterImg.remove();
+            setRemovePosterButtonVisible(false);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('endDate').value = today;
+            document.getElementById('registrationDeadlineDate').value = today;
 
             initMap();
             updateLocationPlaceholder();
@@ -246,11 +293,14 @@
 
             const startSelect = document.getElementById('startTime');
             const endSelect = document.getElementById('endTime');
+            const registrationDeadlineSelect = document.getElementById('registrationDeadlineTime');
             startSelect.innerHTML = timeHtml;
             endSelect.innerHTML = timeHtml;
+            registrationDeadlineSelect.innerHTML = timeHtml;
 
             startSelect.value = "16:30";
             endSelect.value = "17:30";
+            registrationDeadlineSelect.value = "15:30";
 
             // Bind click to the whole box instead of the small generic button
             document.getElementById('posterPreviewBox').closest('.poster-upload-box').addEventListener('click', () => {
@@ -274,6 +324,7 @@
                     preview.prepend(img);
                 }
                 img.src = posterDataUrl;
+                setRemovePosterButtonVisible(true);
             };
             reader.readAsDataURL(file);
         });
@@ -337,7 +388,7 @@
             }
 
             const dropdown = document.getElementById('searchDropdown');
-            dropdown.innerHTML = '<div style="padding: 10px; color: #666;">กำลังค้นหา...</div>';
+            dropdown.innerHTML = '<div style="padding: 10px; color: #666;">Searching...</div>';
             dropdown.style.display = 'block';
 
             try {
@@ -365,11 +416,11 @@
                     });
                     dropdown.style.display = 'block';
                 } else {
-                    dropdown.innerHTML = '<div style="padding: 10px; color: #666;">ไม่พบสถานที่ ลองพิมพ์ชื่อให้กว้างขึ้น</div>';
+                    dropdown.innerHTML = '<div style="padding: 10px; color: #666;">No places found. Try a broader keyword.</div>';
                 }
             } catch (error) {
                 console.error('Error searching location:', error);
-                dropdown.innerHTML = '<div style="padding: 10px; color: #d9534f;">เกิดข้อผิดพลาดในการค้นหา</div>';
+                dropdown.innerHTML = '<div style="padding: 10px; color: #d9534f;">Search failed.</div>';
             }
         }
 
@@ -388,19 +439,63 @@
             const btnSearch = document.getElementById('btnSearchLocation'); // This element does not exist in the provided HTML
 
             if (eventType === 'online') {
-                locationInput.placeholder = "เพิ่มลิงก์การประชุม (เช่น Zoom, Google Meet)";
+                locationInput.placeholder = "Add meeting link (e.g. Zoom, Google Meet)";
                 mapContainer.style.display = 'none';
                 if (btnSearch) btnSearch.style.display = 'none'; // Check if btnSearch exists before accessing style
                 document.getElementById("Latitude").value = "";
                 document.getElementById("Longitude").value = "";
             } else {
-                locationInput.placeholder = "ค้นหาสถานที่จัดงาน...";
+                locationInput.placeholder = "Search event location...";
                 mapContainer.style.display = 'block';
                 if (btnSearch) btnSearch.style.display = 'block'; // Check if btnSearch exists before accessing style
             }
         }
 
         let eventToSubmit = null;
+
+        function createCategoryRow(optionsHtml) {
+            const row = document.createElement('div');
+            row.className = 'category-row';
+            row.style.cssText = 'display:flex; gap:10px; margin-bottom:8px;';
+            row.innerHTML = `
+                <select class="eventCategorySelect" style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px; height:42px;">
+                    ${optionsHtml}
+                </select>
+                <button type="button"
+                        class="category-row-btn"
+                        onclick="onCategoryRowAction(this)"
+                        style="width:42px; min-width:42px; border:1px solid #ced4da; border-radius:8px; background:#fff; cursor:pointer; font-size:1.1rem; font-weight:700;">
+                    +
+                </button>`;
+            return row;
+        }
+
+        function refreshCategoryRowButtons() {
+            const rows = [...document.querySelectorAll('#categoryContainer .category-row')];
+            rows.forEach((row, index) => {
+                const btn = row.querySelector('.category-row-btn');
+                if (!btn) return;
+                btn.textContent = index === rows.length - 1 ? '+' : '-';
+                btn.title = index === rows.length - 1 ? 'Add category' : 'Remove this category';
+            });
+        }
+
+        function onCategoryRowAction(button) {
+            const rows = [...document.querySelectorAll('#categoryContainer .category-row')];
+            const isLastRow = rows.length > 0 && button.closest('.category-row') === rows[rows.length - 1];
+            const container = document.getElementById('categoryContainer');
+            if (!container) return;
+
+            if (isLastRow) {
+                const optionsHtml = rows[0]?.querySelector('.eventCategorySelect')?.innerHTML || '<option value=\"\">Select a category</option>';
+                const newRow = createCategoryRow(optionsHtml);
+                container.appendChild(newRow);
+            } else {
+                button.closest('.category-row')?.remove();
+            }
+
+            refreshCategoryRowButtons();
+        }
 
         function submitEvent() {
             const title = document.getElementById('eventTitle').value;
@@ -419,9 +514,20 @@
             const endDate = document.getElementById('endDate').value;
             const endTime = document.getElementById('endTime').value;
             const timeZone = document.getElementById('eventTimeZone').value;
+            const registrationDeadlineDate = document.getElementById('registrationDeadlineDate').value;
+            const registrationDeadlineTime = document.getElementById('registrationDeadlineTime').value;
 
             const startAtStr = startDate && startTime ? `${startDate}T${startTime}:00` : null;
             const endAtStr = endDate && endTime ? `${endDate}T${endTime}:00` : null;
+            const hasRegistrationDate = Boolean(registrationDeadlineDate);
+            const hasRegistrationTime = Boolean(registrationDeadlineTime);
+            if (hasRegistrationDate !== hasRegistrationTime) {
+                alert("❌ Please select both date and time for registration deadline");
+                return;
+            }
+            const registrationDeadlineStr = (hasRegistrationDate && hasRegistrationTime)
+                ? `${registrationDeadlineDate}T${registrationDeadlineTime}:00`
+                : null;
 
             const capacityStr = document.getElementById('eventCapacity').value;
             const capacity = capacityStr ? parseInt(capacityStr) : 0;
@@ -429,12 +535,14 @@
             const selectedEventType = document.getElementById('eventType').value;
             const eventTypeEnum = selectedEventType === 'online' ? EnumEventType.Online : EnumEventType.Offline;
 
-            const categorySelect = document.querySelector('.eventCategorySelect');
-            const categoryId = categorySelect ? parseInt(categorySelect.value) : 0;
+            const categoryNames = [...document.querySelectorAll('.eventCategorySelect')]
+                .map(select => String(select.value || '').trim())
+                .filter(Boolean);
+            const uniqueCategoryNames = [...new Set(categoryNames)];
 
-            if (!title) { alert("❌ กรุณากรอกชื่อกิจกรรม"); return; }
-            if (!categoryId) { alert("❌ กรุณาเลือกหมวดหมู่กิจกรรม"); return; }
-            if (!location && eventTypeEnum === EnumEventType.Offline) { alert("❌ กรุณากรอกสถานที่"); return; }
+            if (!title) { alert("❌ Please enter an event title"); return; }
+            if (!uniqueCategoryNames.length) { alert("❌ Please select at least one activity category"); return; }
+            if (!location && eventTypeEnum === EnumEventType.Offline) { alert("❌ Please enter a location"); return; }
 
             if (startDate && endDate && startTime && endTime) {
                 const startFull = new Date(`${startDate}T${startTime}:00`);
@@ -444,14 +552,22 @@
                 
                 const startOnlyDate = new Date(`${startDate}T00:00:00`);
                 if (startOnlyDate < now) {
-                    alert("❌ วันที่เริ่มกิจกรรมต้องไม่เป็นอดีต");
+                    alert("❌ Start date cannot be in the past");
                     return;
                 }
                 
                 const diffMins = (endFull.getTime() - startFull.getTime()) / 60000;
                 if (diffMins < 30) {
-                    alert("❌ ระยะเวลากิจกรรมต้องห่างกันอย่างน้อย 30 นาที");
+                    alert("❌ Event duration must be at least 30 minutes");
                     return;
+                }
+
+                if (registrationDeadlineStr) {
+                    const deadlineFull = new Date(registrationDeadlineStr);
+                    if (deadlineFull < new Date()) {
+                        alert("❌ Registration deadline cannot be in the past");
+                        return;
+                    }
                 }
             }
 
@@ -465,10 +581,11 @@
                 eventStatus: EnumEventStatus.Open,
                 jointType: jointType,
                 capacity: capacity,
-                categoryIds: [categoryId],
+                categoryNames: uniqueCategoryNames,
                 posterUrl: typeof posterDataUrl !== 'undefined' ? posterDataUrl : null,
                 startAt: startAtStr,
                 endAt: endAtStr,
+                registrationDeadline: registrationDeadlineStr,
                 timeZone: timeZone
             };
 
@@ -483,7 +600,7 @@
             if (!eventToSubmit) return;
             const btnConfirm = document.getElementById('btnConfirmPublish');
             btnConfirm.disabled = true;
-            btnConfirm.innerText = "กำลังสร้าง...";
+            btnConfirm.innerText = "Creating...";
 
             $.ajax({
                 url: '/Event/Create',
@@ -496,24 +613,28 @@
                 },
                 success: function (result) {
                     if (result && result.success) {
-                        alert('✅ สร้างกิจกรรมสำเร็จ!');
+                        alert('✅ Activity created successfully!');
                         window.location.href = '/Home/Homepage';
                     } else if (result.redirectUrl) {
                         window.location.href = result.redirectUrl;
                     } else {
-                        alert('✅ สร้างกิจกรรมสำเร็จ!');
+                        alert('✅ Activity created successfully!');
                         window.location.href = '/Home/Homepage';
                     }
                 },
                 error: function (xhr, status, error) {
-                    alert('❌ เกิดข้อผิดพลาด: ' + (xhr.responseText || error));
+                    alert('❌ Error: ' + (xhr.responseText || error));
                 },
                 complete: function () {
                     closeConfirmModal();
                     btnConfirm.disabled = false;
-                    btnConfirm.innerText = "สร้างเลย";
+                    btnConfirm.innerText = "Create now";
                 }
             });
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshCategoryRowButtons();
+        });
     </script>
 }

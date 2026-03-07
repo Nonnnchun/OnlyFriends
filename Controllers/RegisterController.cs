@@ -40,13 +40,13 @@ namespace OnlyFriends.Controllers.Api
             // 1) Check for duplicate username
             if (await _context.Users.AnyAsync(u => u.Username == userToCreate.Username))
             {
-                ModelState.AddModelError("Username", "Username นี้ถูกใช้แล้ว");
+                ModelState.AddModelError("Username", "This username is already taken.");
             }
 
             // 2) Check for duplicate email
             if (await _context.Users.AnyAsync(u => u.Email == userToCreate.Email))
             {
-                ModelState.AddModelError("Email", "Email นี้ถูกใช้แล้ว");
+                ModelState.AddModelError("Email", "This email is already taken.");
             }
 
             if (!ModelState.IsValid)

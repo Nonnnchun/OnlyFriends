@@ -12,6 +12,64 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @RenderSection("Styles", required: false)
+    <style>
+        /* Global hard-lock: keep the shared navbar identical on every page */
+        .app-header .custom-navbar {
+            height: 72px !important;
+            min-height: 72px !important;
+            padding: 0 20px !important;
+        }
+
+        .app-header .custom-navbar,
+        .app-header .custom-navbar * {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+        }
+
+        /* Keep Font Awesome glyphs correct (do not override icon font) */
+        .app-header .custom-navbar .fa-solid,
+        .app-header .custom-navbar .fa-regular,
+        .app-header .custom-navbar .fa-brands,
+        .app-header .custom-navbar .fas,
+        .app-header .custom-navbar .far,
+        .app-header .custom-navbar .fab {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+        }
+
+        .app-header .custom-navbar .of-logo-text {
+            font-size: 24px !important;
+            line-height: 1 !important;
+            font-weight: 800 !important;
+        }
+
+        .app-header .custom-navbar .nav-link,
+        .app-header .custom-navbar .nav-btn,
+        .app-header .custom-navbar .sign-in-link,
+        .app-header .custom-navbar .dropdown-link {
+            font-size: 14px !important;
+            line-height: 1 !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+        }
+
+        .app-header .custom-navbar .nav-primary-link,
+        .app-header .custom-navbar .nav-left > .nav-primary-link,
+        .app-header .custom-navbar .nav-right > .nav-primary-link {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 132px !important;
+            min-width: 132px !important;
+            height: 40px !important;
+            padding: 0 12px !important;
+            border: none !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            color: #555 !important;
+            text-decoration: none !important;
+            box-sizing: border-box !important;
+            transform: none !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -20,6 +78,10 @@
                     ?? User?.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
                     ?? User?.FindFirst("unique_name")?.Value
                     ?? "").Trim();
+        var routeController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var routeAction = ViewContext.RouteData.Values["action"]?.ToString();
+        var isHomePage = string.Equals(routeController, "Home", StringComparison.OrdinalIgnoreCase)
+                         && string.Equals(routeAction, "Homepage", StringComparison.OrdinalIgnoreCase);
         var currentUserIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var profileSlug = string.IsNullOrEmpty(uname) ? "" : "@" + uname;
         var picture = User?.FindFirst("picture")?.Value;
@@ -38,32 +100,29 @@
                 </a>
                 @if (User?.Identity?.IsAuthenticated ?? false)
                 {
-                    <a asp-controller="Home" asp-action="Homepage" class="nav-link" style="color:#555; text-decoration:none; font-weight:500;">Home</a>
+                    <a asp-controller="Home" asp-action="Homepage" class="nav-link nav-primary-link">Home</a>
                 }
             </div>
             <div class="nav-right">
                 @if (User?.Identity?.IsAuthenticated ?? false)
                 {
-                    <a asp-controller="Event" asp-action="Create" class="nav-link" style="color:#555; text-decoration:none; font-weight:500;">Create Activity</a>
-                    <div class="dropdown" id="filterDropdown">
-                        <button class="nav-btn" onclick="toggleFilter()" style="display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #ced4da; padding:6px 16px; border-radius:99px; color:#212529; font-weight:600; cursor:pointer; font-size:0.95rem; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
-                            <i class="fa-solid fa-filter"></i> กรองเนื้อหา
-                        </button>
-                        <div class="dropdown-content" id="filterMenu" style="width:280px; padding:15px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); border:1px solid #eee;">
-                            <div style="font-weight:700; margin-bottom:12px; font-size:1.1rem;">หมวดหมู่กิจกรรม</div>
-                            <div class="filter-item" style="padding:8px 0; border-bottom:1px solid #f1f3f5;">
-                                <label style="display:flex; align-items:center; cursor:pointer; gap:10px; margin:0; width:100%;">
-                                    <input type="checkbox" id="catSports" style="width:16px; height:16px;"> เกมส์
-                                </label>
+                    <a asp-controller="Event" asp-action="Create" class="nav-link nav-primary-link">Create Activity</a>
+                    @if (isHomePage)
+                    {
+                        <div class="dropdown" id="filterDropdown">
+                            <button class="nav-btn" onclick="toggleFilter()" style="display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #ced4da; padding:6px 16px; border-radius:99px; color:#212529; font-weight:600; cursor:pointer; font-size:0.95rem; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+                                <i class="fa-solid fa-filter"></i> Filter Content
+                            </button>
+                            <div class="dropdown-content" id="filterMenu" style="width:280px; padding:15px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); border:1px solid #eee;">
+                                <div style="font-weight:700; margin-bottom:12px; font-size:1.1rem;">Activity Categories</div>
+                                <div id="filterCategoryList">
+                                    <div class="filter-item" style="padding:8px 0; color:#6c757d;">Loading categories...</div>
+                                </div>
+                                <button class="btn-apply" onclick="applyFilter()" style="width:100%; margin-top:15px; background:#111; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">Apply</button>
+                                <button class="btn-apply" onclick="resetFilter()" style="width:100%; margin-top:8px; background:#fff; color:#111; border:1px solid #ced4da; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">Reset Filter</button>
                             </div>
-                            <div class="filter-item" style="padding:8px 0; border-bottom:1px solid #f1f3f5;">
-                                <label style="display:flex; align-items:center; cursor:pointer; gap:10px; margin:0; width:100%;">
-                                    <input type="checkbox" id="catEdu" style="width:16px; height:16px;"> ท่องเที่ยว
-                                </label>
-                            </div>
-                            <button class="btn-apply" onclick="applyFilter()" style="width:100%; margin-top:15px; background:#111; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">นำไปใช้</button>
                         </div>
-                    </div>
+                    }
 
                     @await Html.PartialAsync("_NotificationBell")
                     <div class="dropdown" id="profileDropdown">
@@ -73,24 +132,24 @@
                         <div class="dropdown-content profile-menu" id="profileMenu">
                             @if (!string.IsNullOrEmpty(uname))
                             {
-                                <a href="/user/@profileSlug" data-my-profile id="myProfileLink">โปรไฟล์ของฉัน</a>
+                                <a href="/user/@profileSlug" data-my-profile id="myProfileLink">My Profile</a>
                             }
                             else
                             {
-                                <a href="/login" data-my-profile id="myProfileLink">โปรไฟล์ของฉัน</a>
+                                <a href="/login" data-my-profile id="myProfileLink">My Profile</a>
                             }
-                            <a href="/setting">การตั้งค่า</a>
-                            <hr>
+                            <a href="/setting">Settings</a>
+                            <hr class="profile-separator">
                             <form method="post" action="/login/logout">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="dropdown-link">ออกจากระบบ</button>
+                                <button type="submit" class="dropdown-link">Sign Out</button>
                             </form>
                         </div>
                     </div>
                 }
                 else
                 {
-                    <a href="/Home/Homepage" class="nav-link" style="color:#555; text-decoration:none; font-weight:500;">Explore Events <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    <a href="/Home/Homepage" class="guest-explore-link">Explore Events <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     <a href="@Url.Action("Index", "Login")" class="sign-in-link">Sign In</a>
                 }
             </div>
@@ -108,32 +167,32 @@
                 <div class="app-footer-left">
                     <div class="app-footer-brand">OnlyFriends</div>
                     <p class="app-footer-text">
-                        จัดกิจกรรม นัดพบ และค้นหาเพื่อนใหม่ได้ในที่เดียว
+                        Plan activities, meet people, and make new friends in one place.
                     </p>
                 </div>
                 <div class="app-footer-links">
                     <div class="app-footer-column">
-                        <div class="app-footer-title">โปรไฟล์ของฉัน</div>
+                        <div class="app-footer-title">My Profile</div>
                         @if (((User?.Identity?.IsAuthenticated) ?? false) && !string.IsNullOrEmpty(uname))
                         {
-                            <a href="/user/@profileSlug">ดูโปรไฟล์</a>
+                            <a href="/user/@profileSlug">View Profile</a>
                         }
                         else
                         {
-                            <a href="/login">เข้าสู่ระบบ</a>
+                            <a href="/login">Sign In</a>
                         }
-                        <a href="/setting">การตั้งค่า</a>
+                        <a href="/setting">Settings</a>
                     </div>
                     <div class="app-footer-column">
-                        <div class="app-footer-title">ข้อมูล</div>
-                        <a asp-controller="Home" asp-action="Privacy">ความเป็นส่วนตัว</a>
-                        <span class="app-footer-badge">โครงการตัวอย่าง</span>
+                        <div class="app-footer-title">Info</div>
+                        <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <span class="app-footer-badge">Sample Project</span>
                     </div>
                 </div>
             </div>
             <div class="app-footer-bottom">
                 <span>© @DateTime.Now.Year OnlyFriends</span>
-                <span class="app-footer-meta">สร้างเพื่อการเรียนรู้และทดลองใช้งาน</span>
+                <span class="app-footer-meta">Built for learning and experimentation.</span>
             </div>
         </footer>
     </div>

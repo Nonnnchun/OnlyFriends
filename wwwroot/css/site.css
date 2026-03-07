@@ -441,6 +441,8 @@ input[type="password"]{
   z-index: 50;
   background: #fff;
   width: 100%;
+  border-bottom: none;
+  box-shadow: none;
 }
 .custom-navbar{
   display: flex;
@@ -453,6 +455,8 @@ input[type="password"]{
   box-sizing: border-box;
   font-family: system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
   font-size:13px;
+  border: none;
+  box-shadow: none;
 }
 .nav-left,.nav-right{
   display:flex;
@@ -858,7 +862,9 @@ input[type="password"]{
   max-width:1200px;
   width:100%;
   margin:0 auto;
-  padding:16px 24px;
+  height:72px;
+  min-height:72px;
+  padding:0 20px;
   box-sizing:border-box;
 }
 .landing-brand{

@@ -14,7 +14,7 @@
     var currentUserId = (int)(ViewData["CurrentUserId"] ?? 0);
     var isOwnProfile = currentUserId != 0 && currentUserId == Model.Id;
     var avatarUrl = string.IsNullOrEmpty(Model.ProfilePictureUrl)
-        ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(username)}&background=e8f0fe&color=1a56db&size=128&bold=true"
+        ? $"https://ui-avatars.com/api/?background=f0f2f5&color=111&name={Uri.EscapeDataString(username)}"
         : Model.ProfilePictureUrl;
 }
 

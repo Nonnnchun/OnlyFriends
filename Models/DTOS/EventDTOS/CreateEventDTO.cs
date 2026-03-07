@@ -5,24 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 namespace OnlyFriends.Models.DTOS.EventDTOS
 {
-    // public class CreateEventDTO
-    // {
-    //     public required string Title { get; set; }
-    //     public string? Info { get; set; }
-        
-    //     public required string Location { get; set; } 
-    //     public int CategoryId { get; set; }
-
-    //     public EnumJointType JointType { get; set; }
-    //     public EnumEventType EventType { get; set; }
-
-    //     public double? Latitude { get; set; }
-    //     public double? Longitude { get; set; }
-    //     public IFormFile? PosterImage { get; set; }
-
-    //     public int Capacity { get; set; }
-    //     public int OwnerId { get; set; } // เก็บไว้เทสต์ก่อนได้ครับ
-    // }
     public class CreateEventDTO
     {
         public required string Title { get; set; }
@@ -41,5 +23,6 @@ namespace OnlyFriends.Models.DTOS.EventDTOS
         public required int Capacity { get; set; }
         public int OwnerId { get; set; }
         public List<int> CategoryIds { get; set; } = new List<int>();
+        public List<string> CategoryNames { get; set; } = new List<string>();
     }
 }

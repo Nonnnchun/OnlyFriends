@@ -99,11 +99,24 @@ namespace OnlyFriends.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var activity = await _activityService.FindEventByIdAsync(eventId);
+            var isDeadlinePassed = activity.RegistrationDeadline.HasValue &&
+                                   activity.RegistrationDeadline.Value <= DateTime.UtcNow;
+            if (isDeadlinePassed)
+            {
+                if (activity.EventStatus != EnumEventStatus.Closed)
+                {
+                    await _activityService.ToggleRegistrationAsync(eventId, false);
+                }
+                return Conflict("Registration deadline has passed");
+            }
+
+            var acceptedCount = activity.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted);
+            var isCapacityFull = activity.Capacity > 0 && acceptedCount >= activity.Capacity;
             if (userId == activity.Owner.Id)
             {
                 return BadRequest("You cant join your own event!");
             }
-            else if (activity.EventStatus == EnumEventStatus.Closed || activity.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted) >= activity.Capacity)
+            else if (activity.EventStatus == EnumEventStatus.Closed || isCapacityFull)
             {
                 return Conflict("This event is not accepting new participants");
             }
@@ -147,6 +160,11 @@ namespace OnlyFriends.Controllers
                 if (ownerId != activity.Owner.Id)
                     return Unauthorized("Only the event owner can accept join requests");
 
+                var acceptedCount = activity.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted);
+                var isCapacityFull = activity.Capacity > 0 && acceptedCount >= activity.Capacity;
+                if (isCapacityFull)
+                    return Conflict("Event is already full");
+
                 await _activityService.AcceptJoinRequest(eventId, userId);
                 return Ok(new { message = "Join request accepted" });
             }
@@ -171,9 +189,8 @@ namespace OnlyFriends.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
-            ViewData["Categories"] = await _categoryService.GetCategoriesAsync();
             return View();
         }
 
@@ -184,9 +201,25 @@ namespace OnlyFriends.Controllers
             try
             {
                 var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                // Convert kind to UTC to fix database error (IDK)
-                activityToCreate.StartAt = DateTime.SpecifyKind(activityToCreate.StartAt, DateTimeKind.Utc);
-                activityToCreate.EndAt = DateTime.SpecifyKind(activityToCreate.EndAt, DateTimeKind.Utc);
+                // Normalize incoming datetime values to UTC.
+                // If client sends "unspecified" kind, treat it as local server time first.
+                static DateTime ToUtc(DateTime dt) => dt.Kind switch
+                {
+                    DateTimeKind.Utc => dt,
+                    DateTimeKind.Local => dt.ToUniversalTime(),
+                    _ => DateTime.SpecifyKind(dt, DateTimeKind.Local).ToUniversalTime()
+                };
+
+                activityToCreate.StartAt = ToUtc(activityToCreate.StartAt);
+                activityToCreate.EndAt = ToUtc(activityToCreate.EndAt);
+                if (activityToCreate.RegistrationDeadline.HasValue)
+                {
+                    activityToCreate.RegistrationDeadline = ToUtc(activityToCreate.RegistrationDeadline.Value);
+                    if (activityToCreate.RegistrationDeadline.Value < DateTime.UtcNow)
+                    {
+                        return BadRequest("Registration deadline cannot be in the past");
+                    }
+                }
                 activityToCreate.OwnerId = userId;
                 await _activityService.AddEventAsync(activityToCreate);
                 return Json(new {redirectUrl = Url.Action("Homepage", "Home")});

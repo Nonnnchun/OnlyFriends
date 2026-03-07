@@ -1,6 +1,8 @@
 ﻿@using OnlyFriends.Models
 @using OnlyFriends.Models.DTOS.EventDTOS
 @using OnlyFriends.Models.ViewModels
+@using System.Linq
+@using System.IdentityModel.Tokens.Jwt
 @model HomepageViewModel
 
 @{
@@ -8,14 +10,15 @@
     IEnumerable<GetEventDTO> eventsToRender = Model.ActiveTab == "my" ? Model.JoinedEvents : Model.AllEvents;
     bool hasAnyEvents = (Model?.AllEvents?.Any() ?? false) || (Model?.JoinedEvents?.Any() ?? false);
     string lastDate = string.Empty;
-    var currentUserId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var currentUserId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+        ?? User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
     int.TryParse(currentUserId, out int uid);
 }
 
 <div class="main-container home-page">
 
     <div class="page-header">
-        <div class="page-title">Events</div>
+        <div class="page-title">Activities</div>
     </div>
 
     @if (hasAnyEvents)
@@ -24,6 +27,7 @@
             <a asp-action="Homepage"
                 asp-controller="Home"
                 asp-route-tab="all"
+                asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
                 class="event-tab all-tab @(Model.ActiveTab == "all" ? "active" : "")"
                 aria-current="@(Model.ActiveTab == "all" ? "page" : null)">
                 All Events
@@ -31,6 +35,7 @@
             <a asp-action="Homepage"
                 asp-controller="Home"
                 asp-route-tab="my"
+                asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
                 class="event-tab my-tab @(Model.ActiveTab == "my" ? "active" : "")"
                 aria-current="@(Model.ActiveTab == "my" ? "page" : null)">
                 Joined Events
@@ -43,7 +48,6 @@
                 @foreach (var item in eventsToRender)
                 {
                     var eventDate = item.StartAt ?? DateTime.Now;
-                    // Changed date format to English
                     string currentDateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("en-US"));
                     var participantCount = item.UserEvents?.Count(ue => ue.RequestStatus != EnumRequestStatus.Rejected) ?? 0;
                     
@@ -108,14 +112,24 @@
                                     </span>
                                     @if(Model.ActiveTab == "my")
                                     {
-                                        var myStatus = item.UserEvents?.FirstOrDefault(ue => ue.UserId == uid)?.RequestStatus;
-                                        if (myStatus != null)
+                                        var isHost = item.Owner?.Id == uid;
+                                        if (isHost)
                                         {
-                                            string statusColor = myStatus == EnumRequestStatus.Pending ? "#fd7e14" : (myStatus == EnumRequestStatus.Accepted ? "#198754" : "#dc3545");
-                                            string statusText = myStatus == EnumRequestStatus.Pending ? "Pending" : (myStatus == EnumRequestStatus.Accepted ? "Accepted" : "Rejected");
-                                            <span class="tag-my-status" style="background:@(statusColor)15; color:@statusColor; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:700;">
-                                                @(statusText)
+                                            <span class="tag-my-status" style="background:#0d6efd15; color:#0d6efd; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:700;">
+                                                Host
                                             </span>
+                                        }
+                                        else
+                                        {
+                                            var myStatus = item.UserEvents?.FirstOrDefault(ue => ue.UserId == uid)?.RequestStatus;
+                                            if (myStatus != null)
+                                            {
+                                                string statusColor = myStatus == EnumRequestStatus.Pending ? "#fd7e14" : (myStatus == EnumRequestStatus.Accepted ? "#198754" : "#dc3545");
+                                                string statusText = myStatus == EnumRequestStatus.Pending ? "Pending Approval" : (myStatus == EnumRequestStatus.Accepted ? "Joined" : "Rejected");
+                                                <span class="tag-my-status" style="background:@(statusColor)15; color:@statusColor; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:700;">
+                                                    @(statusText)
+                                                </span>
+                                            }
                                         }
                                     }
                                 </div>
@@ -132,7 +146,7 @@
             {
                 <div class="empty-state">
                     @(Model.ActiveTab == "my"
-                        ? "You haven't joined any events yet."
+                        ? "You have not joined any events yet."
                         : "No events available at the moment.")
                 </div>
             }
@@ -150,11 +164,11 @@
                 </div>
                 <h2 class="events-empty-title">No Upcoming Events</h2>
                 <p class="events-empty-sub">
-                    You don't have any upcoming events. Why not organize one yourself?
+                    You do not have any upcoming activities right now. Why not create one?
                 </p>
                 <button type="button" class="of-btn of-btn-neutral events-empty-btn"
                         onclick="window.location.href='@Url.Action("CreateActivity", "Home")'">
-                    + Create Event
+                    + Create Activity
                 </button>
             </div>
         </section>
@@ -166,8 +180,8 @@
 {
     <div class="register-modal-backdrop" id="authRequiredModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
         <div class="register-modal" style="background:#fff; border-radius:14px; padding:24px; max-width:360px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-            <div style="font-size:1.2rem; font-weight:700; margin-bottom:10px;">Please Login</div>
-            <div style="color:#555; margin-bottom:20px;">You must be logged in to view details or join events.</div>
+            <div style="font-size:1.2rem; font-weight:700; margin-bottom:10px;">Please sign in</div>
+            <div style="color:#555; margin-bottom:20px;">You need to sign in first to view details or join events.</div>
             <button onclick="window.location.href='/login'" style="background:#111; color:#fff; border:none; padding:10px 20px; border-radius:99px; cursor:pointer;">Go to Login</button>
             <button onclick="document.getElementById('authRequiredModal').style.display='none'; document.body.style.overflow='auto';" style="background:#fff; color:#111; border:1px solid #ddd; padding:10px 20px; border-radius:99px; cursor:pointer; margin-left:10px;">Close</button>
         </div>

@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
       li.className = 'notif-item';
       const a = document.createElement('a');
       a.href = '/login';
-      a.textContent = 'กรุณาเข้าสู่ระบบเพื่อดูการแจ้งเตือน';
+      a.textContent = 'Please sign in to view notifications';
       li.appendChild(a);
       list.appendChild(li);
       return;
@@ -178,7 +178,7 @@ function updateNavClock() {
   const now = new Date();
   const hours = now.getHours().toString().padStart(2, '0');
   const minutes = now.getMinutes().toString().padStart(2, '0');
-  el.textContent = `${hours} นาฬิกา ${minutes} นาที GMT+7`;
+  el.textContent = `${hours}:${minutes} GMT+7`;
 }
 setInterval(updateNavClock, 1000);
 updateNavClock();
@@ -221,9 +221,122 @@ function toggleNotifMenu(event) {
   }
 }
 
+function parseCategoryIdsQuery(text) {
+  if (!text) return [];
+  return [...new Set(
+    text
+      .split(",")
+      .map(x => parseInt(x, 10))
+      .filter(Number.isInteger)
+  )];
+}
+
+function getSelectedCategoryIdsFromMenu() {
+  const checked = document.querySelectorAll('#filterCategoryList input[data-filter-category]:checked');
+  return [...new Set([...checked]
+    .map(el => parseInt(el.value, 10))
+    .filter(Number.isInteger))];
+}
+
+function setSelectedCategoryIdsToMenu(ids) {
+  const set = new Set(ids);
+  document.querySelectorAll('#filterCategoryList input[data-filter-category]').forEach(el => {
+    el.checked = set.has(parseInt(el.value, 10));
+  });
+}
+
+function syncTabLinksCategoryQuery(selectedIds) {
+  document.querySelectorAll('.event-tabs .event-tab').forEach(link => {
+    const href = link.getAttribute("href");
+    if (!href) return;
+    const targetUrl = new URL(href, window.location.origin);
+    if (selectedIds.length > 0) {
+      targetUrl.searchParams.set("categoryIds", selectedIds.join(","));
+    } else {
+      targetUrl.searchParams.delete("categoryIds");
+    }
+    link.setAttribute("href", targetUrl.pathname + targetUrl.search);
+  });
+}
+
+async function loadFilterCategories() {
+  const container = document.getElementById("filterCategoryList");
+  if (!container) return;
+
+  const categoryIdsFromQuery = parseCategoryIdsQuery(new URLSearchParams(window.location.search).get("categoryIds") || "");
+
+  try {
+    const res = await fetch("/api/category", { cache: "no-store", credentials: "include" });
+    if (!res.ok) throw new Error("Failed to load categories");
+    const categories = await res.json();
+
+    if (!Array.isArray(categories) || categories.length === 0) {
+      container.innerHTML = '<div class="filter-item" style="padding:8px 0; color:#6c757d;">No categories found</div>';
+      return;
+    }
+
+    categories.sort((a, b) => String(a.categoryName || a.CategoryName || "").localeCompare(String(b.categoryName || b.CategoryName || ""), "en"));
+    const selectedSet = new Set(categoryIdsFromQuery);
+    container.innerHTML = "";
+
+    categories.forEach(category => {
+      const rawId = category?.id ?? category?.Id;
+      const rawName = category?.categoryName ?? category?.CategoryName;
+      const id = parseInt(rawId, 10);
+      if (!Number.isInteger(id)) return;
+      const row = document.createElement("div");
+      row.className = "filter-item";
+      row.style.cssText = "padding:8px 0; border-bottom:1px solid #f1f3f5;";
+      const label = document.createElement("label");
+      label.style.cssText = "display:flex; align-items:center; cursor:pointer; gap:10px; margin:0; width:100%;";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = String(id);
+      input.setAttribute("data-filter-category", "true");
+      input.style.cssText = "width:16px; height:16px;";
+      input.checked = selectedSet.has(id);
+      const textNode = document.createTextNode(String(rawName || ""));
+      label.appendChild(input);
+      label.appendChild(textNode);
+      row.appendChild(label);
+      container.appendChild(row);
+    });
+  } catch {
+    container.innerHTML = '<div class="filter-item" style="padding:8px 0; color:#dc3545;">Failed to load categories</div>';
+  }
+
+  if (document.querySelector(".home-page")) {
+    setSelectedCategoryIdsToMenu(categoryIdsFromQuery);
+    const selectedIds = getSelectedCategoryIdsFromMenu();
+    syncTabLinksCategoryQuery(selectedIds);
+  }
+}
+
 function applyFilter() {
-  alert("กำลังกรองข้อมูล...");
-  document.getElementById("filterMenu")?.classList.remove("show");
+  const selectedIds = getSelectedCategoryIdsFromMenu();
+  const currentUrl = new URL(window.location.href);
+  const target = new URL("/Home/Homepage", window.location.origin);
+
+  const tab = currentUrl.searchParams.get("tab");
+  if (tab === "my" || tab === "all") {
+    target.searchParams.set("tab", tab);
+  }
+
+  if (selectedIds.length > 0) {
+    target.searchParams.set("categoryIds", selectedIds.join(","));
+  }
+
+  window.location.href = target.pathname + target.search;
+}
+
+function resetFilter() {
+  const currentUrl = new URL(window.location.href);
+  const target = new URL("/Home/Homepage", window.location.origin);
+  const tab = currentUrl.searchParams.get("tab");
+  if (tab === "my" || tab === "all") {
+    target.searchParams.set("tab", tab);
+  }
+  window.location.href = target.pathname + target.search;
 }
 
 // ถ้าคลิกพื้นที่ว่างๆ นอกเมนู ให้ปิด Dropdown ทั้งหมด
@@ -231,4 +344,8 @@ window.addEventListener("click", function (event) {
   if (!event.target.closest(".dropdown")) {
     closeAllMenus();
   }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadFilterCategories();
 });
