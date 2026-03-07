@@ -41,9 +41,9 @@ public sealed class EventService : IEventService
             var categories = await _context.Categories
                 .Where(c => activityToCreate.CategoryIds.Contains(c.Id))
                 .ToListAsync();
-            
+
             if (!categories.Any()) throw new KeyNotFoundException("No valid categories found!");
-            
+
             activity.Categories = categories;
         }
 
@@ -85,13 +85,13 @@ public sealed class EventService : IEventService
         var activity = await _context.Events
             .Include(e => e.Categories)
             .FirstOrDefaultAsync(e => e.Id == activityToUpdate.Id);
-            
+
         if (activity == null)
         {
             return;
         }
         activityToUpdate.Adapt(activity);
-        
+
         if (activityToUpdate.CategoryIds != null)
         {
             var newCategories = await _context.Categories
@@ -103,7 +103,7 @@ public sealed class EventService : IEventService
                 activity.Categories.Add(cat);
             }
         }
-        
+
         await _context.SaveChangesAsync();
     }
 
@@ -199,5 +199,4 @@ public sealed class EventService : IEventService
         }
         await _context.SaveChangesAsync();
     }
-
 }

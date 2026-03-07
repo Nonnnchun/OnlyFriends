@@ -6,16 +6,26 @@
 @{
     ViewData["Title"] = Model.Title ?? "Event Details";
 
-    var owner = Model.Owner; 
-    var categoryName = Model.Categories != null && Model.Categories.Any() ? string.Join(", ", Model.Categories.Select(c => c.CategoryName)) : "Uncategorized";
+    var owner = Model.Owner;
+    var categoryNames = Model?.Categories?
+        .Select(c => c.CategoryName?.Trim())
+        .Where(name => !string.IsNullOrWhiteSpace(name))
+        .Select(name => name!)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList() ?? new List<string>();
+    if (!categoryNames.Any())
+    {
+        categoryNames.Add("Uncategorized");
+    }
 
     // Poster
-    var poster = string.IsNullOrWhiteSpace(Model.PosterUrl) ? "/images/poster-placeholder.jpg" : Model.PosterUrl;
+    var hasPoster = !string.IsNullOrWhiteSpace(Model?.PosterUrl);
+    var poster = Model?.PosterUrl;
 
     // Date/Time
-    var hasTime = Model.StartAt.HasValue && Model.EndAt.HasValue;
-    var start = Model.StartAt ?? DateTime.Now;
-    var end = Model.EndAt ?? DateTime.Now;
+    var hasTime = Model?.StartAt.HasValue == true && Model?.EndAt.HasValue == true;
+    var start = Model?.StartAt ?? DateTime.Now;
+    var end = Model?.EndAt ?? DateTime.Now;
 
     var monthText = hasTime ? start.ToString("MMM").ToUpper() : "TBD";
     var dayText = hasTime ? start.ToString("dd") : "--";
@@ -54,6 +64,7 @@
         (Model?.UserEvents?.Any(ue => ue.UserId == parsedUserId && ue.RequestStatus == EnumRequestStatus.Pending) ?? false);
     bool hasRejectedRequest = isCurrentUserParsed &&
         (Model?.UserEvents?.Any(ue => ue.UserId == parsedUserId && ue.RequestStatus == EnumRequestStatus.Rejected) ?? false);
+    bool canInviteFriends = isCurrentUserParsed && !canManageEvent;
 
     string locName = Model?.Location ?? "No Location";
     string locDetail = "";
@@ -61,8 +72,18 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/event-detail.css"  />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/invite-modal.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 }
+
+@if (canInviteFriends)
+{
+    @Html.AntiForgeryToken()
+    @await Html.PartialAsync("_InviteModal", Model)
+}
+
+<div id="inviteContext" data-event-id="@Model?.Id" hidden></div>
 
 <div class="ev-page">
     <div class="ev-wrap">
@@ -70,7 +91,14 @@
         <!-- LEFT PANEL -->
         <aside class="ev-left">
             <div class="ev-card">
-                <img class="ev-poster" src="@poster" alt="Event poster" />
+                @if (hasPoster)
+                {
+                    <img class="ev-poster" src="@poster" alt="Event poster" />
+                }
+                else
+                {
+                    <div class="ev-poster-placeholder" role="img" aria-label="No event image">No Image</div>
+                }
 
                 <div class="ev-card-body">
                     @if (canManageEvent)
@@ -135,7 +163,10 @@
                             <a href="@(string.IsNullOrWhiteSpace(owner?.Username) ? "#" : $"/user/{owner.Username}")" class="action-link">Contact the Host</a>
                         </div> 
                          <div class="ev-tags">
-                            <span class="ev-tag">#@categoryName</span>
+                            @foreach (var category in categoryNames)
+                            {
+                                <span class="ev-tag">#@category</span>
+                            }
                         </div>
                 </div>
             </div>
@@ -149,6 +180,14 @@
                         <span class="ev-badge @(Model?.EventStatus == EnumEventStatus.Open ? "ev-badge-open" : "ev-badge-closed")">
                             @Model?.EventStatus
                         </span>
+
+                        @if (canInviteFriends)
+                        {
+                            <button type="button" class="ev-invite-btn" onclick="openInviteModal()">
+                                <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                                <span>Invite Friends</span>
+                            </button>
+                        }
                     </div>
 
                     <h1 class="ev-title">@Model?.Title</h1>
@@ -475,6 +514,10 @@
 
 @section Scripts {
     <script src="~/js/event-detail.js" ></script>
+    @if (canInviteFriends)
+    {
+        <script src="~/js/invite-modal.js" asp-append-version="true"></script>
+    }
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

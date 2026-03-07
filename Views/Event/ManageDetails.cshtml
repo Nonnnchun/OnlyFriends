@@ -24,6 +24,8 @@
     var defaultAvatar = "/images/avatar-placeholder.svg";
     var hostAvatarIsDefault = string.IsNullOrWhiteSpace(Model.Owner.ProfilePictureUrl);
     var hostAvatar = hostAvatarIsDefault ? defaultAvatar : Model.Owner.ProfilePictureUrl;
+    var hasPoster = !string.IsNullOrWhiteSpace(Model.PosterUrl);
+    var emptyCoverDataUrl = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
 }
   
   <div class="app-body">
@@ -63,7 +65,16 @@
                       <div>
                           <div class="event-card">
                               <div class="event-card-cover">
-                                  <img class="event-card-cover-emoji" id="eventCoverImage" src="@Model.PosterUrl" alt="event cover"></img>
+                                  <img
+                                      class="event-card-cover-emoji @(hasPoster ? "" : "is-empty")"
+                                      id="eventCoverImage"
+                                      src="@(hasPoster ? Model.PosterUrl : emptyCoverDataUrl)"
+                                      alt="Event cover image"
+                                      onerror="handleCoverImageError()" />
+                                  <div class="event-card-cover-placeholder @(hasPoster ? "is-hidden" : "")" id="eventCoverPlaceholder" aria-hidden="true">
+                                      <i class="fa-regular fa-image"></i>
+                                      <span>No Image</span>
+                                  </div>
                                   <button class="change-cover-btn" onclick="openCoverPicker()">
                                       <i class="fa-solid fa-image"></i> Change
                                   </button>
@@ -160,11 +171,11 @@
                           </div>
                           <div class="edit-btns">
                           <button class="btn-outline" onclick="openPanel()"><i class="fa-solid fa-pen"></i> Edit Event</button>
-                          <button class="btn-outline" onclick="openCoverPicker()">
-                              <i class="fa-solid fa-image"></i>
-                              <span>Change Photo</span>
-                          </button>
+                          <button class="btn-outline" onclick="openCoverPicker()"><i class="fa-solid fa-image"></i><span> Change Photo</span></button>
                       </div>
+                        <div class="edit-btns" style="margin-top:8px">
+                            <button class= "btn-outline" onclick="updateEvent()"><i class="fa-solid fa-save"></i><span> Update Event</span></button>
+                        </div>
                       </div>
                   </div>
               </div>
@@ -218,16 +229,9 @@
               <div class="section">
                   <div class="section-header">
                       <div class="section-title">Invites</div>
-                      <button class="btn-plus" onclick="openInviteModal()"><i class="fa-solid fa-plus"></i>Invite Guests</button>
+                      <button class="btn-plus" onclick="openInviteModal()"><i class="fa-solid fa-plus"></i>Invite Friends</button>
                   </div>
-                  <div class="section-sub">Invite subscribers, contacts and past guests via email or SMS.</div>
-                  <div class="empty-state">
-                      <div class="empty-icon"><i class="fa-regular fa-envelope"></i></div>
-                      <div>
-                          <div class="empty-title">Invites Sent</div>
-                          <div class="empty-sub">You can invite subscribers, contacts and past guests to the event.</div>
-                      </div>
-                  </div>
+                  <div class="section-sub">Invite friends from your network who have not joined this event yet.</div>
               </div>
   
               @* Hosts *@
@@ -401,7 +405,6 @@
                         </div>
               </div>
           </div>
-  
           @* ══ TAB: REGISTRATION ══ *@
           <div id="tab-Registration" style="display:none">
               <div class="section">
@@ -422,9 +425,30 @@
                           <div class="toggle-label">Delete Event</div>
                           <div class="toggle-sub">Permanently delete this event and all registrations. This action cannot be undone.</div>
                       </div>
-                      <button type="button" class="btn-danger-outline" id="deleteEventBtn" onclick="deleteEvent()">
+                      <button type="button" class="btn-danger-outline" id="deleteEventBtn" onclick="openDeleteConfirmModal()">
                           <i class="fa-regular fa-trash-can"></i> Delete Event
                       </button>
+                  </div>
+              </div>
+          </div>
+
+          <div class="modal-overlay" id="deleteConfirmOverlay" onclick="closeDeleteConfirmModal(event)">
+              <div class="invite-modal delete-confirm-modal">
+                  <div class="invite-header">
+                      <div class="invite-title">Delete Event</div>
+                      <button class="modal-close" onclick="closeDeleteConfirmModal()">
+                          <i class="fa-solid fa-xmark"></i>
+                      </button>
+                  </div>
+
+                  <div class="delete-confirm-body">
+                      <div class="delete-confirm-text">Are you sure you want to delete this event?</div>
+                      <div class="delete-confirm-subtext">This action cannot be undone.</div>
+                  </div>
+
+                  <div class="delete-confirm-actions">
+                      <button type="button" class="btn-outline sm" onclick="closeDeleteConfirmModal()">Cancel</button>
+                      <button type="button" class="btn-danger-solid" id="deleteConfirmBtn" onclick="deleteEvent()">Confirm Delete</button>
                   </div>
               </div>
           </div>
