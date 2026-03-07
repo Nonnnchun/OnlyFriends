@@ -85,5 +85,9 @@ namespace OnlyFriends.Controllers
                 .ToList();
         }
 
+        public IActionResult About()
+        {
+            return View();
+        }
     }
 }

@@ -6,16 +6,26 @@
 @{
     ViewData["Title"] = Model.Title ?? "Event Details";
 
-    var owner = Model.Owner; 
-    var categoryName = Model.Categories != null && Model.Categories.Any() ? string.Join(", ", Model.Categories.Select(c => c.CategoryName)) : "Uncategorized";
+    var owner = Model.Owner;
+    var categoryNames = Model?.Categories?
+        .Select(c => c.CategoryName?.Trim())
+        .Where(name => !string.IsNullOrWhiteSpace(name))
+        .Select(name => name!)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList() ?? new List<string>();
+    if (!categoryNames.Any())
+    {
+        categoryNames.Add("Uncategorized");
+    }
 
     // Poster
-    var poster = string.IsNullOrWhiteSpace(Model.PosterUrl) ? "/images/poster-placeholder.jpg" : Model.PosterUrl;
+    var hasPoster = !string.IsNullOrWhiteSpace(Model?.PosterUrl);
+    var poster = Model?.PosterUrl;
 
     // Date/Time
-    var hasTime = Model.StartAt.HasValue && Model.EndAt.HasValue;
-    var start = Model.StartAt ?? DateTime.Now;
-    var end = Model.EndAt ?? DateTime.Now;
+    var hasTime = Model?.StartAt.HasValue == true && Model?.EndAt.HasValue == true;
+    var start = Model?.StartAt ?? DateTime.Now;
+    var end = Model?.EndAt ?? DateTime.Now;
 
     var monthText = hasTime ? start.ToString("MMM").ToUpper() : "TBD";
     var dayText = hasTime ? start.ToString("dd") : "--";
@@ -35,7 +45,12 @@
     int going = visibleParticipants.Count;
     var participantPreview = visibleParticipants.Take(6).ToList();
     int moreParticipantCount = Math.Max(0, going - participantPreview.Count);
-    int spotsLeft = capacity > 0 ? Math.Max(0, capacity - going) : -1;
+    var acceptedCount = Model?.UserEvents?.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted) ?? 0;
+    bool hasUserEvents = Model?.UserEvents?.Any() ?? false;
+    int joinedCountForCapacity = hasUserEvents ? acceptedCount : allParticipants.Count;
+    bool isCapacityLimited = capacity > 0;
+    bool isCapacityFull = isCapacityLimited && joinedCountForCapacity >= capacity;
+    int spotsLeft = isCapacityLimited ? Math.Max(0, capacity - joinedCountForCapacity) : -1;
 
     // Location
     var mapQuery = $"{Model?.Latitude},{Model?.Longitude}"; 
@@ -54,6 +69,7 @@
         (Model?.UserEvents?.Any(ue => ue.UserId == parsedUserId && ue.RequestStatus == EnumRequestStatus.Pending) ?? false);
     bool hasRejectedRequest = isCurrentUserParsed &&
         (Model?.UserEvents?.Any(ue => ue.UserId == parsedUserId && ue.RequestStatus == EnumRequestStatus.Rejected) ?? false);
+    bool canInviteFriends = isCurrentUserParsed && !canManageEvent;
 
     string locName = Model?.Location ?? "No Location";
     string locDetail = "";
@@ -61,8 +77,18 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/event-detail.css"  />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/invite-modal.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 }
+
+@if (canInviteFriends)
+{
+    @Html.AntiForgeryToken()
+    @await Html.PartialAsync("_InviteModal", Model)
+}
+
+<div id="inviteContext" data-event-id="@Model?.Id" hidden></div>
 
 <div class="ev-page">
     <div class="ev-wrap">
@@ -70,7 +96,14 @@
         <!-- LEFT PANEL -->
         <aside class="ev-left">
             <div class="ev-card">
-                <img class="ev-poster" src="@poster" alt="Event poster" />
+                @if (hasPoster)
+                {
+                    <img class="ev-poster" src="@poster" alt="Event poster" />
+                }
+                else
+                {
+                    <div class="ev-poster-placeholder" role="img" aria-label="No event image">No Image</div>
+                }
 
                 <div class="ev-card-body">
                     @if (canManageEvent)
@@ -135,7 +168,10 @@
                             <a href="@(string.IsNullOrWhiteSpace(owner?.Username) ? "#" : $"/user/{owner.Username}")" class="action-link">Contact the Host</a>
                         </div> 
                          <div class="ev-tags">
-                            <span class="ev-tag">#@categoryName</span>
+                            @foreach (var category in categoryNames)
+                            {
+                                <span class="ev-tag">#@category</span>
+                            }
                         </div>
                 </div>
             </div>
@@ -149,6 +185,14 @@
                         <span class="ev-badge @(Model?.EventStatus == EnumEventStatus.Open ? "ev-badge-open" : "ev-badge-closed")">
                             @Model?.EventStatus
                         </span>
+
+                        @if (canInviteFriends)
+                        {
+                            <button type="button" class="ev-invite-btn" onclick="openInviteModal()">
+                                <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                                <span>Invite Friends</span>
+                            </button>
+                        }
                     </div>
 
                     <h1 class="ev-title">@Model?.Title</h1>
@@ -186,7 +230,7 @@
             </div>
 
             <!-- Registration card -->
-            <div class="ev-join-card" data-status="@Model?.EventStatus" data-joinmode="@Model?.JointType" data-event-id="@Model?.Id" data-joined="@hasJoined.ToString().ToLower()" data-pending="@hasPendingRequest.ToString().ToLower()" data-rejected="@hasRejectedRequest.ToString().ToLower()">
+            <div class="ev-join-card" data-status="@Model?.EventStatus" data-joinmode="@Model?.JointType" data-event-id="@Model?.Id" data-joined="@hasJoined.ToString().ToLower()" data-pending="@hasPendingRequest.ToString().ToLower()" data-rejected="@hasRejectedRequest.ToString().ToLower()" data-full="@isCapacityFull.ToString().ToLower()">
                 @if (canManageEvent)
                 {
                     <div class="ev-reg-body">
@@ -324,6 +368,24 @@
                             <div class="ev-user-meta">
                                 <span class="ev-user-name">@Model?.Owner.Username</span>
                                 <span class="ev-muted">@Model?.Owner.Email</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (isCapacityFull)
+                {
+                    <div class="ev-reg-body">
+                        <div class="ev-reg-row">
+                            <svg class="ev-reg-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" />
+                                <path d="M8 5v3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                <circle cx="8" cy="10.8" r="0.75" fill="currentColor" />
+                            </svg>
+                            <div class="ev-reg-text">
+                                <div class="ev-reg-title">Event is full</div>
+                                <div class="ev-reg-desc">
+                                    This event has reached maximum capacity and is not accepting more registrations.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -475,6 +537,10 @@
 
 @section Scripts {
     <script src="~/js/event-detail.js" ></script>
+    @if (canInviteFriends)
+    {
+        <script src="~/js/invite-modal.js" asp-append-version="true"></script>
+    }
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

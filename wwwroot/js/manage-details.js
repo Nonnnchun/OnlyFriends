@@ -637,6 +637,13 @@ function openCoverPicker() {
     input.click();
 }
 
+function handleCoverImageError() {
+    const coverImage = document.getElementById('eventCoverImage');
+    const coverPlaceholder = document.getElementById('eventCoverPlaceholder');
+    if (coverImage) coverImage.classList.add('is-empty');
+    coverPlaceholder?.classList.remove('is-hidden');
+}
+
 function handleCoverFileChange(inputEl) {
     const file = inputEl?.files?.[0];
     if (!file) return;
@@ -651,10 +658,13 @@ function handleCoverFileChange(inputEl) {
     const reader = new FileReader();
     reader.onload = (e) => {
         const coverImage = document.getElementById('eventCoverImage');
+        const coverPlaceholder = document.getElementById('eventCoverPlaceholder');
         const result = e.target?.result;
         if (coverImage && typeof result === 'string') {
             pendingPosterUrl = result;
             coverImage.src = result;
+            coverImage.classList.remove('is-empty');
+            coverPlaceholder?.classList.add('is-hidden');
             showToast('Cover photo ready. Click Update Event to save.');
         }
     };
@@ -799,14 +809,14 @@ async function deleteEvent() {
         return;
     }
 
-    const confirmed = window.confirm('Delete this event permanently? This action cannot be undone.');
-    if (!confirmed) return;
-
     const deleteBtn = document.getElementById('deleteEventBtn');
-    const originalContent = deleteBtn?.innerHTML;
-    if (deleteBtn) {
-        deleteBtn.disabled = true;
-        deleteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+    const confirmBtn = document.getElementById('deleteConfirmBtn');
+    const originalConfirmContent = confirmBtn?.innerHTML;
+
+    if (deleteBtn) deleteBtn.disabled = true;
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
     }
 
     try {
@@ -832,19 +842,32 @@ async function deleteEvent() {
             throw new Error(`Delete failed (${response.status})`);
         }
 
+        closeDeleteConfirmModal();
         showToast('Event deleted successfully.');
         setTimeout(() => {
-            window.location.href = '/Calendar';
+            window.location.href = '/Home/Homepage';
         }, 700);
     } catch (error) {
         console.error(error);
         showToast('Could not delete event. Please try again.');
     } finally {
-        if (deleteBtn) {
-            deleteBtn.disabled = false;
-            deleteBtn.innerHTML = originalContent || '<i class="fa-regular fa-trash-can"></i> Delete Event';
+        if (deleteBtn) deleteBtn.disabled = false;
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalConfirmContent || 'Confirm Delete';
         }
     }
+}
+
+function openDeleteConfirmModal() {
+    document.getElementById('deleteConfirmOverlay')?.classList.add('open');
+}
+
+function closeDeleteConfirmModal(e) {
+    const overlay = document.getElementById('deleteConfirmOverlay');
+    if (!overlay) return;
+    if (e && e.target !== overlay) return;
+    overlay.classList.remove('open');
 }
 
 function toIsoUtc(localDateTime) {
@@ -871,7 +894,6 @@ function updateEvent() {
     const endValue = document.getElementById('inputEnd')?.value || '';
     const categoryEl = document.getElementById('inputCategory');
     const categoryId = parseInt(categoryEl?.value, 10);
-    const categoryName = categoryEl?.selectedOptions?.[0]?.textContent?.trim() || '';
 
     const payload = {
         id: parseInt(eventId, 10),
@@ -881,8 +903,7 @@ function updateEvent() {
         endAt: combineDateAndTimeToIsoUtc(dateValue, endValue),
         capacity: parseInt(document.getElementById('inputCapacity')?.value, 10),
         location: document.getElementById('inputLocation')?.value?.trim(),
-        categoryId: Number.isNaN(categoryId) ? null : categoryId,
-        category: Number.isNaN(categoryId) ? null : { id: categoryId, categoryName }
+        categoryIds: Number.isNaN(categoryId) ? [] : [categoryId]
     };
     if (pendingPosterUrl) {
         payload.posterUrl = pendingPosterUrl;
@@ -974,7 +995,12 @@ async function loadCategoryOptions() {
     const select = document.getElementById('inputCategory');
     if (!select) return;
 
-    const selectedId = String(select.dataset.selectedId || select.value || '').trim();
+    const selectedRaw = String(select.dataset.selectedId || select.value || '').trim();
+    const selectedIds = selectedRaw
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0);
+    const selectedId = selectedIds.length > 0 ? selectedIds[0] : '';
 
     try {
         const response = await fetch('/api/category', { method: 'GET' });

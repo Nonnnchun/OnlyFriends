@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const eventId = joinCard?.dataset?.eventId;
     const joinMode = joinCard?.dataset?.joinmode;
+    const isCapacityFull = joinCard?.dataset?.full === 'true';
     const initialJoined = joinCard?.dataset?.joined === 'true';
     const initialPending = joinCard?.dataset?.pending === 'true';
     const initialRejected = joinCard?.dataset?.rejected === 'true';
@@ -32,9 +33,14 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             if (btnJoin) {
                 btnJoin.disabled = false;
-                btnJoin.style.display = 'block';
-                btnJoin.innerText = 'Request to Join';
-                btnJoin.onclick = handleJoin;
+                if (isCapacityFull) {
+                    btnJoin.style.display = 'none';
+                    btnJoin.onclick = null;
+                } else {
+                    btnJoin.style.display = 'block';
+                    btnJoin.innerText = 'Request to Join';
+                    btnJoin.onclick = handleJoin;
+                }
             }
             if (btnCancel) {
                 btnCancel.disabled = false;
@@ -64,6 +70,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 } else if (res.status === 401) {
                     window.location.href = '/login';
+                } else if (res.status === 409) {
+                    alert('This event is already full.');
+                    window.location.reload();
                 } else {
                     alert('Failed to join. Please try again.');
                     setJoinState(previousState);

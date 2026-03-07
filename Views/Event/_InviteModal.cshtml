@@ -2,12 +2,19 @@
 @using OnlyFriends.Models.DTOS.EventDTOS
 @using OnlyFriends.Models.DTOS.UserDTOS
 @{
-    var friends = (ViewData["Friends"] as IEnumerable<GetUserDTO>) ?? [];
-    var joinedIds = Model.UserEvents.Select(ue => ue.UserId).ToHashSet();
-    var invitableFriends = friends.Where(f => !joinedIds.Contains(f.Id)).ToList();
-    var acceptedCount = Model.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted);
-    var slotsText = Model.Capacity > 0 ? Math.Max(0, Model.Capacity - acceptedCount).ToString() : "∞";
-    var slotsLabel = Model.Capacity > 0 ? "LEFT" : "UNLIMITED";
+    var friends = (ViewData["Friends"] as IEnumerable<GetUserDTO>)?.ToList() ?? new List<GetUserDTO>();
+    var defaultAvatar = "/images/avatar-placeholder.svg";
+    var allFriends = friends
+        .GroupBy(f => f.Id)
+        .Select(g => g.First())
+        .Where(f => f.Id != Model.Owner.Id)
+        .OrderBy(f => f.FirstName)
+        .ThenBy(f => f.LastName)
+        .ToList();
+    var blockedInviteIds = Model.UserEvents
+        .Where(ue => ue.RequestStatus == EnumRequestStatus.Accepted || ue.RequestStatus == EnumRequestStatus.Pending)
+        .Select(ue => ue.UserId)
+        .ToHashSet();
 }
 
 @* ── OVERLAY ── *@
@@ -21,9 +28,9 @@
                 @* แสดงจำนวน slot ที่เหลือ *@
                 <div class="slots-badge" id="slotsBadge">
                     <i class="fa-solid fa-rotate" style="font-size:11px"></i>
-                    <span id="slotsLeft">@slotsText</span> @slotsLabel
+                    <span id="slotsLeft">@(Model.Capacity - Model.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted))</span> LEFT
                 </div>
-                <button class="modal-close" onclick="document.getElementById('inviteOverlay').classList.remove('open')">
+                <button class="modal-close" onclick="closeInviteModal()">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -37,174 +44,83 @@
 
                 @* Sidebar *@
                 <div class="invite-sidebar">
-                    <div class="sidebar-item active" onclick="switchSideTab(this,'emails')">
-                        <i class="fa-solid fa-at"></i> Enter Emails
-                    </div>
-
                     <div class="sidebar-section-label">CALENDAR CONTACTS</div>
-                    <div class="sidebar-item" onclick="switchSideTab(this,'everyone')">
+                    <div class="sidebar-item active" onclick="switchSideTab(this,'everyone')">
                         <span class="sidebar-dot"></span> Everyone
-                        <span class="sidebar-count">@invitableFriends.Count</span>
-                    </div>
-
-                    <div class="sidebar-section-label">EVENTS</div>
-                    <div class="sidebar-item" onclick="switchSideTab(this,'past')">
-                        @Model.Title
-                        <div style="font-size:11px;color:var(--text-muted)">
-                            Today · @Model.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted) Guest
-                        </div>
+                        <span class="sidebar-count">@allFriends.Count</span>
                     </div>
                 </div>
 
                 @* Main Panel *@
                 <div class="invite-main">
 
-                    @* TAB: Enter Emails *@
-                    <div id="tab-emails">
-                        <div class="invite-section-label">Add Emails</div>
-                        <div class="email-input-row">
-                            <input class="form-input" id="emailInput"
-                                   placeholder="Paste or enter emails here"
-                                   onkeydown="handleEmailKey(event)" />
-                            <button class="btn-add" onclick="addEmail()">Add</button>
-                        </div>
-
-                        @* รายชื่อ user จาก server *@
-                        <div class="guest-list" id="guestList">
-                            @foreach (var user in invitableFriends)
-                            {
-                                <div class="guest-item" data-id="@user.Id" onclick="toggleGuest(this)">
-                                    <img class="guest-avatar"
-                                         src="@(string.IsNullOrEmpty(user.ProfilePictureUrl) ? "/img/default-avatar.png" : user.ProfilePictureUrl)"
-                                         alt="@user.Username"
-                                         onerror="this.style.display='none'" />
-                                    <div class="guest-info">
-                                        <div class="guest-name">@user.FirstName @user.LastName</div>
-                                        <div class="guest-email">@user.Email</div>
-                                    </div>
-                                    <div class="guest-check">
-                                        <i class="fa-solid fa-check"></i>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
                     @* TAB: Everyone *@
-                    <div id="tab-everyone" style="display:none">
+                    <div id="tab-everyone" style="display:block">
                         <div class="invite-section-label">Everyone in Calendar</div>
-                        <div class="guest-list">
-                            @foreach (var user in invitableFriends)
-                            {
-                                <div class="guest-item" data-id="@user.Id" onclick="toggleGuest(this)">
-                                    <img class="guest-avatar"
-                                         src="@(string.IsNullOrEmpty(user.ProfilePictureUrl) ? "/img/default-avatar.png" : user.ProfilePictureUrl)"
-                                         alt="@user.Username"
-                                         onerror="this.style.display='none'" />
-                                    <div class="guest-info">
-                                        <div class="guest-name">@user.FirstName @user.LastName</div>
-                                        <div class="guest-email">@user.Email</div>
-                                    </div>
-                                    <div class="guest-check">
-                                        <i class="fa-solid fa-check"></i>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    @* TAB: Past Event *@
-                    <div id="tab-past" style="display:none">
-                        <div class="invite-section-label">From @Model.Title</div>
-
-                        @if (!Model.UserEvents.Any(ue => ue.RequestStatus == EnumRequestStatus.Accepted))
+                        @if (allFriends.Count == 0)
                         {
-                            <div class="empty-state">
-                                <div class="empty-icon"><i class="fa-regular fa-calendar"></i></div>
+                            <div class="invite-empty-state">
+                                <div class="invite-empty-icon"><i class="fa-regular fa-user"></i></div>
                                 <div>
-                                    <div class="empty-title">No guests yet</div>
-                                    <div class="empty-sub">No one has joined this event yet.</div>
+                                    <div class="invite-empty-title">No friends available to invite</div>
+                                    <div class="invite-empty-sub">Add friends first, then invite them to this event.</div>
                                 </div>
                             </div>
                         }
                         else
                         {
                             <div class="guest-list">
-                                @foreach (var reg in invitableFriends)
+                                @foreach (var user in allFriends)
                                 {
-                                    UserEvent? userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);
-                                    @if (userEvent?.RequestStatus == EnumRequestStatus.Accepted)
-                                    {
-                                        <div class="guest-item" data-id="@reg.Id" onclick="toggleGuest(this)">
-                                            <img class="guest-avatar"
-                                                 src="@reg.ProfilePictureUrl"
-                                                 alt="@reg.Username.Substring(startIndex: 0, length: 1).ToUpper()" />
-                                            <div class="guest-info">
-                                                <div class="guest-name">@reg.FirstName @reg.LastName</div>
-                                                <div class="guest-email">@reg.Email</div>
-                                            </div>
-                                            <div class="guest-check">
-                                                <i class="fa-solid fa-check"></i>
-                                            </div>
+                                    var relation = Model.UserEvents.FirstOrDefault(ue => ue.UserId == user.Id);
+                                    var isBlockedInvite = blockedInviteIds.Contains(user.Id);
+                                    var fullName = $"{user.FirstName} {user.LastName}".Trim();
+                                    var displayName = string.IsNullOrWhiteSpace(fullName) ? user.Username : fullName;
+                                    var emailText = string.IsNullOrWhiteSpace(user.Email) ? $"@@{user.Username}" : user.Email;
+                                    var avatarUrl = string.IsNullOrWhiteSpace(user.ProfilePictureUrl) ? defaultAvatar : user.ProfilePictureUrl;
+                                    var avatarIsDefault = string.IsNullOrWhiteSpace(user.ProfilePictureUrl);
+
+                                    <div class="guest-item @(isBlockedInvite ? "is-disabled" : "")"
+                                         data-id="@user.Id"
+                                         data-invitable="@(!isBlockedInvite).ToString().ToLower()"
+                                         onclick="@(isBlockedInvite ? "" : "toggleGuest(this)")">
+                                        <img class="guest-avatar @(avatarIsDefault ? "is-default-avatar" : "")"
+                                             src="@avatarUrl"
+                                             alt="@displayName"
+                                             onerror="this.onerror=null;this.src='@defaultAvatar';this.classList.add('is-default-avatar');" />
+                                        <div class="guest-info">
+                                            <div class="guest-name">@displayName</div>
+                                            <div class="guest-email">@emailText</div>
+                                            @if (isBlockedInvite)
+                                            {
+                                                <div class="guest-note">@(relation?.RequestStatus == EnumRequestStatus.Pending ? "Pending request" : "Already joined")</div>
+                                            }
+                                            else if (relation?.RequestStatus == EnumRequestStatus.Rejected)
+                                            {
+                                                <div class="guest-note is-rejected">Previously rejected</div>
+                                            }
                                         </div>
-                                    }
+                                        <div class="guest-check">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                    </div>
                                 }
                             </div>
                         }
                     </div>
-
                 </div>
-            </div>
-
-            @* ════ STEP 2: ส่งข้อความ ════ *@
-            <div id="inviteStep2" style="display:none">
-
-                @* Sidebar: รายชื่อที่เลือก *@
-                <div class="invite-sidebar">
-                    <div class="sidebar-section-label" id="invitingLabel">Inviting 1 Person</div>
-                    <div id="selectedList" class="guest-list" style="border:none;padding:0 0 0 8px"></div>
-                </div>
-
-                @* Main: Compose Message *@
-                <div class="invite-main" style="padding:20px">
-                    <div class="message-box">
-                        <div class="message-intro">
-                            Hi, @Model.Owner.FirstName @Model.Owner.LastName invites you to join @Model.Title.
-                        </div>
-                        <textarea class="message-custom" id="customMessage"
-                                  placeholder="Add a custom message here..."></textarea>
-                    </div>
-
-                    <div class="message-rsvp-box">
-                        RSVP: @($"{Context.Request.Scheme}://{Context.Request.Host}/Event/View/{Model.Id}")
-                    </div>
-                </div>
-
             </div>
 
         </div>
 
         @* ── FOOTER ── *@
         <div class="invite-footer">
-
-            @* Footer Step 1 *@
-            <div id="footerStep1" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+            <div class="invite-footer-actions">
                 <div class="selected-count" id="selectedCount">0 Selected</div>
-                <button class="btn-next" id="btnNext" onclick="goToStep2()" disabled>
-                    Next <i class="fa-solid fa-chevron-right"></i>
-                </button>
-            </div>
-
-            @* Footer Step 2 *@
-            <div id="footerStep2" style="display:none;align-items:center;justify-content:space-between;width:100%">
-                <button class="btn-back" onclick="goToStep1()">
-                    <i class="fa-solid fa-chevron-left"></i> Back
-                </button>
-                <button class="btn-send" onclick="sendInvites()">
+                <button class="btn-send" id="btnSendNow" onclick="sendInvites()" disabled>
                     <i class="fa-solid fa-paper-plane"></i> Send Invites
                 </button>
             </div>
-
         </div>
 
     </div>

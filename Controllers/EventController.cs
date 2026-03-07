@@ -38,6 +38,12 @@ namespace OnlyFriends.Controllers
         public async Task<IActionResult> Details(int id)
         {
             IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim != null && int.TryParse(userIdClaim, out var userId))
+            {
+                var friends = await _userService.GetFriendsAsync(userId);
+                ViewData["Friends"] = friends;
+            }
             return View("Details", activities.FirstOrDefault(a => a.Id == id));
         }
 
@@ -223,7 +229,7 @@ namespace OnlyFriends.Controllers
                     }
                     if (activityToCreate.RegistrationDeadline.Value > activityToCreate.StartAt)
                     {
-                        return BadRequest("Registration deadline must be before or equal to start time");
+                        return BadRequest("Registration deadline cannot be after the event starts");
                     }
                 }
                 activityToCreate.OwnerId = userId;
@@ -324,15 +330,12 @@ namespace OnlyFriends.Controllers
                 var activity = await _activityService.FindEventByIdAsync(dto.EventId);
                 if (activity == null) return NotFound("Event not found");
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-                if (userId != activity.Owner.Id) return Unauthorized("Only the event owner can do this");
-
-                await _activityService.SendEventInvitesAsync(dto.EventId, dto.UserIds);
 
                 var inviterUsername = User.FindFirst(ClaimTypes.Name)?.Value ?? $"User#{userId}";
                 foreach (var invitedUserId in dto.UserIds)
                 {
                     await _notificationService.AddEventInviteNotificationAsync(
-                        invitedUserId, userId, inviterUsername, activity.Title);
+                        invitedUserId, userId, inviterUsername, activity.Title, dto.EventId);
                 }
 
                 return Ok(new { success = true });

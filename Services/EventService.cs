@@ -20,7 +20,6 @@ public interface IEventService
     Task ToggleRegistrationAsync(int eventId, bool isOpen);
     Task UpdateVisibilityAsync(int eventId, bool isPublic);
     Task UpdateParticipantStatusAsync(int eventId, int userId, EnumRequestStatus status);
-    Task SendEventInvitesAsync(int eventId, List<int> userIds);
 }
 public sealed class EventService : IEventService
 {
@@ -162,13 +161,13 @@ public sealed class EventService : IEventService
         var activity = await _context.Events
             .Include(e => e.Categories)
             .FirstOrDefaultAsync(e => e.Id == activityToUpdate.Id);
-            
+
         if (activity == null)
         {
             return;
         }
         activityToUpdate.Adapt(activity);
-        
+
         if (activityToUpdate.CategoryIds != null)
         {
             var newCategories = await _context.Categories
@@ -180,7 +179,7 @@ public sealed class EventService : IEventService
                 activity.Categories.Add(cat);
             }
         }
-        
+
         await _context.SaveChangesAsync();
     }
 
@@ -251,29 +250,6 @@ public sealed class EventService : IEventService
             .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId)
             ?? throw new KeyNotFoundException($"No UserEvent found for user {userId} in event {eventId}");
         ue.RequestStatus = status;
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task SendEventInvitesAsync(int eventId, List<int> userIds)
-    {
-        foreach (var userId in userIds)
-        {
-            var ue = await _context.UserEvents
-                .FirstOrDefaultAsync(x => x.EventId == eventId && x.UserId == userId);
-            if (ue == null)
-            {
-                _context.UserEvents.Add(new UserEvent
-                {
-                    EventId = eventId,
-                    UserId = userId,
-                    RequestStatus = EnumRequestStatus.Accepted
-                });
-            }
-            else
-            {
-                ue.RequestStatus = EnumRequestStatus.Accepted;
-            }
-        }
         await _context.SaveChangesAsync();
     }
 

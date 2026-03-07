@@ -1,4 +1,4 @@
-@using OnlyFriends.Models
+﻿@using OnlyFriends.Models
 @using OnlyFriends.Models.DTOS.EventDTOS
 @using OnlyFriends.Models.ViewModels
 @using System.Linq
@@ -50,8 +50,9 @@
                     var eventDate = item.StartAt ?? DateTime.Now;
                     string currentDateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("en-US"));
                     var participantCount = item.UserEvents?.Count(ue => ue.RequestStatus != EnumRequestStatus.Rejected) ?? 0;
+                    
+                    // FIXED: Now takes any user, pfp or not
                     var avatars = (item.Users ?? new List<User>())
-                        .Where(u => !string.IsNullOrWhiteSpace(u.ProfilePictureUrl))
                         .Take(3)
                         .ToList();
 
@@ -75,21 +76,35 @@
                                             <span class="tag-category" style="background:#f1f3f5; color:#495057; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:600;">@cat.CategoryName</span>
                                         }
                                     }
-                                    @if (item.EventStatus == EnumEventStatus.Open)
+
+                                    @if (item.Owner?.Id == uid)
                                     {
-                                        <span class="tag-status">Open</span>
+                                        <a href="/event/manage/@item.Id" style="text-decoration: none !important;">
+                                            <span class="tag-status manage-btn" style="background: #f1f3f5; color: #495057; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: none; font-family: inherit;">
+                                                Manage Event <span style="font-size: 14px; line-height: 1;">→</span>
+                                            </span>
+                                        </a>
+                                    }
+                                    else if (item.EventStatus == EnumEventStatus.Open)
+                                    {
+                                        <span class="tag-status">Registration Open</span>
                                     }
                                     else
                                     {
-                                        <span class="tag-status closed">Closed</span>
+                                        <span class="tag-status closed">Registration Closed</span>
                                     }
+
                                     <span class="tag-count">
                                         @if (avatars.Any())
                                         {
                                             <div class="tag-avatars">
                                                 @foreach (var user in avatars)
                                                 {
-                                                    <img class="tag-avatar" src="@user.ProfilePictureUrl" alt="@user.Username" loading="lazy" />
+                                                    // FALLBACK: Use grey anonymous pic if ProfilePictureUrl is empty
+                                                    var pfp = string.IsNullOrWhiteSpace(user.ProfilePictureUrl) 
+                                                              ? "/images/avatar-placeholder.svg" 
+                                                              : user.ProfilePictureUrl;
+                                                    <img class="tag-avatar" src="@pfp" alt="@user.Username" loading="lazy" />
                                                 }
                                             </div>
                                         }

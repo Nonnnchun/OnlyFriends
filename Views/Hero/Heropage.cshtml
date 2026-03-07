@@ -1,110 +1,94 @@
 @{
-    Layout = null; 
+    ViewData["Title"] = "Home";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home - OnlyFriends</title>
-    
-    <link rel="stylesheet" href="~/css/site.css"  />
-    <link rel="stylesheet" href="~/OnlyFriends.styles.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="landing-wrapper">
-        <header class="main-header">
-            <nav class="landing-nav">
-            <div class="nav-left">
-                <a href="/" class="of-brand-logo">
-                    <div class="of-logo-icon">OF</div>
-                    <div class="of-logo-text">Only<span>Friends</span></div>
-                </a>
-            </div>
-            <div class="nav-right">
-                <span class="live-time" id="clock"></span>
-                <a class="sign-in-link" href="@Url.Action("Index", "Login")">Sign In</a>
-            </div>
-        </nav>
-        </header>
+@section Styles {
+    <link rel="stylesheet" href="~/Views/Hero/Heropage.cshtml.css" asp-append-version="true" />
+}
 
-        <main class="hero-section">
-            <div class="hero-content">
-                <div class="brand-logo" style="display:none;">
-                    <strong>OnlyFriends</strong>
-                </div>
-                
-                <h1 class="hero-title">
-                    Looking for new friends?<br />
-                    Start here <br />
-                    <span class="text-gradient">Start here</span>
-                </h1>
-                
-                <p class="hero-subtitle">
-                    Start activities you love and invite new friends to join.
-                </p>
-                
-                <button class="of-btn of-btn-primary" id="heroCreateBtn">Create your first activity</button>
+<section class="landing-wrapper">
+    <main class="hero-section">
+        <div class="hero-content">
+            <div class="brand-logo" style="display:none;">
+                <strong>OnlyFriends</strong>
             </div>
 
-            <div class="hero-image-container">
-                <img src="https://i.ibb.co/bR8KPymn/OIG3-5-AXItu-Z-KQ776k-FBJAb.jpg" alt="Event App Preview" class="hero-image" />
-            </div>
-        </main>
-    </div>
+            <h1 class="hero-title">
+                Looking for new friends?<br />
+                Start here <br />
+                <span class="text-gradient">Start here</span>
+            </h1>
 
-    <footer class="landing-footer">
-        <div class="landing-footer-inner">
-            <div class="landing-footer-left">
-                <div class="landing-footer-brand" style="font-family:'Inter',sans-serif; font-weight:800; color:var(--text-color);">Only<span style="color:var(--primary-color);">Friends</span></div>
-                <p class="landing-footer-text">
-                    A platform to host activities and meet new friends, designed for easy social fun.
-                </p>
-            </div>
-            <div class="landing-footer-links">
-                <div class="landing-footer-column">
-                    <div class="landing-footer-title">About</div>
-                    <a href="/Home/Homepage">Explore Events</a>
-                    <a href="/Home/Privacy">Privacy Policy</a>
-                </div>
-                <div class="landing-footer-column">
-                    <div class="landing-footer-title">Get Started</div>
-                    <a href="@Url.Action("Index","Login")">Sign In</a>
-                    <a href="/register">Sign Up</a>
-                </div>
-            </div>
-        </div>
-        <div class="landing-footer-bottom">
-            <span>© @DateTime.Now.Year OnlyFriends</span>
-            <span class="landing-footer-meta">Built for learning and experimentation.</span>
-        </div>
-    </footer>
-
-    <div id="heroLoginPrompt" class="hero-modal-backdrop is-hidden">
-        <div class="hero-modal">
-            <h2 class="hero-modal-title">Sign-in required</h2>
-            <p class="hero-modal-text">
-                Please sign in to create a new activity.
+            <p class="hero-subtitle">
+                Start activities you love and invite new friends to join.
             </p>
-            <div class="hero-modal-actions">
-                <button class="of-btn of-btn-neutral" id="heroModalClose">Close</button>
-                <button class="of-btn of-btn-primary" id="heroGoLogin">Go to Login</button>
-            </div>
+
+            <button class="of-btn of-btn-primary" id="heroCreateBtn">Create your first activity</button>
+        </div>
+
+        <div class="hero-image-container">
+            <img src="https://i.ibb.co/bR8KPymn/OIG3-5-AXItu-Z-KQ776k-FBJAb.jpg" alt="Event App Preview" class="hero-image" />
+        </div>
+    </main>
+
+    <section class="hero-highlights">
+        <h2>Why people use OnlyFriends</h2>
+        <div class="highlight-grid">
+            <article class="highlight-card">
+                <div class="highlight-icon"><i class="fa-solid fa-calendar-plus"></i></div>
+                <h3>Create Events Easily</h3>
+                <p>Set title, location, time, and categories in minutes.</p>
+            </article>
+            <article class="highlight-card">
+                <div class="highlight-icon"><i class="fa-solid fa-user-group"></i></div>
+                <h3>Invite Your Friends</h3>
+                <p>Send invites and keep all responses in one place.</p>
+            </article>
+            <article class="highlight-card">
+                <div class="highlight-icon"><i class="fa-solid fa-list-check"></i></div>
+                <h3>Manage Requests</h3>
+                <p>Approve, reject, and organize participants smoothly.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="hero-steps">
+        <h2>How it works</h2>
+        <div class="steps-grid">
+            <article class="step-card">
+                <span class="step-no">01</span>
+                <h3>Create</h3>
+                <p>Start an activity with your preferred date, place, and format.</p>
+            </article>
+            <article class="step-card">
+                <span class="step-no">02</span>
+                <h3>Invite</h3>
+                <p>Share with friends and open your event to new connections.</p>
+            </article>
+            <article class="step-card">
+                <span class="step-no">03</span>
+                <h3>Join</h3>
+                <p>Participants join, hosts manage requests, everyone meets up.</p>
+            </article>
+        </div>
+    </section>
+</section>
+
+<div id="heroLoginPrompt" class="hero-modal-backdrop is-hidden">
+    <div class="hero-modal">
+        <h2 class="hero-modal-title" id="heroLoginPromptTitle">Sign-in required</h2>
+        <p class="hero-modal-text" id="heroLoginPromptText">
+            Please sign in to create a new activity.
+        </p>
+        <div class="hero-modal-actions">
+            <button class="of-btn of-btn-neutral" id="heroModalClose">Close</button>
+            <button class="of-btn of-btn-primary" id="heroGoLogin">Go to Login</button>
         </div>
     </div>
+</div>
 
+@section Scripts {
     <script>
-        function updateClock() {
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock').innerText = `${hours}:${minutes} GMT+7`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
         async function heroIsAuthenticated() {
             try {
                 const res = await fetch('/api/auth/me', { cache: 'no-store', credentials: 'include' });
@@ -117,13 +101,33 @@
         (function () {
             const createBtn = document.getElementById('heroCreateBtn');
             const modal = document.getElementById('heroLoginPrompt');
+            const modalTitle = document.getElementById('heroLoginPromptTitle');
+            const modalText = document.getElementById('heroLoginPromptText');
             const closeBtn = document.getElementById('heroModalClose');
             const goLoginBtn = document.getElementById('heroGoLogin');
             if (!createBtn) return;
 
-            function openModal() {
+            window.showHeroLoginPrompt = function (context) {
+                if (modalTitle) {
+                    modalTitle.textContent = 'Sign-in required';
+                }
+
+                if (modalText) {
+                    if (context === 'settings') {
+                        modalText.textContent = 'Please sign in to access Settings.';
+                    } else {
+                        modalText.textContent = 'Please sign in to create a new activity.';
+                    }
+                }
+
                 if (modal) {
                     modal.classList.remove('is-hidden');
+                }
+            };
+
+            function openModal() {
+                if (typeof window.showHeroLoginPrompt === 'function') {
+                    window.showHeroLoginPrompt('create');
                 }
             }
             function closeModal() {
@@ -163,5 +167,4 @@
             });
         })();
     </script>
-</body>
-</html>
+}
