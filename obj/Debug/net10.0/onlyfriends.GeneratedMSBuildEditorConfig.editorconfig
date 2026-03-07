@@ -19,77 +19,77 @@ build_property.TargetFrameworkIdentifier = .NETCoreApp
 build_property.TargetFrameworkVersion = v10.0
 build_property.RootNamespace = onlyfriends
 build_property.RootNamespace = onlyfriends
-build_property.ProjectDir = /Users/skyyyy/Desktop/web/OnlyFriends/
+build_property.ProjectDir = D:\Users\Chern\OneDrive\Desktop\gitWorkSpace\OnlyFriends\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /Users/skyyyy/Desktop/web/OnlyFriends
+build_property.MSBuildProjectDirectory = D:\Users\Chern\OneDrive\Desktop\gitWorkSpace\OnlyFriends
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Event/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXZlbnQvRGV0YWlscy5jc2h0bWw=
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Event/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Event/ManageDetails.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXZlbnQvTWFuYWdlRGV0YWlscy5jc2h0bWw=
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Event/ManageDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRcTWFuYWdlRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Event/_InviteModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXZlbnQvX0ludml0ZU1vZGFsLmNzaHRtbA==
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Event/_InviteModal.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRcX0ludml0ZU1vZGFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Login/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTG9naW4vSW5kZXguY3NodG1s
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Login/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9naW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Profile/Profile.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvZmlsZS9Qcm9maWxlLmNzaHRtbA==
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Profile/Profile.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZmlsZVxQcm9maWxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Register/Register.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVnaXN0ZXIvUmVnaXN0ZXIuY3NodG1s
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Register/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVnaXN0ZXJcUmVnaXN0ZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Setting/Setting.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2V0dGluZy9TZXR0aW5nLmNzaHRtbA==
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Setting/Setting.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2V0dGluZ1xTZXR0aW5nLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Shared/Error.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Shared/_NotificationBell.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19Ob3RpZmljYXRpb25CZWxsLmNzaHRtbA==
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Shared/_NotificationBell.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Ob3RpZmljYXRpb25CZWxsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Shared/_ValidationScriptsPartial.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/_ViewImports.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/_ViewStart.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Event/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXZlbnQvQ3JlYXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = b-bcyx4tflvc
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Event/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = b-m01qwf8m3i
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Hero/Heropage.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSGVyby9IZXJvcGFnZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = b-9ki552pj4h
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Hero/Heropage.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVyb1xIZXJvcGFnZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = b-uh5r4peili
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Home/Homepage.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Ib21lcGFnZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = b-y45jm4otww
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Home/Homepage.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxIb21lcGFnZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = b-ik3v14voln
 
-[/Users/skyyyy/Desktop/web/OnlyFriends/Views/Shared/_Layout.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = b-ubi76e761p
+[D:/Users/Chern/OneDrive/Desktop/gitWorkSpace/OnlyFriends/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-adpd4ftmgj
