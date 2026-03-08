@@ -404,7 +404,7 @@ function renderEventList(container, events, activeTab, uid) {
 
   if (!eventsToShow.length) {
     container.innerHTML = `<div class="empty-state" style="min-height:280px;display:flex;align-items:center;justify-content:center;text-align:center;color:#666;">${
-      activeTab === 'my' ? 'You have not joined any events yet.' : 'No events available at the moment.'
+      activeTab === 'my' ? 'You have not joined any events yet.' : 'No events with this category now. Try another category or check back later.'
     }</div>`;
     return;
   }
