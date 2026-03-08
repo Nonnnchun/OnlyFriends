@@ -597,41 +597,51 @@
             document.getElementById('submitConfirmModal').classList.remove('show');
         }
 
-        function executeSubmit() {
+        async function executeSubmit() {
             if (!eventToSubmit) return;
             const btnConfirm = document.getElementById('btnConfirmPublish');
             btnConfirm.disabled = true;
             btnConfirm.innerText = "Creating...";
+            const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
+            try {
+                const response = await fetch('/Event/Create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': csrfToken
+                    },
+                    body: JSON.stringify(eventToSubmit),
+                    credentials: 'same-origin'
+                });
 
-            $.ajax({
-                url: '/Event/Create',
-                type: 'POST',
-                contentType: 'application/json',
-                dataType: "json",
-                data: JSON.stringify(eventToSubmit),
-                headers: {
-                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function (result) {
-                    if (result && result.success) {
-                        alert('✅ Activity created successfully!');
-                        window.location.href = '/Home/Homepage';
-                    } else if (result.redirectUrl) {
-                        window.location.href = result.redirectUrl;
-                    } else {
-                        alert('✅ Activity created successfully!');
-                        window.location.href = '/Home/Homepage';
-                    }
-                },
-                error: function (xhr, status, error) {
-                    alert('❌ Error: ' + (xhr.responseText || error));
-                },
-                complete: function () {
-                    closeConfirmModal();
-                    btnConfirm.disabled = false;
-                    btnConfirm.innerText = "Create now";
+                if (response.redirected && response.url) {
+                    window.location.href = response.url;
+                    return;
                 }
-            });
+
+                const contentType = response.headers.get('content-type') || '';
+                const isJson = contentType.includes('application/json');
+                const payload = isJson ? await response.json() : await response.text();
+
+                if (!response.ok) {
+                    const message = (isJson && payload?.message) ? payload.message : `Request failed (${response.status})`;
+                    throw new Error(message);
+                }
+
+                if (isJson && payload?.redirectUrl) {
+                    window.location.href = payload.redirectUrl;
+                    return;
+                }
+
+                alert('✅ Activity created successfully!');
+                window.location.href = '/Home/Homepage';
+            } catch (error) {
+                alert('❌ Error: ' + (error?.message || 'Unknown error'));
+            } finally {
+                closeConfirmModal();
+                btnConfirm.disabled = false;
+                btnConfirm.innerText = "Create now";
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
