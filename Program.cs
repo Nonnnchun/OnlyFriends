@@ -21,6 +21,7 @@ builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddTransient<IEventService, EventService>();
 builder.Services.AddTransient<ICategoryService, CategoryService>();
+builder.Services.AddHostedService<EventReminderBackgroundService>();
 
 // Register Postgresql
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("DefaultConnection not found in configuration");

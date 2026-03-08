@@ -101,7 +101,7 @@ namespace OnlyFriends.ApiControllers
                     // Notify the event owner about the join request
                     var requesterUsername = User.Identity?.Name ?? $"User#{userId}";
                     await _notificationService.AddJoinRequestNotificationAsync(
-                        eventDto.Owner.Id, userId, requesterUsername, eventDto.Title);
+                        eventDto.Owner.Id, userId, requesterUsername, eventDto.Title, eventId);
 
                     return Ok(new { message = "Join request sent. Waiting for owner approval." });
                 }

@@ -137,7 +137,7 @@ namespace OnlyFriends.Controllers
                 });
                 var requesterUsername = User.FindFirst(ClaimTypes.Name)?.Value ?? $"User#{userId}";
                 await _notificationService.AddJoinRequestNotificationAsync(
-                    activity.Owner.Id, userId, requesterUsername, activity.Title);
+                    activity.Owner.Id, userId, requesterUsername, activity.Title, eventId);
                 return Ok(new { message = "Join request sent. Waiting for owner approval." });
             }
             else
@@ -191,6 +191,7 @@ namespace OnlyFriends.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             await _activityService.CancelJoinEvent(userId, eventId);
+            await _notificationService.DeleteJoinRequestNotificationAsync(userId, eventId);
             return Ok();
         }
 
@@ -255,6 +256,21 @@ namespace OnlyFriends.Controllers
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
                 if (userId != activity.Owner.Id) return Unauthorized("Only the event owner can do this");
                 await _activityService.ToggleRegistrationAsync(dto.Id, dto.IsOpen);
+
+                // When closing a private event, notify all pending users they weren't accepted
+                if (!dto.IsOpen && activity.JointType == EnumJointType.Private)
+                {
+                    var pendingUserIds = activity.UserEvents
+                        .Where(ue => ue.RequestStatus == EnumRequestStatus.Pending)
+                        .Select(ue => ue.UserId);
+
+                    foreach (var pendingUserId in pendingUserIds)
+                    {
+                        await _notificationService.AddParticipantStatusNotificationAsync(
+                            pendingUserId, activity.Title, "Rejected", dto.Id);
+                    }
+                }
+
                 return Ok(new { success = true });
             }
             catch (Exception ex)
@@ -305,7 +321,7 @@ namespace OnlyFriends.Controllers
                 
                 if (status == EnumRequestStatus.Accepted || status == EnumRequestStatus.Rejected)
                 {
-                    await _notificationService.AddParticipantStatusNotificationAsync(dto.UserId, activity.Title, status.ToString());
+                    await _notificationService.AddParticipantStatusNotificationAsync(dto.UserId, activity.Title, status.ToString(), dto.EventId);
                 }
 
                 return Ok(new { success = true });

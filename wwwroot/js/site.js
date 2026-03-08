@@ -77,9 +77,41 @@ document.addEventListener('DOMContentLoaded', () => {
     else alert('Could not decline friend request.');
   }
 
+  async function acceptJoinRequest(eventId, fromUserId, notifId) {
+    const res = await fetch('/Event/UpdateParticipantStatus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventId, userId: fromUserId, status: 'Accepted' })
+    });
+    if (res.ok) {
+      await fetch(`/api/notifications/${notifId}`, { method: 'DELETE', credentials: 'include' });
+      removeNotifCard(notifId);
+    } else {
+      alert('Could not accept join request.');
+    }
+  }
+
+  async function rejectJoinRequest(eventId, fromUserId, notifId) {
+    const res = await fetch('/Event/UpdateParticipantStatus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventId, userId: fromUserId, status: 'Rejected' })
+    });
+    if (res.ok) {
+      await fetch(`/api/notifications/${notifId}`, { method: 'DELETE', credentials: 'include' });
+      removeNotifCard(notifId);
+    } else {
+      alert('Could not reject join request.');
+    }
+  }
+
   // Expose accept/decline globally so inline onclick attributes can call them
   window.acceptFriendRequest = acceptFriendRequest;
   window.declineFriendRequest = declineFriendRequest;
+  window.acceptJoinRequest = acceptJoinRequest;
+  window.rejectJoinRequest = rejectJoinRequest;
 
   function populateBell(result) {
     const unauthorized = !!result?.unauthorized;
@@ -118,6 +150,18 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="notif-btn notif-btn-accept" onclick="acceptFriendRequest(${n.fromUserId}, ${n.id})">Accept</button>
             <button class="notif-btn notif-btn-decline" onclick="declineFriendRequest(${n.fromUserId}, ${n.id})">Decline</button>
           </div>`;
+      } else if (n.type === 'JoinRequest') {
+        const hasEventId = n.eventId != null;
+        const actionsHtml = hasEventId ? `
+          <div class="notif-actions">
+            <button class="notif-btn notif-btn-accept" onclick="acceptJoinRequest(${n.eventId}, ${n.fromUserId}, ${n.id})">Accept</button>
+            <button class="notif-btn notif-btn-decline" onclick="rejectJoinRequest(${n.eventId}, ${n.fromUserId}, ${n.id})">Reject</button>
+          </div>` : '';
+        const msgHtml = hasEventId
+          ? `<a href="/event/manage/${n.eventId}" style="text-decoration:none; color:inherit; display:block;"><div class="notif-msg">🎟️ ${escapeHtml(n.message)}</div></a>`
+          : `<div class="notif-msg">🎟️ ${escapeHtml(n.message)}</div>`;
+        li.innerHTML = msgHtml + actionsHtml;
+        li.style.cursor = 'default';
       } else {
         const linkHtml = n.eventId ? `<a href="/event/view/${n.eventId}" style="text-decoration:none; color:inherit; display:block;">` : `<div style="display:block;">`;
         const endLinkHtml = n.eventId ? `</a>` : `</div>`;

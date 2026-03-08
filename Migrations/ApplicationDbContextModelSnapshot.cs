@@ -53,7 +53,7 @@ namespace onlyfriends.Migrations
 
                     b.Property<string>("EventName")
                         .IsRequired()
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int?>("FromUserId")
                         .HasColumnType("integer");

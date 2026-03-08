@@ -19,13 +19,14 @@ namespace OnlyFriends.Services
       Task<IEnumerable<NotificationViewModel>> GetNotificationsForUserAsync(int userId);
 
       // Event join request notifications
-      Task AddJoinRequestNotificationAsync(int ownerId, int fromUserId, string requesterUsername, string eventTitle);
+      Task AddJoinRequestNotificationAsync(int ownerId, int fromUserId, string requesterUsername, string eventTitle, int eventId);
+      Task DeleteJoinRequestNotificationAsync(int fromUserId, int eventId);
 
       // Event invite notifications
       Task AddEventInviteNotificationAsync(int toUserId, int fromUserId, string inviterUsername, string eventTitle, int eventId);
 
       // Participant status updates
-      Task AddParticipantStatusNotificationAsync(int toUserId, string eventTitle, string status);
+      Task AddParticipantStatusNotificationAsync(int toUserId, string eventTitle, string status, int eventId);
    }
 
    public sealed class NotificationService : INotificationService
@@ -136,19 +137,41 @@ namespace OnlyFriends.Services
          return notifications.Select(NotificationViewModel.FromEntity);
       }
 
-      public async Task AddJoinRequestNotificationAsync(int ownerId, int fromUserId, string requesterUsername, string eventTitle)
+      public async Task AddJoinRequestNotificationAsync(int ownerId, int fromUserId, string requesterUsername, string eventTitle, int eventId)
       {
+         var exists = await _context.Notifications.AnyAsync(n =>
+            n.Type == "JoinRequest" &&
+            n.FromUserId == fromUserId &&
+            n.EventId == eventId);
+         if (exists) return;
+
          var notification = new Notification
          {
             Type = "JoinRequest",
             ToUserId = ownerId,
             FromUserId = fromUserId,
             EventName = eventTitle,
+            EventId = eventId,
             Message = $"{requesterUsername} wants to join your event \"{eventTitle}\"",
             CreatedAt = DateTime.UtcNow
          };
          _context.Notifications.Add(notification);
          await _context.SaveChangesAsync();
+      }
+
+      public async Task DeleteJoinRequestNotificationAsync(int fromUserId, int eventId)
+      {
+         var notification = await _context.Notifications
+            .FirstOrDefaultAsync(n =>
+               n.Type == "JoinRequest" &&
+               n.FromUserId == fromUserId &&
+               n.EventId == eventId);
+
+         if (notification != null)
+         {
+            _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
+         }
       }
 
       public async Task AddEventInviteNotificationAsync(int toUserId, int fromUserId, string inviterUsername, string eventTitle, int eventId)
@@ -173,9 +196,9 @@ namespace OnlyFriends.Services
          await _context.SaveChangesAsync();
       }
 
-      public async Task AddParticipantStatusNotificationAsync(int toUserId, string eventTitle, string status)
+      public async Task AddParticipantStatusNotificationAsync(int toUserId, string eventTitle, string status, int eventId)
       {
-         var message = status == "Accepted" 
+         var message = status == "Accepted"
             ? $"Your request to join \"{eventTitle}\" was accepted!"
             : $"Your request to join \"{eventTitle}\" was rejected.";
 
@@ -185,6 +208,7 @@ namespace OnlyFriends.Services
             ToUserId = toUserId,
             FromUserId = 0,
             EventName = eventTitle,
+            EventId = eventId,
             Message = message,
             CreatedAt = DateTime.UtcNow
          };

@@ -12,8 +12,8 @@ using OnlyFriends.Data;
 namespace onlyfriends.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260306220903_MultipleCategoriesUpdate")]
-    partial class MultipleCategoriesUpdate
+    [Migration("20260308101849_Siwakorn5")]
+    partial class Siwakorn5
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,7 +56,7 @@ namespace onlyfriends.Migrations
 
                     b.Property<string>("EventName")
                         .IsRequired()
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int?>("FromUserId")
                         .HasColumnType("integer");
