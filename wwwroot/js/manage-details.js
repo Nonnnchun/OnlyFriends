@@ -681,18 +681,6 @@ function previewTitle(v) {
     if (cardTitle) cardTitle.textContent = title;
 }
 
-// Live preview: date
-function previewDate(v) {
-    if (!v) return;
-
-    const d = new Date(v + 'T00:00:00');
-    const opts = { weekday: 'long', month: 'long', day: 'numeric' };
-    const cardDate = document.getElementById('cardDate');
-
-    if (cardDate) cardDate.textContent = d.toLocaleDateString('en-US', opts);
-}
-
-// Live preview: time
 function pad(n) {
     return String(n).padStart(2, '0');
 }
@@ -702,33 +690,89 @@ function fmt12(h, m) {
     return `${h % 12 || 12}:${pad(m)} ${ampm}`;
 }
 
-function previewTime() {
-    const s = document.getElementById('inputStart')?.value;
-    const e = document.getElementById('inputEnd')?.value;
-    if (!s || !e) return;
+function buildDateTime(dateValue, timeValue) {
+    if (!dateValue || !timeValue) return null;
+    const d = new Date(`${dateValue}T${timeValue}:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+}
 
-    const [sh, sm] = s.split(':').map(Number);
-    const [eh, em] = e.split(':').map(Number);
-    const timeStr = `${fmt12(sh, sm)} - ${fmt12(eh, em)}`;
+function previewSchedule() {
+    const startDate = document.getElementById('inputStartDate')?.value;
+    const startTime = document.getElementById('inputStartTime')?.value;
+    const endDate = document.getElementById('inputEndDate')?.value;
+    const endTime = document.getElementById('inputEndTime')?.value;
+    const start = buildDateTime(startDate, startTime);
+    const end = buildDateTime(endDate, endTime);
 
+    if (start) {
+        const cardDate = document.getElementById('cardDate');
+        const whenDateLabel = document.getElementById('whenDateLabel');
+        if (cardDate) {
+            cardDate.textContent = start.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        if (whenDateLabel) {
+            const isToday = start.toDateString() === new Date().toDateString();
+            whenDateLabel.textContent = isToday
+                ? 'Today'
+                : start.toLocaleDateString('en-US', { weekday: 'long', day: '2-digit', month: 'long' });
+        }
+    }
+
+    if (!start || !end) return;
+
+    const timeStr = `${fmt12(start.getHours(), start.getMinutes())} - ${fmt12(end.getHours(), end.getMinutes())}`;
     const cardTime = document.getElementById('cardTime');
     const whenTime = document.getElementById('whenTime');
     if (cardTime) cardTime.textContent = timeStr;
     if (whenTime) whenTime.textContent = timeStr;
 }
 
-// Live preview: capacity
+function previewLocation(value) {
+    const location = String(value || '').trim();
+    const shortLocation = location.length > 35 ? `${location.slice(0, 35)}...` : location;
+    const shortWhenLocation = location.length > 30 ? `${location.slice(0, 30)}...` : location;
+    const cardLocation = document.getElementById('cardLocation');
+    const whenLocationName = document.getElementById('whenLocationName');
+    const whenLocationSub = document.getElementById('whenLocationSub');
+    if (cardLocation) cardLocation.textContent = shortLocation || 'No location yet';
+    if (whenLocationName) whenLocationName.textContent = shortWhenLocation || 'No location yet';
+    if (whenLocationSub) whenLocationSub.textContent = location || 'No location yet';
+}
+
 function previewCapacity(v) {
-    const n = parseInt(v, 10) || 0;
+    const unlimited = document.getElementById('inputCapacityUnlimited')?.checked === true;
+    const n = unlimited ? 0 : (parseInt(v, 10) || 0);
     const cardCapacity = document.getElementById('cardCapacity');
     const statCapacity = document.getElementById('statCapacity');
 
-    if (cardCapacity) cardCapacity.textContent = `Capacity: ${n}`;
-    if (statCapacity) statCapacity.textContent = n;
+    if (cardCapacity) cardCapacity.textContent = n > 0 ? `Capacity: ${n}` : 'Capacity: Unlimited';
+    if (statCapacity) statCapacity.textContent = n > 0 ? String(n) : 'Unlimited';
+}
+
+function onCapacityModeChange() {
+    const unlimited = document.getElementById('inputCapacityUnlimited')?.checked === true;
+    const input = document.getElementById('inputCapacity');
+    if (!input) return;
+    input.disabled = unlimited;
+    if (unlimited) {
+        input.value = '0';
+        previewCapacity('0');
+        return;
+    }
+
+    if (!input.value || parseInt(input.value, 10) <= 0) {
+        input.value = '1';
+    }
+    previewCapacity(input.value);
 }
 
 // Capacity adjuster
 function adjustCapacity(delta) {
+    if (document.getElementById('inputCapacityUnlimited')?.checked) return;
     const inp = document.getElementById('inputCapacity');
     if (!inp) return;
 
@@ -870,6 +914,15 @@ function closeDeleteConfirmModal(e) {
     overlay.classList.remove('open');
 }
 
+const EVENT_TYPE_ENUM = { online: 0, offline: 1 };
+const DEFAULT_EDIT_LAT = 13.7563;
+const DEFAULT_EDIT_LNG = 100.5018;
+
+let editMap = null;
+let editMarker = null;
+let editLocationSearchTimeout = null;
+let loadedCategoryOptions = [];
+
 function toIsoUtc(localDateTime) {
     if (!localDateTime) return null;
     const d = new Date(localDateTime);
@@ -881,33 +934,348 @@ function combineDateAndTimeToIsoUtc(dateValue, timeValue) {
     return toIsoUtc(`${dateValue}T${timeValue}`);
 }
 
-// Update event
-function updateEvent() {
-    const eventId = document.getElementById('editPanel')?.dataset.eventId;
-    if (!eventId) {
-        showToast('Could not find event ID.');
+function parseCoordinate(value, fallback) {
+    const n = parseFloat(String(value ?? '').trim());
+    return Number.isFinite(n) ? n : fallback;
+}
+
+function updateLatLngInputs(lat, lng) {
+    const latEl = document.getElementById('inputLatitude');
+    const lngEl = document.getElementById('inputLongitude');
+    if (latEl) latEl.value = String(lat);
+    if (lngEl) lngEl.value = String(lng);
+}
+
+function setMapTo(lat, lng) {
+    if (!editMap || !editMarker) return;
+    const latLng = [lat, lng];
+    editMarker.setLatLng(latLng);
+    editMap.setView(latLng, 15);
+    updateLatLngInputs(lat, lng);
+}
+
+function initEditMap() {
+    if (editMap || typeof L === 'undefined') return;
+    const mapEl = document.getElementById('editLocationMap');
+    if (!mapEl) return;
+
+    const panel = document.getElementById('editPanel');
+    const initialLat = parseCoordinate(
+        document.getElementById('inputLatitude')?.value || panel?.dataset.latitude,
+        DEFAULT_EDIT_LAT
+    );
+    const initialLng = parseCoordinate(
+        document.getElementById('inputLongitude')?.value || panel?.dataset.longitude,
+        DEFAULT_EDIT_LNG
+    );
+
+    editMap = L.map('editLocationMap').setView([initialLat, initialLng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(editMap);
+
+    editMarker = L.marker([initialLat, initialLng], { draggable: true }).addTo(editMap);
+    editMarker.on('dragend', () => {
+        const pos = editMarker.getLatLng();
+        updateLatLngInputs(pos.lat, pos.lng);
+    });
+
+    editMap.on('click', (e) => {
+        const { lat, lng } = e.latlng;
+        setMapTo(lat, lng);
+    });
+
+    updateLatLngInputs(initialLat, initialLng);
+    setTimeout(() => editMap?.invalidateSize(), 200);
+}
+
+function updateEditLocationMode() {
+    const eventType = document.getElementById('inputEventType')?.value || 'offline';
+    const locationLabel = document.getElementById('inputLocationLabel');
+    const locationHintText = document.getElementById('locationHintText');
+    const locationInput = document.getElementById('inputLocation');
+    const mapWrap = document.getElementById('editMapWrap');
+    const dropdown = document.getElementById('locationSearchDropdown');
+    const isOnline = eventType === 'online';
+
+    if (locationLabel) locationLabel.textContent = isOnline ? 'MEETING LINK' : 'LOCATION';
+    if (locationInput) {
+        locationInput.placeholder = isOnline
+            ? 'Add meeting link (Zoom, Meet, Teams...)'
+            : 'Search event location...';
+    }
+    if (locationHintText) {
+        locationHintText.textContent = isOnline
+            ? 'Provide a meeting URL (Zoom, Meet, Teams, etc.).'
+            : 'Search and pin an exact place for offline events.';
+    }
+
+    if (isOnline) {
+        if (mapWrap) mapWrap.style.display = 'none';
+        if (dropdown) dropdown.style.display = 'none';
+        const latEl = document.getElementById('inputLatitude');
+        const lngEl = document.getElementById('inputLongitude');
+        if (latEl) latEl.value = '';
+        if (lngEl) lngEl.value = '';
         return;
     }
 
-    const dateValue = document.getElementById('inputDate')?.value || '';
-    const startValue = document.getElementById('inputStart')?.value || '';
-    const endValue = document.getElementById('inputEnd')?.value || '';
-    const categoryEl = document.getElementById('inputCategory');
-    const categoryId = parseInt(categoryEl?.value, 10);
+    if (mapWrap) mapWrap.style.display = 'block';
+    initEditMap();
+    const lat = parseCoordinate(document.getElementById('inputLatitude')?.value, DEFAULT_EDIT_LAT);
+    const lng = parseCoordinate(document.getElementById('inputLongitude')?.value, DEFAULT_EDIT_LNG);
+    setMapTo(lat, lng);
+    setTimeout(() => editMap?.invalidateSize(), 150);
+}
+
+function onEditLocationInput() {
+    const inputValue = document.getElementById('inputLocation')?.value || '';
+    previewLocation(inputValue);
+
+    const eventType = document.getElementById('inputEventType')?.value || 'offline';
+    if (eventType === 'online') {
+        const dropdown = document.getElementById('locationSearchDropdown');
+        if (dropdown) dropdown.style.display = 'none';
+        return;
+    }
+
+    const latEl = document.getElementById('inputLatitude');
+    const lngEl = document.getElementById('inputLongitude');
+    if (latEl) latEl.value = '';
+    if (lngEl) lngEl.value = '';
+
+    clearTimeout(editLocationSearchTimeout);
+    editLocationSearchTimeout = setTimeout(() => {
+        searchEditLocation();
+    }, 500);
+}
+
+async function searchEditLocation() {
+    const query = (document.getElementById('inputLocation')?.value || '').trim();
+    const dropdown = document.getElementById('locationSearchDropdown');
+    if (!dropdown) return;
+
+    if (!query || query.length < 3) {
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    dropdown.innerHTML = '<div class="location-search-item muted">Searching...</div>';
+    dropdown.style.display = 'block';
+
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            dropdown.innerHTML = '<div class="location-search-item muted">No places found.</div>';
+            return;
+        }
+
+        dropdown.innerHTML = '';
+        data.forEach((item) => {
+            const row = document.createElement('div');
+            row.className = 'location-search-item';
+            row.textContent = item.display_name || 'Unnamed location';
+            row.addEventListener('click', () => {
+                const lat = parseFloat(item.lat);
+                const lng = parseFloat(item.lon);
+                const locationInput = document.getElementById('inputLocation');
+                if (locationInput) locationInput.value = item.display_name || '';
+                previewLocation(item.display_name || '');
+                if (Number.isFinite(lat) && Number.isFinite(lng)) {
+                    updateEditLocationMode();
+                    setMapTo(lat, lng);
+                }
+                dropdown.style.display = 'none';
+            });
+            dropdown.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Location search failed', error);
+        dropdown.innerHTML = '<div class="location-search-item muted">Search failed.</div>';
+    }
+}
+
+function buildCategoryOptionsHtml() {
+    if (!loadedCategoryOptions.length) {
+        return '<option value="">No categories available</option>';
+    }
+
+    return loadedCategoryOptions
+        .map((category) => `<option value="${category.id}">${category.categoryName || `Category #${category.id}`}</option>`)
+        .join('');
+}
+
+function createCategoryRow(selectedId = '') {
+    const row = document.createElement('div');
+    row.className = 'category-row';
+    row.innerHTML = `
+        <select class="form-select category-select">${buildCategoryOptionsHtml()}</select>
+        <button type="button" class="category-row-btn" onclick="onCategoryRowAction(this)">+</button>
+    `;
+
+    const select = row.querySelector('.category-select');
+    if (select && selectedId) {
+        select.value = String(selectedId);
+        if (!select.value && select.options.length > 0) {
+            select.selectedIndex = 0;
+        }
+    }
+
+    return row;
+}
+
+function syncCategoryRowButtons() {
+    const rows = [...document.querySelectorAll('#categoryRows .category-row')];
+    rows.forEach((row, index) => {
+        const btn = row.querySelector('.category-row-btn');
+        if (!btn) return;
+        const isLast = index === rows.length - 1;
+        btn.textContent = isLast ? '+' : '-';
+        btn.title = isLast ? 'Add category' : 'Remove category';
+    });
+}
+
+function addCategoryRow(selectedId = '') {
+    const container = document.getElementById('categoryRows');
+    if (!container) return;
+    container.appendChild(createCategoryRow(selectedId));
+    syncCategoryRowButtons();
+}
+
+function onCategoryRowAction(button) {
+    const rows = [...document.querySelectorAll('#categoryRows .category-row')];
+    const currentRow = button?.closest('.category-row');
+    if (!currentRow || rows.length === 0) return;
+    const isLast = currentRow === rows[rows.length - 1];
+
+    if (isLast) {
+        addCategoryRow('');
+        return;
+    }
+
+    currentRow.remove();
+    if (!document.querySelector('#categoryRows .category-row')) {
+        addCategoryRow('');
+        return;
+    }
+    syncCategoryRowButtons();
+}
+
+function getSelectedCategoryIds() {
+    const ids = [...document.querySelectorAll('#categoryRows .category-select')]
+        .map((select) => parseInt(select.value, 10))
+        .filter((id) => Number.isInteger(id) && id > 0);
+    return [...new Set(ids)];
+}
+
+function validateUpdateForm() {
+    const panel = document.getElementById('editPanel');
+    const eventId = parseInt(panel?.dataset.eventId || '', 10);
+    if (!Number.isInteger(eventId) || eventId <= 0) {
+        return { error: 'Could not find event ID.' };
+    }
+
+    const title = (document.getElementById('inputTitle')?.value || '').trim();
+    if (!title) return { error: 'Please enter an event title.' };
+
+    const startDate = document.getElementById('inputStartDate')?.value || '';
+    const startTime = document.getElementById('inputStartTime')?.value || '';
+    const endDate = document.getElementById('inputEndDate')?.value || '';
+    const endTime = document.getElementById('inputEndTime')?.value || '';
+    if (!startDate || !startTime || !endDate || !endTime) {
+        return { error: 'Please complete start and end date/time.' };
+    }
+
+    const startLocal = buildDateTime(startDate, startTime);
+    const endLocal = buildDateTime(endDate, endTime);
+    if (!startLocal || !endLocal) return { error: 'Date/time format is invalid.' };
+    if (startLocal < new Date()) return { error: 'Start date/time cannot be in the past.' };
+    if (endLocal <= startLocal) return { error: 'End time must be after start time.' };
+
+    const durationMinutes = (endLocal.getTime() - startLocal.getTime()) / 60000;
+    if (durationMinutes < 30) return { error: 'Event duration must be at least 30 minutes.' };
+
+    const deadlineDate = document.getElementById('inputDeadlineDate')?.value || '';
+    const deadlineTime = document.getElementById('inputDeadlineTime')?.value || '';
+    const hasDeadlineDate = Boolean(deadlineDate);
+    const hasDeadlineTime = Boolean(deadlineTime);
+    if (hasDeadlineDate !== hasDeadlineTime) {
+        return { error: 'Please select both date and time for registration deadline.' };
+    }
+
+    let registrationDeadline = null;
+    if (hasDeadlineDate && hasDeadlineTime) {
+        const deadlineLocal = buildDateTime(deadlineDate, deadlineTime);
+        if (!deadlineLocal) return { error: 'Registration deadline is invalid.' };
+        if (deadlineLocal >= startLocal) return { error: 'Registration deadline must be before event start.' };
+        if (deadlineLocal < new Date()) return { error: 'Registration deadline cannot be in the past.' };
+        registrationDeadline = combineDateAndTimeToIsoUtc(deadlineDate, deadlineTime);
+    }
+
+    const eventType = (document.getElementById('inputEventType')?.value || 'offline').toLowerCase();
+    const location = (document.getElementById('inputLocation')?.value || '').trim();
+    if (!location) {
+        return { error: eventType === 'online' ? 'Please enter a meeting link.' : 'Please enter a location.' };
+    }
+
+    let latitude = null;
+    let longitude = null;
+    if (eventType === 'offline') {
+        latitude = parseCoordinate(document.getElementById('inputLatitude')?.value, NaN);
+        longitude = parseCoordinate(document.getElementById('inputLongitude')?.value, NaN);
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+            return { error: 'Please pin the event location on the map.' };
+        }
+    }
+
+    const categoryIds = getSelectedCategoryIds();
+    if (!categoryIds.length) return { error: 'Please select at least one category.' };
+
+    const unlimited = document.getElementById('inputCapacityUnlimited')?.checked === true;
+    const capacityRaw = parseInt(document.getElementById('inputCapacity')?.value || '', 10);
+    const capacity = unlimited ? 0 : capacityRaw;
+    if (!unlimited && (!Number.isInteger(capacity) || capacity <= 0)) {
+        return { error: 'Capacity must be greater than zero or set to Unlimited.' };
+    }
+
+    const timeZone = (document.getElementById('inputTimeZone')?.value || '').trim();
+    if (!timeZone) return { error: 'Please select a time zone.' };
 
     const payload = {
-        id: parseInt(eventId, 10),
-        title: document.getElementById('inputTitle')?.value?.trim(),
-        info: document.getElementById('inputDesc')?.value?.trim(),
-        startAt: combineDateAndTimeToIsoUtc(dateValue, startValue),
-        endAt: combineDateAndTimeToIsoUtc(dateValue, endValue),
-        capacity: parseInt(document.getElementById('inputCapacity')?.value, 10),
-        location: document.getElementById('inputLocation')?.value?.trim(),
-        categoryIds: Number.isNaN(categoryId) ? [] : [categoryId]
+        id: eventId,
+        title,
+        info: (document.getElementById('inputDesc')?.value || '').trim(),
+        location,
+        eventType: EVENT_TYPE_ENUM[eventType] ?? EVENT_TYPE_ENUM.offline,
+        startAt: combineDateAndTimeToIsoUtc(startDate, startTime),
+        endAt: combineDateAndTimeToIsoUtc(endDate, endTime),
+        registrationDeadline,
+        timeZone,
+        latitude: eventType === 'online' ? null : latitude,
+        longitude: eventType === 'online' ? null : longitude,
+        capacity,
+        categoryIds
     };
+
     if (pendingPosterUrl) {
         payload.posterUrl = pendingPosterUrl;
     }
+
+    return { payload };
+}
+
+// Update event
+function updateEvent() {
+    const validation = validateUpdateForm();
+    if (validation.error) {
+        showToast(validation.error);
+        return;
+    }
+    const payload = validation.payload;
+    const eventId = payload.id;
 
     fetch(`/event/manage/${eventId}`, {
         method: 'PUT',
@@ -918,7 +1286,7 @@ function updateEvent() {
         body: JSON.stringify(payload)
     })
         .then((r) => {
-            if (!r.ok) throw new Error(r.response);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r;
         })
         .then(() => {
@@ -928,7 +1296,7 @@ function updateEvent() {
             showToast('Event updated successfully.');
             closePanel();
         })
-        .catch((e) => showToast('Something went wrong. Please try again.' + e));
+        .catch((e) => showToast(`Something went wrong. Please try again. ${e?.message || ''}`.trim()));
 }
 
 // Copy event URL
@@ -992,40 +1360,45 @@ function getAntiForgeryToken() {
 
 // Category options
 async function loadCategoryOptions() {
-    const select = document.getElementById('inputCategory');
-    if (!select) return;
+    const container = document.getElementById('categoryRows');
+    if (!container) return;
 
-    const selectedRaw = String(select.dataset.selectedId || select.value || '').trim();
+    const selectedRaw = String(container.dataset.selectedIds || '').trim();
     const selectedIds = selectedRaw
         .split(',')
         .map((id) => id.trim())
-        .filter((id) => id.length > 0);
-    const selectedId = selectedIds.length > 0 ? selectedIds[0] : '';
+        .filter((id) => id.length > 0)
+        .map((id) => parseInt(id, 10))
+        .filter((id) => Number.isInteger(id) && id > 0);
 
     try {
         const response = await fetch('/api/category', { method: 'GET' });
         if (!response.ok) throw new Error('Failed to fetch categories');
 
         const categories = await response.json();
-        if (!Array.isArray(categories) || categories.length === 0) return;
-
-        categories.sort((a, b) => (a.categoryName || '').localeCompare(b.categoryName || ''));
-
-        select.innerHTML = '';
-
-        categories.forEach((category) => {
-            const option = document.createElement('option');
-            option.value = String(category.id);
-            option.textContent = category.categoryName || `Category #${category.id}`;
-            option.selected = String(category.id) === selectedId;
-            select.appendChild(option);
-        });
-
-        if (!select.value && categories.length > 0) {
-            select.value = String(categories[0].id);
+        if (!Array.isArray(categories) || categories.length === 0) {
+            loadedCategoryOptions = [];
+            container.innerHTML = '';
+            addCategoryRow('');
+            return;
         }
+
+        loadedCategoryOptions = [...categories]
+            .sort((a, b) => (a.categoryName || '').localeCompare(b.categoryName || ''));
+
+        container.innerHTML = '';
+        if (selectedIds.length === 0) {
+            addCategoryRow(String(loadedCategoryOptions[0].id));
+            return;
+        }
+
+        selectedIds.forEach((id) => addCategoryRow(String(id)));
+        syncCategoryRowButtons();
     } catch (error) {
         console.error('Could not load categories', error);
+        loadedCategoryOptions = [];
+        container.innerHTML = '';
+        addCategoryRow('');
     }
 }
 
@@ -1246,11 +1619,40 @@ document.addEventListener('DOMContentLoaded', () => {
         regOpen = panel.dataset.regOpen === 'true';
         selectedVisibility = panel.dataset.jointType || 'private';
         syncRegistrationUI();
+
+        const eventTypeSelect = document.getElementById('inputEventType');
+        if (eventTypeSelect && panel.dataset.eventType) {
+            eventTypeSelect.value = panel.dataset.eventType;
+        }
+
+        const timeZoneSelect = document.getElementById('inputTimeZone');
+        if (timeZoneSelect) {
+            const timezone = panel.dataset.timeZone || 'GMT+07:00';
+            timeZoneSelect.value = timezone;
+        }
+
+        const latEl = document.getElementById('inputLatitude');
+        const lngEl = document.getElementById('inputLongitude');
+        if (latEl && !latEl.value) latEl.value = panel.dataset.latitude || String(DEFAULT_EDIT_LAT);
+        if (lngEl && !lngEl.value) lngEl.value = panel.dataset.longitude || String(DEFAULT_EDIT_LNG);
+
+        onCapacityModeChange();
+        previewSchedule();
+        previewLocation(document.getElementById('inputLocation')?.value || '');
+        updateEditLocationMode();
     }
 
     loadCategoryOptions();
     initializeParticipantStatusUI();
     applyFilters();
+
+    document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('locationSearchDropdown');
+        const locationInput = document.getElementById('inputLocation');
+        if (!dropdown || !locationInput) return;
+        if (e.target === dropdown || e.target === locationInput || dropdown.contains(e.target)) return;
+        dropdown.style.display = 'none';
+    });
 });
 
 function openVisibilityModal() {

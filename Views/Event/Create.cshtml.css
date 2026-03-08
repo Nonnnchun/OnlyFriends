@@ -295,3 +295,60 @@ input[type="date"], input[type="time"], input[type="number"], select {
     position: relative;
     z-index: 1; 
 }
+
+/* ─── Category Pill Tags (Create page) ─── */
+.category-pills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0 2px;
+}
+
+.create-category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 99px;
+    border: 1.5px solid #e2e5ea;
+    background: #ffffff;
+    color: #444;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.create-category-pill:hover {
+    background: #eef1f5;
+    border-color: #c5cad4;
+    color: #111;
+}
+.create-category-pill.selected {
+    background: var(--primary-color, #00AFF0);
+    border-color: var(--primary-color, #00AFF0);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(0, 175, 240, 0.25);
+}
+.create-category-pill.selected:hover {
+    background: var(--primary-hover, #0099D6);
+    border-color: var(--primary-hover, #0099D6);
+}
+
+/* Checkmark — only visible when selected */
+.create-pill-check {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    width: 0;
+    overflow: hidden;
+    opacity: 0;
+    display: inline-block;
+    transition: width 0.15s ease, opacity 0.15s ease;
+}
+.create-category-pill.selected .create-pill-check {
+    width: 12px;
+    opacity: 1;
+}

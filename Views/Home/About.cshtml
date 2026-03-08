@@ -1,40 +1,81 @@
 @{
-    ViewData["Title"] = "About";
+    ViewData["Title"] = "About us";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/Views/Home/About.cshtml.css" asp-append-version="true" />
 }
 
-<section class="about-page">
-    <div class="about-card">
-        <p class="about-kicker">About OnlyFriends</p>
-        <h1>Our Team</h1>
-        <p class="about-desc">
-            OnlyFriends is a small learning project focused on helping people discover activities and connect with others.
-        </p>
+<div class="about-wrapper">
 
-        <div class="about-grid">
-            <article class="member">
-                <h2>67010751</h2>
-                <p>นายยกพล นิลบารันต์</p>
+    <!-- ── Hero ── -->
+    <section class="about-hero">
+        <span class="about-kicker">The team behind</span>
+        <h1 class="about-hero-title">OnlyFriends</h1>
+        <p class="about-hero-sub">
+            A learning project built with passion — helping people discover activities,
+            host events, and make new connections in one beautifully simple place.
+        </p>
+    </section>
+
+    <!-- ── Team ── -->
+    <section class="about-team-section">
+        <p class="about-section-label">Our Team</p>
+        <h2 class="about-section-title">Five people, one project</h2>
+
+        <div class="about-team-grid">
+            <article class="member-card">
+                <div class="member-avatar" style="--av-bg: linear-gradient(135deg,#00AFF0,#0077b6);">ยก</div>
+                <div class="member-info">
+                    <span class="member-id">67010751</span>
+                    <h3 class="member-name">นายยกพล นิลบารันต์</h3>
+                </div>
             </article>
-            <article class="member">
-                <h2>67010889</h2>
-                <p>นายศิวกร สุขชมทอง</p>
+
+            <article class="member-card">
+                <div class="member-avatar" style="--av-bg: linear-gradient(135deg,#7c3aed,#5b21b6);">ศก</div>
+                <div class="member-info">
+                    <span class="member-id">67010889</span>
+                    <h3 class="member-name">นายศิวกร สุขชมทอง</h3>
+                </div>
             </article>
-            <article class="member">
-                <h2>67010943</h2>
-                <p>นายสิรภพ ลิ้มไกรสรรณ์</p>
+
+            <article class="member-card">
+                <div class="member-avatar" style="--av-bg: linear-gradient(135deg,#059669,#047857);">สภ</div>
+                <div class="member-info">
+                    <span class="member-id">67010943</span>
+                    <h3 class="member-name">นายสิรภพ ลิ้มไกรสรรณ์</h3>
+                </div>
             </article>
-            <article class="member">
-                <h2>67011464</h2>
-                <p>นายธีภพ มหาสุข</p>
+
+            <article class="member-card">
+                <div class="member-avatar" style="--av-bg: linear-gradient(135deg,#f59e0b,#d97706);">ธพ</div>
+                <div class="member-info">
+                    <span class="member-id">67011464</span>
+                    <h3 class="member-name">นายธีภพ มหาสุข</h3>
+                </div>
             </article>
-            <article class="member">
-                <h2>67011509</h2>
-                <p>นายพิทวัส เฉิน</p>
+
+            <article class="member-card">
+                <div class="member-avatar" style="--av-bg: linear-gradient(135deg,#ef4444,#dc2626);">พช</div>
+                <div class="member-info">
+                    <span class="member-id">67011509</span>
+                    <h3 class="member-name">นายพิทวัส เฉิน</h3>
+                </div>
             </article>
         </div>
-    </div>
-</section>
+    </section>
+
+    <!-- ── Built with ── -->
+    <section class="about-stack-section">
+        <p class="about-section-label">Built with</p>
+        <div class="about-stack-grid">
+            <div class="stack-pill"><i class="fa-solid fa-code"></i> ASP.NET Core MVC</div>
+            <div class="stack-pill"><i class="fa-solid fa-database"></i> PostgreSQL + EF Core</div>
+            <div class="stack-pill"><i class="fa-solid fa-palette"></i> Vanilla CSS</div>
+            <div class="stack-pill"><i class="fa-brands fa-js"></i> Vanilla JavaScript</div>
+            <div class="stack-pill"><i class="fa-solid fa-server"></i> C# / .NET 10</div>
+        </div>
+    </section>
+
+</div>

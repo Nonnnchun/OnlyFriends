@@ -7,52 +7,92 @@
 }
 
 <section class="landing-wrapper">
+
+    <!-- ─── Hero ─── -->
     <main class="hero-section">
         <div class="hero-content">
-            <div class="brand-logo" style="display:none;">
-                <strong>OnlyFriends</strong>
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                Meet people. Do things together.
             </div>
 
             <h1 class="hero-title">
-                Looking for new friends?<br />
-                Start here <br />
-                <span class="text-gradient">Start here</span>
+                The easiest way to<br />
+                <span class="hero-title-gradient">organise activities</span><br />
+                with new friends
             </h1>
 
             <p class="hero-subtitle">
-                Start activities you love and invite new friends to join.
+                Create events in minutes, invite your circle, and welcome new faces —
+                all in one beautifully simple place.
             </p>
 
-            <button class="of-btn of-btn-primary" id="heroCreateBtn">Create your first activity</button>
+            <div class="hero-cta-row">
+                <button class="of-btn of-btn-primary hero-cta-main" id="heroCreateBtn">
+                    <i class="fa-solid fa-plus"></i> Create your first activity
+                </button>
+                <a href="/Home/Homepage" class="hero-cta-ghost">
+                    Explore events <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="hero-social-proof">
+                <div class="proof-avatars">
+                    <span class="proof-avatar" style="background:#ff6b6b;">A</span>
+                    <span class="proof-avatar" style="background:#4dabf7;">S</span>
+                    <span class="proof-avatar" style="background:#69db7c;">K</span>
+                    <span class="proof-avatar" style="background:#ffd43b;">J</span>
+                </div>
+                <span class="proof-text">Join a growing community of activity creators</span>
+            </div>
         </div>
 
         <div class="hero-image-container">
-            <img src="https://i.ibb.co/bR8KPymn/OIG3-5-AXItu-Z-KQ776k-FBJAb.jpg" alt="Event App Preview" class="hero-image" />
+            <div class="hero-image-glow"></div>
+            <img src="https://i.ibb.co/bR8KPymn/OIG3-5-AXItu-Z-KQ776k-FBJAb.jpg"
+                 alt="Friends gathering"
+                 class="hero-image" />
+
+            <!-- Floating cards -->
+            <div class="float-card float-card-top">
+                <i class="fa-solid fa-calendar-check" style="color:#00AFF0;"></i>
+                <span>Board Game Night</span>
+                <small>Tomorrow · 6 PM</small>
+            </div>
+            <div class="float-card float-card-bottom">
+                <i class="fa-solid fa-user-plus" style="color:#7c3aed;"></i>
+                <span>3 new RSVPs!</span>
+                <small>Just now</small>
+            </div>
         </div>
     </main>
 
+    <!-- ─── Feature cards ─── -->
     <section class="hero-highlights">
-        <h2>Why people use OnlyFriends</h2>
+        <div class="section-eyebrow">Why OnlyFriends</div>
+        <h2>Everything you need to connect</h2>
         <div class="highlight-grid">
             <article class="highlight-card">
-                <div class="highlight-icon"><i class="fa-solid fa-calendar-plus"></i></div>
+                <div class="highlight-icon icon-blue"><i class="fa-solid fa-calendar-plus"></i></div>
                 <h3>Create Events Easily</h3>
-                <p>Set title, location, time, and categories in minutes.</p>
+                <p>Set title, location, time, and categories in minutes — no fuss required.</p>
             </article>
             <article class="highlight-card">
-                <div class="highlight-icon"><i class="fa-solid fa-user-group"></i></div>
+                <div class="highlight-icon icon-purple"><i class="fa-solid fa-user-group"></i></div>
                 <h3>Invite Your Friends</h3>
-                <p>Send invites and keep all responses in one place.</p>
+                <p>Send invites and keep all responses in one place. Public or private.</p>
             </article>
             <article class="highlight-card">
-                <div class="highlight-icon"><i class="fa-solid fa-list-check"></i></div>
+                <div class="highlight-icon icon-teal"><i class="fa-solid fa-list-check"></i></div>
                 <h3>Manage Requests</h3>
-                <p>Approve, reject, and organize participants smoothly.</p>
+                <p>Approve, reject, and organise participants with a single click.</p>
             </article>
         </div>
     </section>
 
+    <!-- ─── How it works ─── -->
     <section class="hero-steps">
+        <div class="section-eyebrow">Simple process</div>
         <h2>How it works</h2>
         <div class="steps-grid">
             <article class="step-card">
@@ -72,8 +112,17 @@
             </article>
         </div>
     </section>
+
+    <!-- ─── CTA Banner ─── -->
+    <section class="hero-cta-banner" style="background: linear-gradient(135deg, #0f1523 0%, #1a2240 100%) !important; border-radius: 24px; padding: 56px 40px; text-align: center; margin: 0 auto 72px; max-width: 1200px; width: 92%; position: relative; overflow: hidden;">
+        <h2 style="color: #ffffff !important; font-size: clamp(1.6rem, 2.5vw, 2.2rem); font-weight: 800; letter-spacing: -0.025em; margin: 0 0 10px;">Ready to make new friends?</h2>
+        <p style="color: rgba(255,255,255,0.72) !important; font-size: 1rem; margin: 0 0 28px;">Create your account in under a minute and host your first event today.</p>
+        <button class="of-btn of-btn-primary" id="heroBannerBtn" style="box-shadow: 0 4px 20px rgba(0,175,240,0.4);">Get started for free</button>
+    </section>
+
 </section>
 
+<!-- Login prompt modal -->
 <div id="heroLoginPrompt" class="hero-modal-backdrop is-hidden">
     <div class="hero-modal">
         <h2 class="hero-modal-title" id="heroLoginPromptTitle">Sign-in required</h2>
@@ -99,72 +148,43 @@
         }
 
         (function () {
-            const createBtn = document.getElementById('heroCreateBtn');
-            const modal = document.getElementById('heroLoginPrompt');
-            const modalTitle = document.getElementById('heroLoginPromptTitle');
+            const modal     = document.getElementById('heroLoginPrompt');
             const modalText = document.getElementById('heroLoginPromptText');
-            const closeBtn = document.getElementById('heroModalClose');
+            const closeBtn  = document.getElementById('heroModalClose');
             const goLoginBtn = document.getElementById('heroGoLogin');
-            if (!createBtn) return;
 
             window.showHeroLoginPrompt = function (context) {
-                if (modalTitle) {
-                    modalTitle.textContent = 'Sign-in required';
-                }
-
                 if (modalText) {
-                    if (context === 'settings') {
-                        modalText.textContent = 'Please sign in to access Settings.';
-                    } else {
-                        modalText.textContent = 'Please sign in to create a new activity.';
-                    }
+                    modalText.textContent = context === 'settings'
+                        ? 'Please sign in to access Settings.'
+                        : 'Please sign in to create a new activity.';
                 }
-
-                if (modal) {
-                    modal.classList.remove('is-hidden');
-                }
+                if (modal) modal.classList.remove('is-hidden');
             };
 
-            function openModal() {
-                if (typeof window.showHeroLoginPrompt === 'function') {
-                    window.showHeroLoginPrompt('create');
-                }
-            }
-            function closeModal() {
-                if (modal) {
-                    modal.classList.add('is-hidden');
-                }
-            }
+            function openModal()  { window.showHeroLoginPrompt('create'); }
+            function closeModal() { if (modal) modal.classList.add('is-hidden'); }
 
-            createBtn.addEventListener('click', async function (e) {
+            async function handleCreate(e) {
                 e.preventDefault();
                 const authed = await heroIsAuthenticated();
-                if (authed) {
-                    window.location.href = '@Url.Action("Create", "Event")';
-                    return;
-                }
+                if (authed) { window.location.href = '@Url.Action("Create", "Event")'; return; }
                 openModal();
-            });
-
-            if (closeBtn) {
-                closeBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    closeModal();
-                });
             }
 
-            if (goLoginBtn) {
-                goLoginBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    window.location.href = '@Url.Action("Index", "Login")';
-                });
-            }
+            document.getElementById('heroCreateBtn')?.addEventListener('click', handleCreate);
+            document.getElementById('heroBannerBtn')?.addEventListener('click', handleCreate);
+            closeBtn?.addEventListener('click', e => { e.preventDefault(); closeModal(); });
+            goLoginBtn?.addEventListener('click', e => { e.preventDefault(); window.location.href = '@Url.Action("Index", "Login")'; });
+            window.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-            window.addEventListener('click', function (e) {
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
+            // Scroll reveal
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add('revealed');
+                });
+            }, { threshold: 0.12 });
+            document.querySelectorAll('.highlight-card, .step-card').forEach(el => observer.observe(el));
         })();
     </script>
 }

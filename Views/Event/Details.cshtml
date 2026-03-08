@@ -52,10 +52,19 @@
     bool isCapacityFull = isCapacityLimited && joinedCountForCapacity >= capacity;
     int spotsLeft = isCapacityLimited ? Math.Max(0, capacity - joinedCountForCapacity) : -1;
 
-    // Location
-    var mapQuery = $"{Model?.Latitude},{Model?.Longitude}"; 
-    var mapSrc = $"https://www.google.com/maps?q={mapQuery}&output=embed"; 
-    var mapOpenUrl = $"https://www.google.com/maps/search/?api=1&query={mapQuery}"; 
+    // Location / Meeting link
+    bool isOnlineEvent = Model?.EventType == EnumEventType.Online;
+    var rawLocation = (Model?.Location ?? string.Empty).Trim();
+    var meetingUrl = string.Empty;
+    bool hasMeetingUrl = false;
+    if (isOnlineEvent && !string.IsNullOrWhiteSpace(rawLocation))
+    {
+        meetingUrl = rawLocation.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || rawLocation.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+            ? rawLocation
+            : $"https://{rawLocation}";
+        hasMeetingUrl = Uri.IsWellFormedUriString(meetingUrl, UriKind.Absolute);
+    }
     var defaultAvatar = "/images/avatar-placeholder.svg";
     var ownerAvatarIsDefault = string.IsNullOrWhiteSpace(owner?.ProfilePictureUrl);
     var ownerAvatar = ownerAvatarIsDefault ? defaultAvatar : owner!.ProfilePictureUrl;
@@ -71,15 +80,17 @@
         (Model?.UserEvents?.Any(ue => ue.UserId == parsedUserId && ue.RequestStatus == EnumRequestStatus.Rejected) ?? false);
     bool canInviteFriends = isCurrentUserParsed && !canManageEvent;
 
-    string locName = Model?.Location ?? "No Location";
-    string locDetail = "";
+    string locName = string.IsNullOrWhiteSpace(rawLocation) ? "No Location" : rawLocation;
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/event-detail.css"  />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/invite-modal.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    @if (!isOnlineEvent)
+    {
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    }
 }
 
 @if (canInviteFriends)
@@ -90,7 +101,7 @@
 
 <div id="inviteContext" data-event-id="@Model?.Id" hidden></div>
 
-<div class="ev-page">
+<div class="ev-page" data-event-type="@(isOnlineEvent ? "online" : "offline")">
     <div class="ev-wrap">
 
         <!-- LEFT PANEL -->
@@ -479,16 +490,33 @@
                 <div class="ev-about">@(!string.IsNullOrWhiteSpace(Model?.Info) ? Model.Info : "No description yet.")</div>
             </section>
 
-            <!-- Location -->
+            <!-- Location / Meeting -->
             <section class="ev-section">
-                <div class="ev-section-title">Location</div>
-
-                <div class="ev-loc-row">
-                    <div class="ev-muted" id="locDetail">@Model?.Location</div>
-                </div>
-                <div class="ev-map" style="height: 300px; width: 100%; border-radius: 12px; overflow: hidden; z-index: 1;"> 
-                    <div id="leafletMapDetail" style="width: 100%; height: 100%;"></div>
-                </div>
+                @if (isOnlineEvent)
+                {
+                    <div class="ev-section-title">Meeting Link</div>
+                    <div class="ev-loc-row">
+                        <div class="ev-muted" id="locDetail">@locName</div>
+                        @if (hasMeetingUrl)
+                        {
+                            <div class="ev-loc-actions">
+                                <a class="ev-meeting-btn" href="@meetingUrl" target="_blank" rel="noopener noreferrer">
+                                    Open Meeting Link
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="ev-section-title">Location</div>
+                    <div class="ev-loc-row">
+                        <div class="ev-muted" id="locDetail">@locName</div>
+                    </div>
+                    <div class="ev-map" style="height: 300px; width: 100%; border-radius: 12px; overflow: hidden; z-index: 1;">
+                        <div id="leafletMapDetail" style="width: 100%; height: 100%;"></div>
+                    </div>
+                }
             </section>
         </main>
 
@@ -541,12 +569,18 @@
     {
         <script src="~/js/invite-modal.js" asp-append-version="true"></script>
     }
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    @if (!isOnlineEvent)
+    {
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    }
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            var mapContainer = document.getElementById('leafletMapDetail');
+            if (!mapContainer || typeof L === 'undefined') return;
+
             var lat = @(Model?.Latitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "13.7563");
             var lng = @(Model?.Longitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "100.5018");
-            
+
             var map = L.map('leafletMapDetail').setView([lat, lng], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
