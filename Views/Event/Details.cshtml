@@ -2,6 +2,7 @@
 @using OnlyFriends.Models.DTOS.EventDTOS
 @using OnlyFriends.Models
 @using System.Security.Claims
+@using System.Globalization
 
 @{
     ViewData["Title"] = Model.Title ?? "Event Details";
@@ -81,16 +82,17 @@
     bool canInviteFriends = isCurrentUserParsed && !canManageEvent;
 
     string locName = string.IsNullOrWhiteSpace(rawLocation) ? "No Location" : rawLocation;
+    var mapLat = Model?.Latitude ?? 13.7563;
+    var mapLng = Model?.Longitude ?? 100.5018;
+    var mapLatStr = mapLat.ToString(CultureInfo.InvariantCulture);
+    var mapLngStr = mapLng.ToString(CultureInfo.InvariantCulture);
+    var mapBbox = FormattableString.Invariant($"{mapLng - 0.01},{mapLat - 0.01},{mapLng + 0.01},{mapLat + 0.01}");
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/event-detail.css"  />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/invite-modal.css" asp-append-version="true" />
-    @if (!isOnlineEvent)
-    {
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    }
 }
 
 @if (canInviteFriends)
@@ -514,7 +516,13 @@
                         <div class="ev-muted" id="locDetail">@locName</div>
                     </div>
                     <div class="ev-map" style="height: 300px; width: 100%; border-radius: 12px; overflow: hidden; z-index: 1;">
-                        <div id="leafletMapDetail" style="width: 100%; height: 100%;"></div>
+                        <iframe
+                            title="Event location map"
+                            width="100%"
+                            height="100%"
+                            frameborder="0"
+                            style="border:0;"
+                            src="https://www.openstreetmap.org/export/embed.html?bbox=@mapBbox&amp;layer=mapnik&amp;marker=@mapLatStr,@mapLngStr"></iframe>
                     </div>
                 }
             </section>
@@ -569,29 +577,4 @@
     {
         <script src="~/js/invite-modal.js" asp-append-version="true"></script>
     }
-    @if (!isOnlineEvent)
-    {
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    }
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var mapContainer = document.getElementById('leafletMapDetail');
-            if (!mapContainer || typeof L === 'undefined') return;
-
-            var lat = @(Model?.Latitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "13.7563");
-            var lng = @(Model?.Longitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "100.5018");
-
-            var map = L.map('leafletMapDetail').setView([lat, lng], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-            L.marker([lat, lng]).addTo(map)
-                .bindPopup('@(Html.Raw(Model?.Title?.Replace("'", "\\'") ?? ""))')
-                .openPopup();
-                
-            setTimeout(() => { map.invalidateSize(); }, 200);
-        });
-    </script>
 }
-

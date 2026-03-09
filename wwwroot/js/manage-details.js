@@ -918,8 +918,6 @@ const EVENT_TYPE_ENUM = { online: 0, offline: 1 };
 const DEFAULT_EDIT_LAT = 13.7563;
 const DEFAULT_EDIT_LNG = 100.5018;
 
-let editMap = null;
-let editMarker = null;
 let editLocationSearchTimeout = null;
 let loadedCategoryOptions = [];
 
@@ -939,26 +937,28 @@ function parseCoordinate(value, fallback) {
     return Number.isFinite(n) ? n : fallback;
 }
 
+function updateEditMapEmbed(lat, lng) {
+    const frame = document.getElementById('editLocationMapFrame');
+    if (!frame || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return;
+    const latNum = Number(lat);
+    const lngNum = Number(lng);
+    const bbox = `${lngNum - 0.01},${latNum - 0.01},${lngNum + 0.01},${latNum + 0.01}`;
+    frame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${encodeURIComponent(`${latNum},${lngNum}`)}`;
+}
+
 function updateLatLngInputs(lat, lng) {
     const latEl = document.getElementById('inputLatitude');
     const lngEl = document.getElementById('inputLongitude');
     if (latEl) latEl.value = String(lat);
     if (lngEl) lngEl.value = String(lng);
+    updateEditMapEmbed(lat, lng);
 }
 
 function setMapTo(lat, lng) {
-    if (!editMap || !editMarker) return;
-    const latLng = [lat, lng];
-    editMarker.setLatLng(latLng);
-    editMap.setView(latLng, 15);
     updateLatLngInputs(lat, lng);
 }
 
 function initEditMap() {
-    if (editMap || typeof L === 'undefined') return;
-    const mapEl = document.getElementById('editLocationMap');
-    if (!mapEl) return;
-
     const panel = document.getElementById('editPanel');
     const initialLat = parseCoordinate(
         document.getElementById('inputLatitude')?.value || panel?.dataset.latitude,
@@ -968,26 +968,7 @@ function initEditMap() {
         document.getElementById('inputLongitude')?.value || panel?.dataset.longitude,
         DEFAULT_EDIT_LNG
     );
-
-    editMap = L.map('editLocationMap').setView([initialLat, initialLng], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(editMap);
-
-    editMarker = L.marker([initialLat, initialLng], { draggable: true }).addTo(editMap);
-    editMarker.on('dragend', () => {
-        const pos = editMarker.getLatLng();
-        updateLatLngInputs(pos.lat, pos.lng);
-    });
-
-    editMap.on('click', (e) => {
-        const { lat, lng } = e.latlng;
-        setMapTo(lat, lng);
-    });
-
     updateLatLngInputs(initialLat, initialLng);
-    setTimeout(() => editMap?.invalidateSize(), 200);
 }
 
 function updateEditLocationMode() {
@@ -1026,7 +1007,6 @@ function updateEditLocationMode() {
     const lat = parseCoordinate(document.getElementById('inputLatitude')?.value, DEFAULT_EDIT_LAT);
     const lng = parseCoordinate(document.getElementById('inputLongitude')?.value, DEFAULT_EDIT_LNG);
     setMapTo(lat, lng);
-    setTimeout(() => editMap?.invalidateSize(), 150);
 }
 
 function onEditLocationInput() {

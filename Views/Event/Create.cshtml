@@ -7,9 +7,6 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <style>
         .custom-confirm-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -79,7 +76,7 @@
                         Start
                     </div>
                     <div class="dt-input-group">
-                        <input type="date" id="startDate" class="flatpickr-date">
+                        <input type="date" id="startDate">
                         <select id="startTime" class="time-select"></select>
                     </div>
                 </div>
@@ -90,7 +87,7 @@
                         End
                     </div>
                     <div class="dt-input-group">
-                        <input type="date" id="endDate" class="flatpickr-date">
+                        <input type="date" id="endDate">
                         <select id="endTime" class="time-select"></select>
                     </div>
                 </div>
@@ -134,7 +131,7 @@
             <span>⏳</span>
             <span style="min-width:170px; color:#495057; font-weight:600;">Registration Deadline</span>
             <div style="display:flex; gap:10px; flex:1;">
-                <input type="date" id="registrationDeadlineDate" class="flatpickr-date" style="flex:1;">
+                <input type="date" id="registrationDeadlineDate" style="flex:1;">
                 <select id="registrationDeadlineTime" class="time-select" style="flex:1;"></select>
             </div>
         </div>
@@ -148,8 +145,17 @@
         <input type="hidden" id="Latitude" name="Latitude">
         <input type="hidden" id="Longitude" name="Longitude">
 
-        <div id="mapContainer" style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block; z-index: 1;">
-            <div id="leafletMap" style="width: 100%; height: 100%;"></div>
+        <div id="mapContainer" style="width: 100%; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block; z-index: 1; padding: 12px; background: #f8f9fa;">
+            <iframe
+                id="staticMapPreview"
+                title="Location preview map"
+                width="100%"
+                height="220"
+                style="border:1px solid #dee2e6; border-radius:10px; margin-top:10px; background:#fff;"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="">
+            </iframe>
         </div>
         <div class="input-group">
             <span>📝</span>
@@ -209,8 +215,6 @@
 </div>
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         const EnumEventType = { Online: 0, Offline: 1 };
         const EnumEventStatus = { Open: 0, Closed: 1 };
@@ -282,13 +286,8 @@
             document.getElementById('endDate').value = today;
             document.getElementById('registrationDeadlineDate').value = today;
 
-            initMap();
+            updateLatLngFields(defaultLat, defaultLng);
             updateLocationPlaceholder();
-
-            flatpickr(".flatpickr-date", {
-                dateFormat: "Y-m-d",
-                minDate: "today",
-            });
 
             // Populate time dropdowns
             function generateTimeOptions() {
@@ -361,43 +360,23 @@
             // function removed
         }
 
-        let map;
-        let marker;
-
-        function initMap() {
-            map = L.map('leafletMap').setView([defaultLat, defaultLng], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-
-            marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
-
-            marker.on('dragend', function(e) {
-                const position = marker.getLatLng();
-                updateLatLngFields(position.lat, position.lng);
-            });
-
-            map.on('click', function(e) {
-                marker.setLatLng(e.latlng);
-                updateLatLngFields(e.latlng.lat, e.latlng.lng);
-            });
-
-            setTimeout(() => { map.invalidateSize(); }, 200);
-            updateLatLngFields(defaultLat, defaultLng);
+        function setMapLocation(lat, lng) {
+            updateLatLngFields(lat, lng);
         }
 
-        function setMapLocation(lat, lng) {
-            if (map && marker) {
-                const newLatLng = new L.LatLng(lat, lng);
-                map.setView(newLatLng, 15);
-                marker.setLatLng(newLatLng);
-            }
+        function updateStaticMapEmbed(lat, lng) {
+            const mapFrame = document.getElementById('staticMapPreview');
+            if (!mapFrame || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return;
+            const latNum = Number(lat);
+            const lngNum = Number(lng);
+            const bbox = `${lngNum - 0.01},${latNum - 0.01},${lngNum + 0.01},${latNum + 0.01}`;
+            mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${encodeURIComponent(`${latNum},${lngNum}`)}`;
         }
 
         function updateLatLngFields(lat, lng) {
             document.getElementById("Latitude").value = lat;
             document.getElementById("Longitude").value = lng;
+            updateStaticMapEmbed(lat, lng);
         }
 
         let searchTimeout;
@@ -437,7 +416,6 @@
                             const lat = parseFloat(item.lat);
                             const lon = parseFloat(item.lon);
                             setMapLocation(lat, lon);
-                            updateLatLngFields(lat, lon);
                             dropdown.style.display = 'none';
                         };
                         dropdown.appendChild(div);
@@ -597,41 +575,51 @@
             document.getElementById('submitConfirmModal').classList.remove('show');
         }
 
-        function executeSubmit() {
+        async function executeSubmit() {
             if (!eventToSubmit) return;
             const btnConfirm = document.getElementById('btnConfirmPublish');
             btnConfirm.disabled = true;
             btnConfirm.innerText = "Creating...";
+            const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
+            try {
+                const response = await fetch('/Event/Create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': csrfToken
+                    },
+                    body: JSON.stringify(eventToSubmit),
+                    credentials: 'same-origin'
+                });
 
-            $.ajax({
-                url: '/Event/Create',
-                type: 'POST',
-                contentType: 'application/json',
-                dataType: "json",
-                data: JSON.stringify(eventToSubmit),
-                headers: {
-                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function (result) {
-                    if (result && result.success) {
-                        alert('✅ Activity created successfully!');
-                        window.location.href = '/Home/Homepage';
-                    } else if (result.redirectUrl) {
-                        window.location.href = result.redirectUrl;
-                    } else {
-                        alert('✅ Activity created successfully!');
-                        window.location.href = '/Home/Homepage';
-                    }
-                },
-                error: function (xhr, status, error) {
-                    alert('❌ Error: ' + (xhr.responseText || error));
-                },
-                complete: function () {
-                    closeConfirmModal();
-                    btnConfirm.disabled = false;
-                    btnConfirm.innerText = "Create now";
+                if (response.redirected && response.url) {
+                    window.location.href = response.url;
+                    return;
                 }
-            });
+
+                const contentType = response.headers.get('content-type') || '';
+                const isJson = contentType.includes('application/json');
+                const payload = isJson ? await response.json() : await response.text();
+
+                if (!response.ok) {
+                    const message = (isJson && payload?.message) ? payload.message : `Request failed (${response.status})`;
+                    throw new Error(message);
+                }
+
+                if (isJson && payload?.redirectUrl) {
+                    window.location.href = payload.redirectUrl;
+                    return;
+                }
+
+                alert('✅ Activity created successfully!');
+                window.location.href = '/Home/Homepage';
+            } catch (error) {
+                alert('❌ Error: ' + (error?.message || 'Unknown error'));
+            } finally {
+                closeConfirmModal();
+                btnConfirm.disabled = false;
+                btnConfirm.innerText = "Create now";
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
