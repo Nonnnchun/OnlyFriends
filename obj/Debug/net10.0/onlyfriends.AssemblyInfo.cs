@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("onlyfriends")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f6873809bb71507617bed176af6e70b7564c4b14")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9fc798d1155255ae7a46ebfc8021838fa3c0ef0a")]
 [assembly: System.Reflection.AssemblyProductAttribute("onlyfriends")]
 [assembly: System.Reflection.AssemblyTitleAttribute("onlyfriends")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

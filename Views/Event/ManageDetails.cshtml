@@ -119,7 +119,7 @@
                           </div>
   
                            @* Share & Edit *@
-                          <div class="share-row" style="margin-top:12px">
+                          <div class="share-row share-row-spaced">
                               <span class="share-label">Share Event</span>
                               <div class="share-icons">
                                   <button type="button" class="share-icon-btn" onclick="shareEvent('facebook')" aria-label="Share on Facebook">
@@ -174,7 +174,7 @@
                           <button class="btn-outline" onclick="openPanel()"><i class="fa-solid fa-pen"></i> Edit Event</button>
                           <button class="btn-outline" onclick="openCoverPicker()"><i class="fa-solid fa-image"></i><span> Change Photo</span></button>
                       </div>
-                        <div class="edit-btns" style="margin-top:8px">
+                        <div class="edit-btns edit-btns-spaced">
                             <button class= "btn-outline" onclick="updateEvent()"><i class="fa-solid fa-save"></i><span> Update Event</span></button>
                         </div>
                       </div>
@@ -217,7 +217,7 @@
                                     <span class="reg-Email">@reg.Email</span>
                                 </div>
                             </div>
-                            <div class="reg-time" style="margin-left:auto; white-space:nowrap;">
+                            <div class="reg-time reg-time-fixed">
                                 <span class="reg-status">@{UserEvent? userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);}@userEvent?.RequestStatus</span>
                                 @Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id)?.RegisteredAt.ToString("dd MMM yyyy ,HH:mm")
                             </div>
@@ -240,7 +240,7 @@
                   <div class="section-header">
                       <div class="section-title">Hosts</div>
                   </div>
-                  <div style="margin-top:8px">
+                  <div class="host-block">
                       <div class="host-row">
                           <img class="host-avatar @(hostAvatarIsDefault ? "is-default-avatar" : "")" src="@hostAvatar" alt="host avatar" />
                           <div>
@@ -253,7 +253,7 @@
               </div>
               @* Visibility & Discovery *@
               <div class="section">
-                <div class="section-title" style="margin-bottom:4px">Visibility &amp; Discovery</div>
+                <div class="section-title section-title-tight">Visibility &amp; Discovery</div>
                 <p class="section-sub">Control how people can find your event.</p>
 
                 <div class="visibility-card">
@@ -282,7 +282,7 @@
                     </div>
                 </div>
 
-                <div class="visibility-btns" style="margin-top:12px">
+                <div class="visibility-btns visibility-btns-spaced">
                     <button class="btn-outline sm" onclick="openVisibilityModal()"><i class="fa-solid fa-eye"></i> Change Visibility</button>
                 </div>
 
@@ -296,7 +296,7 @@
           </div>
 
           <div class="modal-overlay" id="visibilityOverlay" onclick="closeVisibilityModal(event)">
-            <div class="invite-modal" style="width:420px;height:auto">
+            <div class="invite-modal visibility-modal">
             
                 <div class="invite-header">
                     <div class="invite-title">Change Visibility</div>
@@ -305,7 +305,7 @@
                     </button>
                 </div>
         
-                <div style="padding:20px;display:flex;flex-direction:column;gap:10px">
+                <div class="visibility-modal-body">
                 
                     <div class="confighost-option @(Model.JointType == EnumJointType.Public ? "selected" : "")" data-role="public" onclick="selectVisibility(this)">
                         <div class="confighost-option-left">
@@ -339,7 +339,7 @@
         
                 </div>
         
-                <div style="padding:0 20px 20px">
+                <div class="visibility-modal-actions">
                     <button class="confighost-send-btn" onclick="saveVisibility()">Save</button>
                 </div>
         
@@ -357,7 +357,7 @@
                     <div class="search-input-wrap">
                       <input class="form-input" id="participantSearch" placeholder="Search..." oninput="filterParticipants(this.value)" />
                   </div> 
-                        <div class="filter-tabs" style="display:flex;gap:8px;margin-bottom:16px">
+                        <div class="filter-tabs">
                             <button class="filter-btn active" onclick="filterByStatus(this, '')">All</button>
                             <button class="filter-btn" onclick="filterByStatus(this, 'Accepted')">Accepted</button>
                             <button class="filter-btn" data-private-only="true" onclick="filterByStatus(this, 'Pending')">Pending</button>

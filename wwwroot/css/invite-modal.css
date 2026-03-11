@@ -245,7 +245,80 @@
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-    .invite-modal   { height: 90vh; }
-    .invite-sidebar { width: 130px; }
-    .sidebar-item   { padding: 8px 10px; font-size: 12px; }
+    #inviteOverlay {
+        padding: 10px;
+    }
+    #inviteOverlay .invite-modal {
+        width: 100%;
+        max-width: 100%;
+        height: min(92dvh, 760px);
+        border-radius: 14px;
+    }
+    #inviteOverlay #inviteStep1 {
+        flex-direction: column;
+        min-height: 0;
+    }
+    #inviteOverlay .invite-sidebar {
+        width: 100%;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
+        overflow-y: hidden;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+    }
+    #inviteOverlay .sidebar-section-label {
+        padding: 0 4px;
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+    #inviteOverlay .sidebar-item {
+        padding: 8px 10px;
+        font-size: 12px;
+        border-radius: 10px;
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+    #inviteOverlay .invite-main {
+        padding: 14px;
+        min-height: 0;
+    }
+    #inviteOverlay .invite-footer {
+        padding: 12px 14px;
+    }
+    #inviteOverlay .invite-footer-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    #inviteOverlay .selected-count {
+        width: 100%;
+        order: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    #inviteOverlay .btn-send {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+    #inviteOverlay {
+        padding: 6px;
+    }
+    #inviteOverlay .invite-modal {
+        height: calc(100dvh - 12px);
+        max-height: calc(100dvh - 12px);
+        border-radius: 12px;
+    }
+    #inviteOverlay .invite-header {
+        padding: 12px 14px 10px;
+    }
+    #inviteOverlay .invite-footer {
+        padding: 10px 14px;
+    }
 }

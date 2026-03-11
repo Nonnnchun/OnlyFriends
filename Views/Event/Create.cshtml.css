@@ -5,10 +5,12 @@
 /* เปลี่ยนชื่อ class เป็น create-container */
 .create-container {
     display: flex;
+    width: min(100%, 1000px);
     max-width: 1000px;
     margin: 0 auto;
     background: #fff;
     padding: 30px;
+    box-sizing: border-box;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     gap: 30px;
@@ -17,24 +19,59 @@
 }
 
 .left-col {
-    flex: 1;
-    min-width: 300px;
+    flex: 1 1 280px;
+    min-width: 0;
 }
 
 .right-col {
-    flex: 2;
-    min-width: 300px;
+    flex: 2 1 360px;
+    min-width: 0;
 }
 
 .poster-preview {
     background-color: #e9ecef;
-    height: 350px;
+    width: 100%;
+    height: clamp(260px, 42vw, 350px);
     border-radius: 12px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
+    color: #888;
     border: 2px dashed #ced4da;
     transition: 0.3s;
+}
+
+.poster-preview-icon {
+    font-size: 3.5rem;
+    color: #adb5bd;
+    margin-bottom: 12px;
+}
+
+.poster-preview-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.poster-preview-subtitle {
+    font-size: 0.75rem;
+    color: #adb5bd;
+    margin-top: 4px;
+}
+
+.remove-poster-btn {
+    margin-top: 10px;
+    width: 100%;
+    max-width: 320px;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background: #fff;
+    color: #dc3545;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .poster-preview:hover {
@@ -66,6 +103,11 @@
     border-bottom-color: #0d6efd;
 }
 
+.top-actions {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
 /* ================= กล่องสีเทา (สถานที่, คำอธิบาย) ================= */
 .input-group {
     background-color: #f1f3f4; 
@@ -94,7 +136,9 @@
 
 /* ================= ส่วนวันที่และเวลา ================= */
 .schedule-wrapper {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 180px);
+    align-items: stretch;
     gap: 15px;
     margin-bottom: 20px;
 }
@@ -107,7 +151,8 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 15px; 
+    gap: 15px;
+    min-width: 0;
 }
 
 .timeline-line {
@@ -182,10 +227,39 @@
     background-color: #f1f3f4;
     border-radius: 12px;
     padding: 15px;
-    width: 150px; 
+    width: auto;
+    min-width: 0;
     display: flex;
+    flex: 0 0 auto;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.timezone-icon {
+    color: #9aa0a6;
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+.timezone-select {
+    border: none !important;
+    outline: none !important;
+    font-weight: bold;
+    cursor: pointer;
+    background: transparent !important;
+    width: 100%;
+    text-align: left !important;
+    text-align-last: left;
+    direction: ltr;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.timezone-select option {
+    direction: ltr;
 }
 
 .timezone-text {
@@ -232,6 +306,13 @@ input[type="date"], input[type="time"], input[type="number"], select {
     border-bottom: 1px solid #dadce0; 
 }
 
+.option-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
 .option-row:last-child {
     border-bottom: none;
 }
@@ -248,6 +329,22 @@ input[type="date"], input[type="time"], input[type="number"], select {
 
 .option-row select {
     color: #5f6368 !important; 
+}
+
+.event-type-select {
+    border: none !important;
+    background: transparent !important;
+    color: var(--primary-color) !important;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    text-align: right;
+}
+
+.capacity-edit-icon {
+    color: var(--text-muted);
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
 /* ================= ปุ่มค้นหา (ปรับใหม่ให้เป็นสีเทาและดูสวยมีมิติ) ================= */
@@ -294,6 +391,95 @@ input[type="date"], input[type="time"], input[type="number"], select {
 #mapContainer {
     position: relative;
     z-index: 1; 
+}
+
+.registration-deadline-row {
+    align-items: center;
+    gap: 10px;
+}
+
+.registration-deadline-label {
+    color: #5f6368;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.registration-deadline-fields {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.registration-date-input {
+    min-width: 0;
+    flex: 1 1 160px;
+}
+
+.registration-time-input {
+    min-width: 0;
+    flex: 1 1 130px;
+}
+
+.location-row {
+    position: relative;
+}
+
+.location-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-dropdown {
+    position: absolute;
+    left: 42px;
+    right: 12px;
+    top: calc(100% - 4px);
+    z-index: 20;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    display: none;
+    overflow-y: auto;
+}
+
+.map-container {
+    position: relative;
+    z-index: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+}
+
+.static-map-preview {
+    display: block;
+    width: 100%;
+    height: 220px;
+    border: 0;
+}
+
+.capacity-inline-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    min-width: 0;
+}
+
+.capacity-input {
+    width: 100px;
+    max-width: 120px;
+    min-width: 72px;
+    text-align: right;
+}
+
+.category-input-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
 }
 
 /* ─── Category Pill Tags (Create page) ─── */
@@ -351,4 +537,303 @@ input[type="date"], input[type="time"], input[type="number"], select {
 .create-category-pill.selected .create-pill-check {
     width: 12px;
     opacity: 1;
+}
+
+/* Responsive overrides for inline widths in Create.cshtml */
+#posterPreviewBox {
+    width: 100% !important;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+#removePosterBtn {
+    width: 100% !important;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#searchDropdown {
+    max-height: 45vh !important;
+}
+
+@media (max-width: 1100px) {
+    .create-container {
+        width: min(100%, 980px);
+        padding: 22px;
+        gap: 20px;
+    }
+
+    .left-col {
+        flex: 1 1 250px;
+    }
+
+    .right-col {
+        flex: 2 1 340px;
+    }
+
+    .registration-deadline-row {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .registration-deadline-label {
+        width: 100%;
+        white-space: normal;
+    }
+
+    .registration-deadline-fields {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .create-container {
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .left-col,
+    .right-col {
+        flex: 1 1 100%;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .schedule-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .timezone-block {
+        width: 100%,320px;
+        min-width: 0;
+        justify-self: stretch;
+    }
+
+    .title-input {
+        font-size: 1.7rem;
+    }
+
+    .input-group {
+        flex-wrap: wrap;
+    }
+
+    .registration-deadline-label {
+        width: 100%;
+    }
+
+    .registration-deadline-fields {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .registration-date-input,
+    .registration-time-input {
+        flex: 1 1 140px;
+        min-width: 0;
+    }
+
+    .search-dropdown {
+        left: 12px;
+    }
+
+    .dt-label {
+        width: 70px;
+        gap: 10px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .create-container {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    .poster-preview {
+        height: 260px;
+    }
+
+    #posterPreviewBox {
+        height: 260px !important;
+    }
+
+    .title-input {
+        font-size: 1.45rem;
+    }
+
+    .dt-input-group {
+        flex-direction: column;
+    }
+
+    .dt-input-group input[type="date"] {
+        border-right: none;
+        border-bottom: 1px solid #dadce0;
+    }
+
+    #eventTimeZone {
+        max-width: 100% !important;
+    }
+
+    .participant-limit-row {
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .participant-limit-row .option-label {
+        flex: 0 1 auto;
+        white-space: nowrap;
+    }
+
+    .participant-limit-row .capacity-inline-row {
+        width: auto;
+        margin-left: auto;
+        justify-content: flex-end;
+        flex: 0 0 auto;
+    }
+
+    .participant-limit-row #eventCapacity,
+    .participant-limit-row .capacity-input {
+        width: 96px !important;
+        max-width: 96px;
+    }
+
+    .location-row {
+        padding-bottom: 2px;
+    }
+
+    .search-dropdown {
+        left: 12px;
+        right: 12px;
+        top: calc(100% + 2px);
+    }
+
+    .static-map-preview {
+        height: 200px;
+    }
+
+    .submit-btn {
+        font-size: 1rem;
+        padding: 12px;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 540px) and (max-width: 920px) {
+    .create-container {
+        margin-top: 10px;
+        padding: 12px 14px;
+        gap: 14px;
+        align-items: flex-start;
+    }
+
+    .left-col {
+        flex: 0 1 240px;
+    }
+
+    .right-col {
+        flex: 1 1 340px;
+    }
+
+    .top-actions {
+        margin-bottom: 6px;
+    }
+
+    .title-input {
+        font-size: 1.35rem;
+        margin-bottom: 12px;
+        padding: 8px 0;
+    }
+
+    .poster-preview {
+        height: 180px;
+    }
+
+    #posterPreviewBox {
+        height: 180px !important;
+        max-width: 240px;
+    }
+
+    #removePosterBtn {
+        max-width: 240px;
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+
+    .schedule-wrapper {
+        grid-template-columns: minmax(0, 1fr) 130px;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .datetime-block,
+    .timezone-block {
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .timezone-block {
+        width: auto;
+        min-width: 0;
+    }
+
+    .datetime-block {
+        gap: 10px;
+    }
+
+    .timeline-line {
+        top: 24px;
+        bottom: 24px;
+    }
+
+    .dt-label {
+        width: 68px;
+        gap: 8px;
+        font-size: 0.95rem;
+    }
+
+    .dt-input-group input,
+    .time-select {
+        padding: 8px 10px;
+        font-size: 0.95rem;
+    }
+
+    .input-group {
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        gap: 10px;
+    }
+
+    .search-dropdown {
+        max-height: 55vh !important;
+    }
+
+    .map-container {
+        margin-bottom: 10px;
+    }
+
+    .static-map-preview {
+        height: 160px;
+    }
+
+    .section-title {
+        margin-top: 14px;
+        margin-bottom: 8px;
+        font-size: 1rem;
+    }
+
+    .form-section {
+        margin-bottom: 12px;
+    }
+
+    .option-row {
+        padding: 10px 0;
+    }
+
+    .submit-btn {
+        margin-top: 14px;
+        padding: 11px;
+        font-size: 1rem;
+    }
 }
