@@ -1,4 +1,4 @@
-﻿@using System.Security.Claims
+@using System.Security.Claims
 
 <!DOCTYPE html>
 <html lang="en">
@@ -69,7 +69,37 @@
             box-sizing: border-box !important;
             transform: none !important;
         }
+
+        /* Prevent FOUC (Flash of Unstyled Content) and add smooth page transition */
+        html { background-color: #F8F9FA; }
+        body {
+            opacity: 0.5;
+            transition: opacity 0.3s ease-out;
+        }
+        body.page-loaded {
+            opacity: 1;
+        }
     </style>
+    <script>
+        // Add class to fade in when DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+            document.body.classList.add("page-loaded");
+        });
+        // Handle back/forward cache
+        window.addEventListener("pageshow", function (e) {
+            if (e.persisted) {
+                document.body.classList.add("page-loaded");
+            }
+        });
+        // Fade out on page unload
+        window.addEventListener("beforeunload", function () {
+            document.body.classList.remove("page-loaded");
+        });
+        // Fallback in case JS is blocked or slow
+        setTimeout(function () {
+            document.body.classList.add("page-loaded");
+        }, 1500);
+    </script>
 </head>
 
 <body>
