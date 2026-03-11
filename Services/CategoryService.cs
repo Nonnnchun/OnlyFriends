@@ -27,6 +27,7 @@ public sealed class CategoryService : ICategoryService
     public async Task<GetCategoryDTO> AddCategoryAsync(CreateCategoryDTO categoryToCreate)
     {
         Category category = categoryToCreate.Adapt<Category>();
+        
         _context.Categories.Add(category);
         await _context.SaveChangesAsync();
         return category.Adapt<GetCategoryDTO>();
@@ -40,12 +41,12 @@ public sealed class CategoryService : ICategoryService
 
     public async Task<GetCategoryDTO?> FindCategoryByIdAsync(int id)
     {
-        Category? category = await _context.Categories.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync();
-        if (category == null)
-        {
-            return null;
-        }
-        return category.Adapt<GetCategoryDTO>();
+        var result = await _context.Categories
+                .Where(x => x.Id == id)
+                .AsNoTracking()
+                .ProjectToType<GetCategoryDTO>()
+                .FirstOrDefaultAsync();
+        return result;
     }
 
     public async Task<IEnumerable<GetCategoryDTO>> GetCategoriesAsync()
@@ -56,8 +57,12 @@ public sealed class CategoryService : ICategoryService
 
     public async Task UpdateCategoryAsync(UpdateCategoryDTO categoryToUpdate)
     {
-        Category category = categoryToUpdate.Adapt<Category>();
-        _context.Categories.Update(category);
+        var category = await _context.Categories.FindAsync(categoryToUpdate.Id);
+        if (category == null)
+        {
+            return;
+        }
+        categoryToUpdate.Adapt(category);
         await _context.SaveChangesAsync();
     }
 }

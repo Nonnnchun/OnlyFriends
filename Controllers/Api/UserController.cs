@@ -10,6 +10,7 @@ using OnlyFriends.Services;
 using OnlyFriends.Models.DTOS.UserDTOS;
 using Mapster;
 using OnlyFriends.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OnlyFriends.ApiControllers
 {
@@ -26,6 +27,7 @@ namespace OnlyFriends.ApiControllers
             _logger = logger;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> AddUserAsync(CreateUserDTO userToCreate)
         {
@@ -41,6 +43,7 @@ namespace OnlyFriends.ApiControllers
             }
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUserAsync(int id, UpdateUserDTO userToUpdate)
         {
@@ -99,6 +102,7 @@ namespace OnlyFriends.ApiControllers
             }
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {
@@ -118,6 +122,7 @@ namespace OnlyFriends.ApiControllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
 
     }
 }

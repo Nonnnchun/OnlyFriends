@@ -1,52 +1,230 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - OnlyFriends</title>
     <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
-    <link rel="stylesheet" href="~/OnlyFriends.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/OnlyFriends.styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @RenderSection("Styles", required: false)
+    <style>
+        /* Global hard-lock: keep the shared navbar identical on every page */
+        .app-header .custom-navbar {
+            height: 72px !important;
+            min-height: 72px !important;
+            padding: 0 20px !important;
+        }
+
+        .app-header .custom-navbar,
+        .app-header .custom-navbar * {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+        }
+
+        /* Keep Font Awesome glyphs correct (do not override icon font) */
+        .app-header .custom-navbar .fa-solid,
+        .app-header .custom-navbar .fa-regular,
+        .app-header .custom-navbar .fa-brands,
+        .app-header .custom-navbar .fas,
+        .app-header .custom-navbar .far,
+        .app-header .custom-navbar .fab {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+        }
+
+        .app-header .custom-navbar .of-logo-text {
+            font-size: 24px !important;
+            line-height: 1 !important;
+            font-weight: 800 !important;
+        }
+
+        .app-header .custom-navbar .nav-link,
+        .app-header .custom-navbar .nav-btn,
+        .app-header .custom-navbar .sign-in-link,
+        .app-header .custom-navbar .dropdown-link {
+            font-size: 14px !important;
+            line-height: 1 !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+        }
+
+        .app-header .custom-navbar .nav-primary-link,
+        .app-header .custom-navbar .nav-left > .nav-primary-link,
+        .app-header .custom-navbar .nav-right > .nav-primary-link {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 132px !important;
+            min-width: 132px !important;
+            height: 40px !important;
+            padding: 0 12px !important;
+            border: none !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            color: #555 !important;
+            text-decoration: none !important;
+            box-sizing: border-box !important;
+            transform: none !important;
+        }
+    </style>
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Homepage">OnlyFriends</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Homepage">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Createactivity">Create Activity</a>
-                        </li>
-                    </ul>
-                </div>
+    @{
+        var uname = (User?.Identity?.Name
+                    ?? User?.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+                    ?? User?.FindFirst("unique_name")?.Value
+                    ?? "").Trim();
+        var routeController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var routeAction = ViewContext.RouteData.Values["action"]?.ToString();
+        var isHomePage = string.Equals(routeController, "Home", StringComparison.OrdinalIgnoreCase)
+                         && string.Equals(routeAction, "Homepage", StringComparison.OrdinalIgnoreCase);
+        var currentUserIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var profileSlug = string.IsNullOrEmpty(uname) ? "" : "@" + uname;
+        var picture = User?.FindFirst("picture")?.Value;
+        var avatarUrl = !string.IsNullOrWhiteSpace(picture)
+            ? picture
+            : (!string.IsNullOrEmpty(uname)
+                ? $"https://ui-avatars.com/api/?background=f0f2f5&color=111&name={Uri.EscapeDataString(uname)}"
+                : "https://ui-avatars.com/api/?background=f0f2f5&color=111&name=U");
+    }
+    <header class="app-header">
+        <nav class="custom-navbar">
+            <div class="nav-left">
+                <a href="/" class="of-brand-logo">
+                    <div class="of-logo-icon">OF</div>
+                    <div class="of-logo-text">Only<span>Friends</span></div>
+                </a>
+                @if (User?.Identity?.IsAuthenticated ?? false)
+                {
+                    <a asp-controller="Home" asp-action="Homepage" class="nav-link nav-primary-link">Home</a>
+                }
+            </div>
+            <div class="nav-right">
+                @if (User?.Identity?.IsAuthenticated ?? false)
+                {
+                    <a asp-controller="Event" asp-action="Create" class="nav-link nav-primary-link">Create Activity</a>
+                    @if (isHomePage)
+                    {
+                        <div class="dropdown" id="filterDropdown">
+                            <button class="filter-btn" onclick="toggleFilter()">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Filter</span>
+                            </button>
+                            <div class="dropdown-content filter-menu-panel" id="filterMenu">
+                                <div class="filter-menu-header">
+                                    <span class="filter-menu-title">Activity Categories</span>
+                                    <button class="filter-reset-inline" onclick="resetFilter()">Reset</button>
+                                </div>
+                                <div id="filterCategoryList">
+                                    <div class="filter-item filter-loading">Loading categories...</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @await Html.PartialAsync("_NotificationBell")
+                    <div class="dropdown" id="profileDropdown">
+                        <button class="profile-btn" onclick="toggleProfile()">
+                            <img src="@avatarUrl" alt="Profile">
+                        </button>
+                        <div class="dropdown-content profile-menu" id="profileMenu">
+                            @if (!string.IsNullOrEmpty(uname))
+                            {
+                                <a href="/user/@profileSlug" data-my-profile id="myProfileLink">My Profile</a>
+                            }
+                            else
+                            {
+                                <a href="/login" data-my-profile id="myProfileLink">My Profile</a>
+                            }
+                            <a href="/setting">Settings</a>
+                            <hr class="profile-separator">
+                            <form method="post" action="/login/logout">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-link">Sign Out</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a href="/Home/Homepage" class="guest-explore-link">Explore Events <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    <a href="@Url.Action("Index", "Login")" class="sign-in-link">Sign In</a>
+                }
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
+    <div class="app-shell">
         <div class="container">
-            &copy; 2569 - OnlyFriends - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+        <footer class="app-footer">
+            <div class="app-footer-inner">
+                <div class="app-footer-left">
+                    <div class="app-footer-brand">OnlyFriends</div>
+                    <p class="app-footer-text">
+                        Plan activities, meet people, and make new friends in one place.
+                    </p>
+                </div>
+                <div class="app-footer-links">
+                    <div class="app-footer-column">
+                        <div class="app-footer-title">My Profile</div>
+                        @if (((User?.Identity?.IsAuthenticated) ?? false) && !string.IsNullOrEmpty(uname))
+                        {
+                            <a href="/user/@profileSlug">View Profile</a>
+                            <a href="/setting">Settings</a>
+                        }
+                        else
+                        {
+                            <a href="/login">Sign In</a>
+                            <a href="/register">Sign Up</a>
+                        }
+                    </div>
+                    <div class="app-footer-column">
+                        <div class="app-footer-title">Info</div>
+                        <a asp-controller="Home" asp-action="About">About us</a>
+                        <span class="app-footer-badge">Sample Project</span>
+                    </div>
+                </div>
+            </div>
+            <div class="app-footer-bottom">
+                <span>© @DateTime.Now.Year OnlyFriends</span>
+                <span class="app-footer-meta">Built for learning and experimentation.</span>
+            </div>
+        </footer>
+    </div>
+    <script src="~/js/site.js"></script>
+    <script>
+        (function () {
+            const guardedLinks = document.querySelectorAll('a.requires-auth');
+            if (!guardedLinks.length) return;
+
+            guardedLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const heroLoginModal = document.getElementById('heroLoginPrompt');
+                    if (heroLoginModal) {
+                        e.preventDefault();
+                        const action = link.getAttribute('data-auth-action') || 'default';
+                        if (typeof window.showHeroLoginPrompt === 'function') {
+                            window.showHeroLoginPrompt(action);
+                        } else {
+                            heroLoginModal.classList.remove('is-hidden');
+                        }
+                        return;
+                    }
+                    // Fallback for pages without hero modal
+                    e.preventDefault();
+                    window.location.href = '/login';
+                });
+            });
+        })();
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 

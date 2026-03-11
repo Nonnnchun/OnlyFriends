@@ -1,285 +1,580 @@
-@model OnlyFriends.Models.Event
+@model OnlyFriends.Models.DTOS.EventDTOS.GetEventDTO
+@using OnlyFriends.Models.DTOS.EventDTOS
+@using OnlyFriends.Models
+@using System.Security.Claims
+@using System.Globalization
+
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model.Title ?? "Event Details";
+
+    var owner = Model.Owner;
+    var categoryNames = Model?.Categories?
+        .Select(c => c.CategoryName?.Trim())
+        .Where(name => !string.IsNullOrWhiteSpace(name))
+        .Select(name => name!)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList() ?? new List<string>();
+    if (!categoryNames.Any())
+    {
+        categoryNames.Add("Uncategorized");
+    }
 
     // Poster
-    var poster = string.IsNullOrWhiteSpace(Model.PosterUrl)
-        ? "/images/poster-placeholder.jpg"
-        : Model.PosterUrl;
+    var hasPoster = !string.IsNullOrWhiteSpace(Model?.PosterUrl);
+    var poster = Model?.PosterUrl;
 
     // Date/Time
-    var hasTime = Model.StartAt.HasValue && Model.EndAt.HasValue;
-    var start = Model.StartAt ?? DateTime.Now;
-    var end = Model.EndAt ?? DateTime.Now;
+    var hasTime = Model?.StartAt.HasValue == true && Model?.EndAt.HasValue == true;
+    var start = Model?.StartAt ?? DateTime.Now;
+    var end = Model?.EndAt ?? DateTime.Now;
 
     var monthText = hasTime ? start.ToString("MMM").ToUpper() : "TBD";
     var dayText = hasTime ? start.ToString("dd") : "--";
     var dayLong = hasTime ? start.ToString("dddd, MMMM dd") : "Date TBD";
     var timeRange = hasTime ? $"{start:hh:mm tt} - {end:hh:mm tt}" : "Time TBD";
 
-    var placeName = "TBD";
-    var city = "Thailand";
-    if (!string.IsNullOrWhiteSpace(Model.Location))
+    // Going count
+    int capacity = Model?.Capacity ?? 0;
+    var allParticipants = Model?.Users?.ToList() ?? new List<User>();
+    var acceptedParticipantIds = Model?.UserEvents?
+        .Where(ue => ue.RequestStatus == EnumRequestStatus.Accepted)
+        .Select(ue => ue.UserId)
+        .ToHashSet() ?? new HashSet<int>();
+    var visibleParticipants = Model?.JointType == EnumJointType.Private
+        ? allParticipants.Where(u => acceptedParticipantIds.Contains(u.Id)).ToList()
+        : allParticipants;
+    int going = visibleParticipants.Count;
+    var participantPreview = visibleParticipants.Take(6).ToList();
+    int moreParticipantCount = Math.Max(0, going - participantPreview.Count);
+    var acceptedCount = Model?.UserEvents?.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted) ?? 0;
+    bool hasUserEvents = Model?.UserEvents?.Any() ?? false;
+    int joinedCountForCapacity = hasUserEvents ? acceptedCount : allParticipants.Count;
+    bool isCapacityLimited = capacity > 0;
+    bool isCapacityFull = isCapacityLimited && joinedCountForCapacity >= capacity;
+    int spotsLeft = isCapacityLimited ? Math.Max(0, capacity - joinedCountForCapacity) : -1;
+
+    // Location / Meeting link
+    bool isOnlineEvent = Model?.EventType == EnumEventType.Online;
+    var rawLocation = (Model?.Location ?? string.Empty).Trim();
+    var meetingUrl = string.Empty;
+    bool hasMeetingUrl = false;
+    if (isOnlineEvent && !string.IsNullOrWhiteSpace(rawLocation))
     {
-        var lines = Model.Location
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-        if (lines.Length > 0) placeName = lines[0];
-
-        // เดาเมืองจากคำที่พบบ่อยในตัวอย่าง
-        if (Model.Location.Contains("Krung Thep", StringComparison.OrdinalIgnoreCase))
-            city = "Krung Thep Maha Nakhon";
-        else if (Model.Location.Contains("Bangkok", StringComparison.OrdinalIgnoreCase))
-            city = "Bangkok";
+        meetingUrl = rawLocation.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || rawLocation.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+            ? rawLocation
+            : $"https://{rawLocation}";
+        hasMeetingUrl = Uri.IsWellFormedUriString(meetingUrl, UriKind.Absolute);
     }
+    var defaultAvatar = "/images/avatar-placeholder.svg";
+    var ownerAvatarIsDefault = string.IsNullOrWhiteSpace(owner?.ProfilePictureUrl);
+    var ownerAvatar = ownerAvatarIsDefault ? defaultAvatar : owner!.ProfilePictureUrl;
+    var currentUserIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    @* bool canManageEvent = int.TryParse(currentUserIdClaim, out var currentUserId) && owner?.Id == currentUserId; *@
+    bool canManageEvent = currentUserIdClaim == owner?.Id.ToString(); // TODO: replace with real permission check
+    bool isCurrentUserParsed = int.TryParse(currentUserIdClaim, out var parsedUserId);
+    bool hasJoined = isCurrentUserParsed &&
+        (Model?.UserEvents?.Any(ue => ue.UserId == parsedUserId && ue.RequestStatus == EnumRequestStatus.Accepted) ?? false);
+    bool hasPendingRequest = isCurrentUserParsed &&
+        (Model?.UserEvents?.Any(ue => ue.UserId == parsedUserId && ue.RequestStatus == EnumRequestStatus.Pending) ?? false);
+    bool hasRejectedRequest = isCurrentUserParsed &&
+        (Model?.UserEvents?.Any(ue => ue.UserId == parsedUserId && ue.RequestStatus == EnumRequestStatus.Rejected) ?? false);
+    bool canInviteFriends = isCurrentUserParsed && !canManageEvent;
 
-    // Featured (เดา: ถ้าเป็น offline + มีคำว่า Bangkok/ Krung Thep)
-    var isFeatured = Model.EventType == OnlyFriends.Models.EnumEventType.Offline &&
-                     (city.Contains("Bangkok", StringComparison.OrdinalIgnoreCase) ||
-                      city.Contains("Krung Thep", StringComparison.OrdinalIgnoreCase));
-
-    // Going count (ใช้ Users หรือ UserEvents)
-    var going = (Model.UserEvents?.Count > 0) ? Model.UserEvents.Count : (Model.Users?.Count ?? 0);
-    var capacity = Model.Capacity;
-    var spotsLeft = capacity > 0 ? Math.Max(0, capacity - going) : -1;
-
-    // Google maps embed (ใช้ Location เป็น query)
-    var mapQuery = Uri.EscapeDataString(Model.Location ?? "");
-    var mapSrc = $"https://www.google.com/maps?q={mapQuery}&output=embed";
-    var mapOpenUrl = $"https://www.google.com/maps/search/?api=1&query={mapQuery}";
+    string locName = string.IsNullOrWhiteSpace(rawLocation) ? "No Location" : rawLocation;
+    var mapLat = Model?.Latitude ?? 13.7563;
+    var mapLng = Model?.Longitude ?? 100.5018;
+    var mapLatStr = mapLat.ToString(CultureInfo.InvariantCulture);
+    var mapLngStr = mapLng.ToString(CultureInfo.InvariantCulture);
+    var mapBbox = FormattableString.Invariant($"{mapLng - 0.01},{mapLat - 0.01},{mapLng + 0.01},{mapLat + 0.01}");
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/event-detail.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/event-detail.css"  />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/invite-modal.css" asp-append-version="true" />
 }
 
-<div class="ev-page">
+@if (canInviteFriends)
+{
+    @Html.AntiForgeryToken()
+    @await Html.PartialAsync("_InviteModal", Model)
+}
+
+<div id="inviteContext" data-event-id="@Model?.Id" hidden></div>
+
+<div class="ev-page" data-event-type="@(isOnlineEvent ? "online" : "offline")">
     <div class="ev-wrap">
 
         <!-- LEFT PANEL -->
         <aside class="ev-left">
             <div class="ev-card">
-                <img class="ev-poster" src="@poster" alt="Event poster" />
+                @if (hasPoster)
+                {
+                    <img class="ev-poster" src="@poster" alt="Event poster" />
+                }
+                else
+                {
+                    <div class="ev-poster-placeholder" role="img" aria-label="No event image">No Image</div>
+                }
 
                 <div class="ev-card-body">
-                    <div class="ev-present">
-                        <div class="ev-muted">Presented by</div>
-                        <button class="ev-btn-lite" type="button" id="btnSubscribe">Subscribe</button>
-                    </div>
-
-                    <div class="ev-present-name">@Model.Owner.Username.ToString()</div>
-
-                    <div class="ev-divider"></div>
+                    @if (canManageEvent)
+                    {
+                        <div class="ev-manage-card">
+                            <div class="ev-manage-text">You have manage access for this event.</div>
+                            <a href="/event/manage/@Model?.Id" class="ev-manage-btn">
+                                Manage <span aria-hidden="true">&#8599;</span>
+                            </a>
+                        </div>
+                    }
 
                     <div class="ev-section-title">Hosted By</div>
-
                     <ul class="ev-host-list">
-                        <li class="ev-host-item"><img class="ev-host-avatar"
-                                                          src="@Model.Owner.ProfilePictureUrl"></img><span>@Model.Owner.FirstName
-                            @Model.Owner.LastName</span></li>
-                        </ul>
-
-                        <div class="ev-going">
-                            <div class="ev-going-num">@going Went</div>
-                            <div class="ev-muted ev-small">
-                                @if (capacity > 0)
+                        <li class="ev-host-item">
+                            <a href="/user/@owner?.Username" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">
+                                <img class="ev-host-avatar @(ownerAvatarIsDefault ? "is-default-avatar" : "")" src="@ownerAvatar" alt="host" />
+                                <span>@Model?.Owner.Username</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="ev-going">
+                        <div class="ev-going-num">@going Went</div>
+                            <div class="avatar-group ev-participant-trigger"
+                                 id="participantModalTrigger"
+                                 role="button"
+                                 tabindex="0"
+                                 aria-haspopup="dialog"
+                                 aria-controls="participantModal"
+                                 aria-label="Open participant list">
+                                @if (participantPreview.Any())
                                 {
-                                    <span>@spotsLeft spots left</span>
+                                    @foreach (var user in participantPreview)
+                                    {
+                                        var displayName = string.IsNullOrWhiteSpace(user.Username) ? $"User {user.Id}" : user.Username;
+                                        var isDefaultAvatar = string.IsNullOrWhiteSpace(user.ProfilePictureUrl);
+                                        var userAvatar = isDefaultAvatar ? defaultAvatar : user.ProfilePictureUrl;
+                                        <img src="@userAvatar" alt="@displayName" class="avatar-img @(isDefaultAvatar ? "is-default-avatar" : "")" />
+                                    }
+                                    @if (moreParticipantCount > 0)
+                                    {
+                                        <span class="avatar-more">+@moreParticipantCount</span>
+                                    }
                                 }
                                 else
                                 {
-                                    <span>No capacity limit</span>
+                                    <span class="ev-muted ev-small">No participants yet</span>
                                 }
                             </div>
+                            <div class="ev-muted ev-small"> 
+                                @if (capacity > 0) 
+                                { 
+                                    <span>@spotsLeft spots left</span> 
+                                } 
+                                else 
+                                { 
+                                    <span>No capacity limit</span> 
+                                } 
+                            </div> 
                         </div>
-
-                        <div class="ev-tags">
-                            @if (Model.Category != null)
+                        <div class="action-links">
+                            <a href="@(string.IsNullOrWhiteSpace(owner?.Username) ? "#" : $"/user/{owner.Username}")" class="action-link">Contact the Host</a>
+                        </div> 
+                         <div class="ev-tags">
+                            @foreach (var category in categoryNames)
                             {
-                                <span class="ev-tag">#@Model.Category.CategoryName</span>
+                                <span class="ev-tag">#@category</span>
                             }
                         </div>
-                    </div>
                 </div>
-            </aside>
+            </div>
+        </aside>
 
-            <!-- RIGHT PANEL -->
-            <main class="ev-right">
-                <div class="ev-header">
-                    <div>
-                        <div class="ev-status">
-                            <span
-                                class="ev-badge @(Model.EventStatus == OnlyFriends.Models.EnumEventStatus.Open ? "ev-badge-open" : "ev-badge-closed")">
-                                @Model.EventStatus
-                            </span>
-                        </div>
+        <!-- RIGHT PANEL -->
+        <main class="ev-right">
+            <div class="ev-header">
+                <div>
+                    <div class="ev-status">
+                        <span class="ev-badge @(Model?.EventStatus == EnumEventStatus.Open ? "ev-badge-open" : "ev-badge-closed")">
+                            @Model?.EventStatus
+                        </span>
 
-                        <h1 class="ev-title">@Model.Title</h1>
+                        @if (canInviteFriends)
+                        {
+                            <button type="button" class="ev-invite-btn" onclick="openInviteModal()">
+                                <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                                <span>Invite Friends</span>
+                            </button>
+                        }
+                    </div>
 
-                        <div class="ev-meta">
-                            <div class="ev-meta-item">
-                                <div class="ev-icon-box">
-                                    <div class="ev-cal">
-                                        <div class="ev-cal-month">@monthText</div>
-                                        <div class="ev-cal-day">@dayText</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="ev-strong">@dayLong</div>
-                                    <div class="ev-muted">@timeRange</div>
+                    <h1 class="ev-title">@Model?.Title</h1>
+
+                    <div class="ev-meta">
+                        <div class="ev-meta-item">
+                            <div class="ev-icon-box">
+                                <div class="ev-cal">
+                                    <div class="ev-cal-month">@monthText</div>
+                                    <div class="ev-cal-day">@dayText</div>
                                 </div>
                             </div>
+                            <div>
+                                <div class="ev-strong">@dayLong</div>
+                                <div class="ev-muted">@timeRange</div>
+                            </div>
+                        </div>
 
-                            <div class="ev-meta-item">
-                                <div class="ev-icon-box"><svg class="ev-icon" xmlns="http://www.w3.org/2000/svg"
-                                                              viewBox="0 0 16 16">
+                        <div class="ev-meta-item">
+                            <div class="ev-icon-box">
+                                <svg class="ev-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                                     <g fill="none" fill-rule="evenodd" stroke="currentColor" stroke-linecap="round"
-                                           stroke-linejoin="round" stroke-width="1.5">
-                                        <path
-                                            d="M2 6.854C2 11.02 7.04 15 8 15s6-3.98 6-8.146C14 3.621 11.314 1 8 1S2 3.62 2 6.854">
-                                        </path>
+                                       stroke-linejoin="round" stroke-width="1.5">
+                                        <path d="M2 6.854C2 11.02 7.04 15 8 15s6-3.98 6-8.146C14 3.621 11.314 1 8 1S2 3.62 2 6.854"></path>
                                         <path d="M9.5 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"></path>
                                     </g>
-                                </svg></div>
-                                <div>
-                                    <div class="ev-strong">@placeName <span class="ev-open-ext">↗</span></div>
-                                    <div class="ev-muted">@city</div>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="ev-strong">@locName</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration card -->
+            <div class="ev-join-card" data-status="@Model?.EventStatus" data-joinmode="@Model?.JointType" data-event-id="@Model?.Id" data-joined="@hasJoined.ToString().ToLower()" data-pending="@hasPendingRequest.ToString().ToLower()" data-rejected="@hasRejectedRequest.ToString().ToLower()" data-full="@isCapacityFull.ToString().ToLower()">
+                @if (canManageEvent)
+                {
+                    <div class="ev-reg-body">
+                        <div class="ev-reg-row">
+                            <svg class="ev-reg-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" />
+                                <line x1="5" y1="5" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            </svg>
+                            <div class="ev-reg-text">
+                                <div class="ev-reg-title">You are viewing this event as the host</div>
+                                <div class="ev-reg-desc">
+                                    You can reopen registration anytime or close it anytime from the event management page.
                                 </div>
                             </div>
                         </div>
                     </div>
+                }
+                else if (hasJoined)
+                {
+                    <div class="ev-join-topbar">
+                        <div class="ev-muted">Registration</div>
+                    </div>
 
-                </div>
+                    <div class="ev-join-panel">
+                        <div class="ev-join-panel-head">
+                            <div class="ev-panel-icon">
+                                <svg class="ev-icon-register" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z" fill="none" stroke="currentColor" stroke-width="1.6" />
+                                    <path d="M8.5 12.5l2 2 4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
 
-                <!-- Thank you / Join card -->
-                <div class="ev-join-card" data-status="@Model.EventStatus" data-joinmode="@Model.JointType">
+                            <div class="ev-panel-text">
+                                <div class="ev-panel-title">You are already attending</div>
+                                <div class="ev-muted">Cancel below if you need to leave the event.</div>
+                            </div>
+                        </div>
+                    </div>
 
-                     @if (Model.EventStatus == OnlyFriends.Models.EnumEventStatus.Closed)
-                    {
-                        <!-- ✅ Registration Closed -->
-                        <div class="ev-reg-body">
-                          <div class="ev-reg-row">
+                    <div class="ev-join-body">
+                        <div class="ev-join-welcome">Thanks for registering - see you there!</div>
+                        <div class="ev-user-row">
+                            <img class="ev-user-avatar @(ownerAvatarIsDefault ? "is-default-avatar" : "")" src="@ownerAvatar" alt="avatar" />
+                            <div class="ev-user-meta">
+                                <span class="ev-user-name">@Model?.Owner.Username</span>
+                                <span class="ev-muted">@Model?.Owner.Email</span>
+                            </div>
+                        </div>
+                        <div class="ev-join-actions">
+                            <button class="ev-btn-wide ev-btn-wide--outline" type="button" id="btnCancelJoin">
+                                Cancel Participation
+                            </button>
+                        </div>
+                    </div>
+                }
+                else if (hasPendingRequest)
+                {
+                    <div class="ev-join-topbar">
+                        <div class="ev-muted">Registration</div>
+                    </div>
+
+                    <div class="ev-join-panel">
+                        <div class="ev-join-panel-head">
+                            <div class="ev-panel-icon">
+                                <svg class="ev-icon-register" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" fill="none" stroke="currentColor" stroke-width="1.6" />
+                                    <path d="M12 9.8v2.6l1.8 1.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+
+                            <div class="ev-panel-text">
+                                <div class="ev-panel-title">Your request is pending approval</div>
+                                <div class="ev-muted">You can cancel your request while waiting for the host.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ev-join-body">
+                        <div class="ev-join-welcome">We sent your request to the host.</div>
+                        <div class="ev-user-row">
+                            <img class="ev-user-avatar @(ownerAvatarIsDefault ? "is-default-avatar" : "")" src="@ownerAvatar" alt="avatar" />
+                            <div class="ev-user-meta">
+                                <span class="ev-user-name">@Model?.Owner.Username</span>
+                                <span class="ev-muted">@Model?.Owner.Email</span>
+                            </div>
+                        </div>
+                        <div class="ev-join-actions">
+                            <button class="ev-btn-wide ev-btn-wide--outline" type="button" id="btnCancelJoin">
+                                Cancel Request
+                            </button>
+                        </div>
+                    </div>
+                }
+                else if (Model?.EventStatus == EnumEventStatus.Closed)
+                {
+                    <div class="ev-reg-body">
+                        <div class="ev-reg-row">
                             <span class="ev-reg-icon" aria-hidden="true">⛔</span>
                             <div class="ev-reg-text">
-                              <div class="ev-reg-title">Registration Closed</div>
-                              <div class="ev-reg-desc">
-                                This event is not currently taking registrations. You may contact the host or subscribe to receive updates.
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                    }
-
-                    else if (@Model.JointType == OnlyFriends.Models.EnumJointType.Private)
-                    {
-                        // Private event - request to join
-                        <div class="ev-join-topbar">
-                            <div class="ev-muted">Registration</div>
-                        </div>
-
-                        <div class="ev-join-panel">
-                            <div class="ev-join-panel-head">
-                                <div class="ev-panel-icon">
-                                    <svg class="ev-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" fill="none" stroke="currentColor"
-                                              stroke-width="1.6" />
-                                        <path d="M4 20a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="1.6"
-                                              stroke-linecap="round" />
-                                    </svg>
-                                </div>
-
-                                <div class="ev-panel-text">
-                                    <div class="ev-panel-title">Approval Required</div>
-                                    <div class="ev-muted">Your registration is subject to host approval.</div>
+                                <div class="ev-reg-title">Registration Closed</div>
+                                <div class="ev-reg-desc">
+                                    This event is not currently taking registrations. You may contact the host or subscribe to receive updates.
                                 </div>
                             </div>
                         </div>
+                    </div>
+                }
+                else if (hasRejectedRequest)
+                {
+                    <div class="ev-join-topbar">
+                        <div class="ev-muted">Registration</div>
+                    </div>
 
-                        <div class="ev-join-body">
-                            <div class="ev-join-welcome">Welcome! To join the event, please register below.</div>
-
-                            <div class="ev-user-row">
-                                <img class="ev-user-avatar" src="@Model.Owner.ProfilePictureUrl" alt="avatar" />
-                                <div class="ev-user-meta">
-                                    <span class="ev-user-name">@Model.Owner.FirstName @Model.Owner.LastName</span>
-                                    <span class="ev-muted">@Model.Owner.Email</span>
-                                </div>
+                    <div class="ev-join-panel">
+                        <div class="ev-join-panel-head">
+                            <div class="ev-panel-icon">
+                                <svg class="ev-icon-register" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.6" />
+                                    <path d="M9.6 9.6l4.8 4.8m0-4.8l-4.8 4.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                                </svg>
                             </div>
 
+                            <div class="ev-panel-text">
+                                <div class="ev-panel-title">Your previous registration was declined</div>
+                                <div class="ev-muted">You cannot submit another request for this event.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ev-join-body">
+                        <div class="ev-join-welcome">Please contact the host if you think this is a mistake.</div>
+
+                        <div class="ev-user-row">
+                            <img class="ev-user-avatar @(ownerAvatarIsDefault ? "is-default-avatar" : "")" src="@ownerAvatar" alt="avatar" />
+                            <div class="ev-user-meta">
+                                <span class="ev-user-name">@Model?.Owner.Username</span>
+                                <span class="ev-muted">@Model?.Owner.Email</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (isCapacityFull)
+                {
+                    <div class="ev-reg-body">
+                        <div class="ev-reg-row">
+                            <svg class="ev-reg-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" />
+                                <path d="M8 5v3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                <circle cx="8" cy="10.8" r="0.75" fill="currentColor" />
+                            </svg>
+                            <div class="ev-reg-text">
+                                <div class="ev-reg-title">Event is full</div>
+                                <div class="ev-reg-desc">
+                                    This event has reached maximum capacity and is not accepting more registrations.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (Model?.JointType == EnumJointType.Private)
+                {
+                    <div class="ev-join-topbar">
+                        <div class="ev-muted">Registration</div>
+                    </div>
+
+                    <div class="ev-join-panel">
+                        <div class="ev-join-panel-head">
+                            <div class="ev-panel-icon">
+                                <svg class="ev-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" fill="none" stroke="currentColor" stroke-width="1.6" />
+                                    <path d="M4 20a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                                </svg>
+                            </div>
+
+                            <div class="ev-panel-text">
+                                <div class="ev-panel-title">Approval Required</div>
+                                <div class="ev-muted">Your registration is subject to host approval.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ev-join-body">
+                        <div class="ev-join-welcome">Welcome! To join the event, please register below.</div>
+                        <div class="ev-user-row">
+                            <img class="ev-user-avatar @(ownerAvatarIsDefault ? "is-default-avatar" : "")" src="@ownerAvatar" alt="avatar" />
+                            <div class="ev-user-meta">
+                                <span class="ev-user-name">@Model.Owner.FirstName @Model.Owner.LastName</span>
+                                <span class="ev-muted">@Model.Owner.Email</span>
+                            </div>
+                        </div>
+
+                        <div class="ev-join-actions">
+                            <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">Request to Join</button>
+                            <button class="ev-btn-wide ev-btn-wide--outline" type="button" id="btnCancelJoin" style="display:none;">Cancel Request</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="ev-join-topbar">
+                        <div class="ev-muted">Registration</div>
+                    </div>
+
+                    <div class="ev-join-panel">
+                        <div class="ev-join-panel-head">
+                            <div class="ev-panel-icon">
+                                <svg class="ev-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" fill="none" stroke="currentColor" stroke-width="1.6" />
+                                    <path d="M4 20a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                                </svg>
+                            </div>
+
+                            <div class="ev-panel-text">
+                                <div class="ev-panel-title">Registrations are accepted on a first-come, first-served basis.</div>
+                                <div class="ev-muted">Seats are limited. Your spot is confirmed immediately until capacity is full.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ev-join-body">
+                        <div class="ev-join-welcome">Welcome! To join the event, please register below.</div>
+
+                        <div class="ev-user-row">
+                            <img class="ev-user-avatar @(ownerAvatarIsDefault ? "is-default-avatar" : "")" src="@ownerAvatar" alt="avatar" />
+                            <div class="ev-user-meta">
+                                <span class="ev-user-name">@Model?.Owner.Username</span>
+                                <span class="ev-muted">@Model?.Owner.Email</span>
+                            </div>
+                        </div>
+
+                        <div class="ev-join-actions">
                             <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">
                                 Request to Join
                             </button>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="ev-join-topbar">
-                            <div class="ev-muted">Registration</div>
-                        </div>
-
-                        <div class="ev-join-panel">
-                            <div class="ev-join-panel-head">
-                                <div class="ev-panel-icon">
-                                    <svg class="ev-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" fill="none" stroke="currentColor"
-                                              stroke-width="1.6" />
-                                        <path d="M4 20a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="1.6"
-                                              stroke-linecap="round" />
-                                    </svg>
-                                </div>
-
-                                <div class="ev-panel-text">
-                                    <div class="ev-panel-title">Registrations are accepted on a first-come, first-served basis.</div>
-                                    <div class="ev-muted">Seats are limited. Your spot is confirmed immediately until capacity is full.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="ev-join-body">
-                            <div class="ev-join-welcome">Welcome! To join the event, please register below.</div>
-
-                            <div class="ev-user-row">
-                                <img class="ev-user-avatar" src="@Model.Owner.ProfilePictureUrl" alt="avatar" />
-                                <div class="ev-user-meta">
-                                    <span class="ev-user-name">@Model.Owner.FirstName @Model.Owner.LastName</span>
-                                    <span class="ev-muted">@Model.Owner.Email</span>
-                                </div>
-                            </div>
-
-                            <button class="ev-btn-wide ev-btn-wide--gray" type="button" id="btnRequestJoin">
-                                Request to Join
+                            <button class="ev-btn-wide ev-btn-wide--outline" type="button" id="btnCancelJoin" style="display:none;">
+                                Cancel Request
                             </button>
                         </div>
-                    }
-                </div>
-                <!-- About -->
-                <section class="ev-section">
-                    <div class="ev-section-title">About Event</div>
-                    <div class="ev-about">@Model.Info</div>
-                </section>
+                    </div>
+                }
+            </div>
 
-                <!-- Location -->
-                <section class="ev-section">
-                    <div class="ev-section-title">Location</div>
+            <!-- About -->
+            <section class="ev-section">
+                <div class="ev-section-title">About Event</div>
+                <div class="ev-about">@(!string.IsNullOrWhiteSpace(Model?.Info) ? Model.Info : "No description yet.")</div>
+            </section>
 
+            <!-- Location / Meeting -->
+            <section class="ev-section">
+                @if (isOnlineEvent)
+                {
+                    <div class="ev-section-title">Meeting Link</div>
                     <div class="ev-loc-row">
-                        <div class="ev-muted" id="locText">@Model.Location</div>
-
-                        <div class="ev-loc-actions">
-                            <button class="ev-btn-lite" type="button" id="btnCopyLocation">Copy</button>
-                            <a class="ev-btn-lite" href="@mapOpenUrl" target="_blank">Open Maps</a>
-                        </div>
+                        <div class="ev-muted" id="locDetail">@locName</div>
+                        @if (hasMeetingUrl)
+                        {
+                            <div class="ev-loc-actions">
+                                <a class="ev-meeting-btn" href="@meetingUrl" target="_blank" rel="noopener noreferrer">
+                                    Open Meeting Link
+                                </a>
+                            </div>
+                        }
                     </div>
-
-                    <div class="ev-map">
-                        <iframe src="@mapSrc" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                }
+                else
+                {
+                    <div class="ev-section-title">Location</div>
+                    <div class="ev-loc-row">
+                        <div class="ev-muted" id="locDetail">@locName</div>
                     </div>
-                </section>
-            </main>
+                    <div class="ev-map" style="height: 300px; width: 100%; border-radius: 12px; overflow: hidden; z-index: 1;">
+                        <iframe
+                            title="Event location map"
+                            width="100%"
+                            height="100%"
+                            frameborder="0"
+                            style="border:0;"
+                            src="https://www.openstreetmap.org/export/embed.html?bbox=@mapBbox&amp;layer=mapnik&amp;marker=@mapLatStr,@mapLngStr"></iframe>
+                    </div>
+                }
+            </section>
+        </main>
 
+    </div>
+</div>
+
+<div class="ev-participant-modal-overlay" id="participantModal" aria-hidden="true">
+    <div class="ev-participant-modal" role="dialog" aria-modal="true" aria-labelledby="evParticipantTitle">
+        <button type="button" class="ev-participant-modal-close" id="participantModalClose" aria-label="Close participant list">&times;</button>
+        <div class="ev-participant-modal-head">
+            <div class="ev-participant-modal-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-8 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 2c-2.761 0-5 1.79-5 4v1h10v-1c0-2.21-2.239-4-5-4Zm8-1c-1.334 0-2.538.42-3.45 1.1A5.55 5.55 0 0 1 15 18v1h6v-1c0-2.21-2.239-4-5-4Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+            <div>
+                <div class="ev-participant-modal-title" id="evParticipantTitle">@going @(going == 1 ? "Guest" : "Guests")</div>
+                <div class="ev-participant-modal-subtitle">
+                    @(Model?.JointType == EnumJointType.Private ? "Accepted participants approved by the host." : "People who have joined this event.")
+                </div>
+            </div>
+        </div>
+
+        <div class="ev-participant-modal-list">
+            @if (visibleParticipants.Any())
+            {
+                @foreach (var user in visibleParticipants)
+                {
+                    var displayName = string.IsNullOrWhiteSpace(user.Username) ? $"User {user.Id}" : user.Username;
+                    var isDefaultAvatar = string.IsNullOrWhiteSpace(user.ProfilePictureUrl);
+                    var userAvatar = isDefaultAvatar ? defaultAvatar : user.ProfilePictureUrl;
+                    var profileUrl = string.IsNullOrWhiteSpace(user.Username) ? "#" : $"/user/{user.Username}";
+                    <a href="@profileUrl" class="ev-participant-row ev-participant-link" title="View @displayName profile">
+                        <img src="@userAvatar" alt="@displayName" class="ev-participant-avatar @(isDefaultAvatar ? "is-default-avatar" : "")" />
+                        <span class="ev-participant-name">@displayName</span>
+                    </a>
+                }
+            }
+            else
+            {
+                <div class="ev-participant-empty">No participants yet.</div>
+            }
         </div>
     </div>
+</div>
 
-    @section Scripts {
-        <script src="~/js/event-detail.js" asp-append-version="true"></script>
+@section Scripts {
+    <script src="~/js/event-detail.js" ></script>
+    @if (canInviteFriends)
+    {
+        <script src="~/js/invite-modal.js" asp-append-version="true"></script>
     }
+}

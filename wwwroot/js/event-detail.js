@@ -1,79 +1,188 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const joinCard = document.querySelector(".ev-join-card");
-  const btnJoin = document.getElementById("btnJoin");
-  const joinTitle = document.getElementById("joinTitle");
+document.addEventListener('DOMContentLoaded', function () {
+    const joinCard = document.querySelector('.ev-join-card');
+    const btnJoin = document.getElementById('btnRequestJoin');
+    const btnCancel = document.getElementById('btnCancelJoin');
 
-  const btnTicket = document.getElementById("btnMyTicket");
-  const btnInvite = document.getElementById("btnInvite");
-  const btnCopy = document.getElementById("btnCopyLocation");
-  const locText = document.getElementById("locText");
-  const btnSub = document.getElementById("btnSubscribe");
+    const eventId = joinCard?.dataset?.eventId;
+    const joinMode = joinCard?.dataset?.joinmode;
+    const isCapacityFull = joinCard?.dataset?.full === 'true';
+    const initialJoined = joinCard?.dataset?.joined === 'true';
+    const initialPending = joinCard?.dataset?.pending === 'true';
+    const initialRejected = joinCard?.dataset?.rejected === 'true';
+    let currentJoinState = initialJoined ? 'joined' : (initialPending ? 'pending' : 'none');
 
-  // --- Simulate join state (เพื่อลอง UI ก่อน ยังไม่ต่อ DB) ---
-  // เก็บสถานะ join ไว้ใน localStorage
-  const joinedKey = "OnlyFriends_joined_demo";
-  const status = (joinCard?.dataset.status || "").toLowerCase();
-  const isClosed = status === "closed";
-  const isJoined = localStorage.getItem(joinedKey) === "1";
+    function setJoinState(state) {
+        if (!btnJoin && !btnCancel) return;
+        currentJoinState = state;
 
-  function renderJoinState() {
-    if (!btnJoin || !joinTitle || !btnTicket || !btnInvite) return;
+        const isJoined = state === 'joined';
+        const isPending = state === 'pending';
 
-    if (isClosed) {
-      btnJoin.disabled = true;
-      btnJoin.textContent = "Closed";
-      joinTitle.textContent = "Event Closed";
-      btnTicket.style.display = "none";
-      btnInvite.style.display = "none";
-      return;
+        if (isJoined || isPending) {
+            if (btnJoin) {
+                btnJoin.disabled = false;
+                btnJoin.style.display = 'none';
+                btnJoin.onclick = null;
+            }
+            if (btnCancel) {
+                btnCancel.disabled = false;
+                btnCancel.style.display = 'block';
+                btnCancel.innerText = isPending ? 'Cancel Request' : 'Cancel Participation';
+                btnCancel.onclick = handleCancel;
+            }
+        } else {
+            if (btnJoin) {
+                btnJoin.disabled = false;
+                if (isCapacityFull) {
+                    btnJoin.style.display = 'none';
+                    btnJoin.onclick = null;
+                } else {
+                    btnJoin.style.display = 'block';
+                    btnJoin.innerText = 'Request to Join';
+                    btnJoin.onclick = handleJoin;
+                }
+            }
+            if (btnCancel) {
+                btnCancel.disabled = false;
+                btnCancel.style.display = 'none';
+                btnCancel.onclick = null;
+            }
+        }
     }
 
-    const joined = localStorage.getItem(joinedKey) === "1";
-    if (joined) {
-      joinTitle.textContent = "Thank You for Joining";
-      btnJoin.textContent = "Joined";
-      btnJoin.disabled = true;
-      btnTicket.style.display = "inline-flex";
-      btnInvite.style.display = "inline-flex";
-    } else {
-      joinTitle.textContent = "Register Now";
-      btnJoin.textContent = "Join";
-      btnJoin.disabled = false;
-      btnTicket.style.display = "none";
-      btnInvite.style.display = "none";
+    function handleJoin() {
+        if (!btnJoin || btnJoin.disabled) return;
+        const previousState = currentJoinState;
+        btnJoin.disabled = true;
+        btnJoin.innerText = 'Processing...';
+
+        fetch(`/event/join/${eventId}`, { method: 'POST', credentials: 'same-origin' })
+            .then(res => {
+                if (res.ok) {
+                    if (joinMode === 'Private') {
+                        if (initialRejected) {
+                            window.location.reload();
+                            return;
+                        }
+                        setJoinState('pending');
+                    } else {
+                        setJoinState('joined');
+                    }
+                } else if (res.status === 401) {
+                    window.location.href = '/login';
+                } else if (res.status === 409) {
+                    alert('This event is already full.');
+                    window.location.reload();
+                } else {
+                    alert('Failed to join. Please try again.');
+                    setJoinState(previousState);
+                }
+            })
+            .catch(() => {
+                alert('Network error. Please try again.');
+                setJoinState(previousState);
+            });
     }
-  }
 
-  renderJoinState();
+    function handleCancel() {
+        if (!btnCancel || btnCancel.disabled) return;
+        const previousState = currentJoinState;
+        btnCancel.disabled = true;
+        btnCancel.innerText = 'Processing...';
 
-  if (btnJoin && !isClosed) {
-    btnJoin.addEventListener("click", () => {
-      const ok = confirm("Join this event? (demo)");
-      if (!ok) return;
-      localStorage.setItem(joinedKey, "1");
-      renderJoinState();
-      alert("Joined! (demo)");
+        fetch(`/event/join/${eventId}`, { method: 'DELETE', credentials: 'same-origin' })
+            .then(res => {
+                if (res.ok) {
+                    if (!btnJoin) {
+                        window.location.reload();
+                        return;
+                    }
+                    setJoinState('none');
+                } else if (res.status === 401) {
+                    window.location.href = '/login';
+                } else {
+                    alert('Failed to cancel. Please try again.');
+                    setJoinState(previousState);
+                }
+            })
+            .catch(() => {
+                alert('Network error. Please try again.');
+                setJoinState(previousState);
+            });
+    }
+
+    if ((btnJoin || btnCancel) && eventId) {
+        setJoinState(currentJoinState);
+    }
+
+    const pageRoot = document.querySelector('.ev-page');
+    const isOnlineEvent = pageRoot?.dataset?.eventType === 'online';
+    const locBox = document.querySelector('.ev-meta-item:last-child');
+    if (locBox && !isOnlineEvent) {
+        locBox.style.cursor = 'pointer';
+        locBox.addEventListener('click', () => {
+            const label = locBox.querySelector('.ev-strong')?.innerText || '';
+            const locName = label
+                .replace(/\u2197/g, '')
+                .replace(/\u00e2\u2020\u2014/g, '')
+                .trim();
+
+            if (locName && locName !== 'No Location') {
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locName)}`, '_blank');
+            }
+        });
+    }
+
+    const mapFrame = document.querySelector('.ev-map iframe');
+    if (mapFrame) {
+        mapFrame.onload = function () {
+            console.log('Map loaded');
+        };
+    }
+
+    const participantModal = document.getElementById('participantModal');
+    const participantModalTrigger = document.getElementById('participantModalTrigger');
+    const participantModalClose = document.getElementById('participantModalClose');
+
+    function openParticipantModal() {
+        if (!participantModal) return;
+        participantModal.classList.add('is-open');
+        participantModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('ev-modal-open');
+    }
+
+    function closeParticipantModal() {
+        if (!participantModal) return;
+        participantModal.classList.remove('is-open');
+        participantModal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('ev-modal-open');
+    }
+
+    if (participantModalTrigger) {
+        participantModalTrigger.addEventListener('click', openParticipantModal);
+        participantModalTrigger.addEventListener('keydown', (evt) => {
+            if (evt.key === 'Enter' || evt.key === ' ') {
+                evt.preventDefault();
+                openParticipantModal();
+            }
+        });
+    }
+
+    if (participantModal) {
+        participantModal.addEventListener('click', (evt) => {
+            if (evt.target === participantModal) {
+                closeParticipantModal();
+            }
+        });
+    }
+
+    if (participantModalClose) {
+        participantModalClose.addEventListener('click', closeParticipantModal);
+    }
+
+    document.addEventListener('keydown', (evt) => {
+        if (evt.key === 'Escape' && participantModal?.classList.contains('is-open')) {
+            closeParticipantModal();
+        }
     });
-  }
-
-  // Ticket / Invite (demo)
-  btnTicket?.addEventListener("click", () => alert("My Ticket (demo)"));
-  btnInvite?.addEventListener("click", () => alert("Invite a Friend (demo)"));
-
-  // Copy location
-  btnCopy?.addEventListener("click", async () => {
-    const text = (locText?.textContent || "").trim();
-    if (!text) return;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      btnCopy.textContent = "Copied!";
-      setTimeout(() => (btnCopy.textContent = "Copy"), 1200);
-    } catch {
-      prompt("Copy location:", text);
-    }
-  });
-
-  // Subscribe (demo)
-  btnSub?.addEventListener("click", () => alert("Subscribed! (demo)"));
 });

@@ -21,14 +21,14 @@ namespace OnlyFriends.Models
     public class Event
     {
         public int Id { get; set; }
-        public string Title { get; set; } = string.Empty;
+        public required string Title { get; set; } = string.Empty;
         public string Info { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
-        public EnumEventType EventType { get; set; }
-        public EnumEventStatus EventStatus { get; set; }
-        public EnumJointType JointType { get; set; }
+        public required EnumEventType EventType { get; set; }
+        public required EnumEventStatus EventStatus { get; set; }
+        public required EnumJointType JointType { get; set; }
 
-        public int Capacity { get; set; }
+        public required int Capacity { get; set; }
 
         // Upload poster image and save the URL here
         public string? PosterUrl { get; set; }
@@ -36,22 +36,21 @@ namespace OnlyFriends.Models
         // Time
         public DateTime? StartAt { get; set; }
         public DateTime? EndAt { get; set; }
-        public string? TimeZone { get; set; } = "Asia/Bangkok";
+        public DateTime? RegistrationDeadline { get; set; }
+        public string? TimeZone { get; set; } 
 
         // Map pin
-         public double? Latitude { get; set; }
+        public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
-        public int OwnerId { get; set; }
-        public User Owner { get; set; } = null!;
+        public required int OwnerId { get; set; } 
+        public required User Owner { get; set; } 
 
         // Participants
         public List<User> Users { get; } = [];
         public List<UserEvent> UserEvents { get; } = [];
 
-        // Category
-        public int CategoryId { get; set; } // Required foreign key property
-        public Category Category { get; set; } = null!; // Required reference navigation to principal 
+        // Categories
+        public List<Category> Categories { get; set; } = new List<Category>(); 
     }
-
 }

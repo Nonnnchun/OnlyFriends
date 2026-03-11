@@ -1,84 +1,488 @@
 ﻿@using OnlyFriends.Models
-@model List<Event>
+@using OnlyFriends.Models.DTOS.EventDTOS
+@using OnlyFriends.Models.ViewModels
+@using System.Linq
+@model HomepageViewModel
 
 @{
-    ViewData["Title"] = "หน้าแรก";
-    string lastDate = "";
+    ViewData["Title"] = "Home";
+    var now = DateTime.Now;
+
+    if (Model == null) return;
+
+    var currentUserIdStr = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+        ?? User?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+    int.TryParse(currentUserIdStr, out int uid);
+
+    string currentTab = (Model.ActiveTab ?? "all").ToLower();
+    var all = Model.AllEvents ?? Enumerable.Empty<GetEventDTO>();
+
+    // NOTE: Tab filters compare raw DB UTC times against server's DateTime.Now.
+    // This is acceptable for filtering — display times are corrected per-card using ApplyTimezone().
+
+    // PENDING: user has a pending request on someone else's event
+    var pendingEvents = all.Where(e =>
+        uid != 0 &&
+        e.Owner?.Id != uid &&
+        (e.UserEvents?.Any(ue => ue.UserId == uid && ue.RequestStatus == EnumRequestStatus.Pending) ?? false))
+        .OrderBy(e => e.StartAt);
+
+    // JOINED: accepted into someone else's event, not yet expired
+    var joinedEvents = all.Where(e =>
+        uid != 0 &&
+        e.Owner?.Id != uid &&
+        (e.UserEvents?.Any(ue => ue.UserId == uid && ue.RequestStatus == EnumRequestStatus.Accepted) ?? false) &&
+        (e.EndAt ?? e.StartAt?.AddHours(12) ?? DateTime.MaxValue) > now)
+        .OrderBy(e => e.StartAt);
+
+    // CLOSED: end date is in the past OR event status is Closed
+    var closedEvents = all.Where(e =>
+        (e.EndAt ?? e.StartAt?.AddHours(12) ?? DateTime.MinValue) < now ||
+        e.EventStatus == EnumEventStatus.Closed)
+        .OrderByDescending(e => e.StartAt);
+
+    // ALL: every non-closed, non-expired event, sorted soonest first
+    var allEvents = all.Where(e =>
+        (e.EndAt ?? e.StartAt?.AddHours(12) ?? DateTime.MinValue) >= now &&
+        e.EventStatus != EnumEventStatus.Closed)
+        .OrderBy(e => e.StartAt);
+
+    IEnumerable<GetEventDTO> eventsToRender = currentTab switch {
+        "pending" => pendingEvents,
+        "joined"  => joinedEvents,
+        "closed"  => closedEvents,
+        _         => allEvents
+    };
+
+    bool hasAnyEvents = all.Any();
+    string lastDate = string.Empty;
+
+    // Helper: apply TimeZone offset string (e.g. "GMT+07:00", "GMT-05:00") to a UTC datetime
+    DateTime ApplyTimezone(DateTime? utcTime, string? tzString)
+    {
+        if (utcTime == null) return DateTime.Now;
+        if (string.IsNullOrWhiteSpace(tzString)) return utcTime.Value;
+        try
+        {
+            // Strip "GMT" or "UTC" prefix, leaving e.g. "+07:00" or "-05:00"
+            var raw = tzString.Replace("UTC", "").Replace("GMT", "").Trim();
+
+            // TrimStart('+') so TimeSpan.TryParse can handle it,
+            // but we detect the sign ourselves first
+            bool isNegative = raw.StartsWith("-");
+            if (TimeSpan.TryParse(raw.TrimStart('+').TrimStart('-'), out var offset))
+            {
+                // Apply correct direction — TimeSpan.TryParse loses sign when we strip it
+                return isNegative
+                    ? utcTime.Value - offset
+                    : utcTime.Value + offset;
+            }
+        }
+        catch { }
+        return utcTime.Value;
+    }
 }
 
-<div class="main-container">
+<style>
+    .event-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-bottom: 12px;
+        transition: box-shadow 0.2s ease, transform 0.15s ease;
+        position: relative;
+        overflow: hidden;
+    }
 
+    .event-card:hover {
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.09);
+        transform: translateY(-2px);
+    }
+
+    .event-card.is-expired {
+        background: #fafafa;
+        border-color: #ebebeb;
+        opacity: 0.75;
+    }
+
+    .event-card.is-owner::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #6366f1, #4f46e5);
+        border-radius: 4px 0 0 4px;
+    }
+
+    .event-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .event-time-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .event-time {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #9ca3af;
+        letter-spacing: 0.04em;
+    }
+
+    .event-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 2px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .event-card.is-expired .event-title {
+        color: #6b7280;
+    }
+
+    .event-desc-preview {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        line-height: 1.45;
+        margin: 1px 0 3px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .event-organizer {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+
+    .event-location {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    /* Tags row */
+    .event-tags {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    .tag-category {
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: #f3f4f6;
+        color: #374151;
+        padding: 3px 10px;
+        border-radius: 20px;
+        letter-spacing: 0.02em;
+        border: 1px solid #e5e7eb;
+    }
+
+    .tag-count {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #6b7280;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+
+    .tag-count.spots-critical {
+        color: #dc2626;
+        background: #fef2f2;
+        border-color: #fecaca;
+        font-weight: 700;
+    }
+
+    /* Status badge row */
+    .event-status-row {
+        margin-top: 8px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        letter-spacing: 0.02em;
+    }
+
+    .status-open {
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+    }
+
+    .status-joined {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+    }
+
+    .status-pending {
+        background: #fffbeb;
+        color: #d97706;
+        border: 1px solid #fde68a;
+    }
+
+    .status-expired {
+        background: #f3f4f6;
+        color: #9ca3af;
+        border: 1px solid #e5e7eb;
+    }
+
+    .status-manage {
+        background: #eef2ff;
+        color: #4f46e5;
+        border: 1px solid #c7d2fe;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .joint-type-badge {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 20px;
+        letter-spacing: 0.03em;
+        pointer-events: none;
+    }
+
+    .joint-public {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+    }
+
+    .joint-private {
+        background: #faf5ff;
+        color: #7c3aed;
+        border: 1px solid #ddd6fe;
+    }
+
+    .event-image {
+        flex-shrink: 0;
+        width: 100px;
+        height: 100px;
+        border-radius: 12px;
+        overflow: hidden;
+        align-self: center;
+    }
+
+    .event-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-link {
+        display: block;
+        text-decoration: none !important;
+        color: inherit;
+    }
+
+    .card-link:hover {
+        text-decoration: none !important;
+        color: inherit;
+    }
+</style>
+
+<div class="main-container home-page">
     <div class="page-header">
-        <div class="page-title">กิจกรรม</div>
-        <div class="header-actions">
-            <a asp-controller="Home" asp-action="CreateActivity" class="btn-add">
-                Create Activity
-            </a>
-        </div>
+        <div class="page-title">Activities</div>
     </div>
 
-    @if (Model != null && Model.Count > 0)
+    @if (hasAnyEvents)
     {
-        @foreach (var item in Model)
-        {
-            // 1. จัดการวันที่ (เนื่องจาก StartAt เป็น DateTime? จึงต้องเช็ค null และใช้ .Value)
-            // ถ้า StartAt เป็น null ให้แสดงค่าว่าง หรือวันที่ปัจจุบันแทน
-            var eventDate = item.StartAt ?? DateTime.Now;
-            string currentDateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("th-TH"));
-            
-            if (currentDateText != lastDate)
+        <div class="event-tabs">
+            <a asp-action="Homepage" asp-controller="Home" asp-route-tab="all"
+               asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
+               class="event-tab all-tab @(currentTab == "all" ? "active" : "")"
+               aria-current="@(currentTab == "all" ? "page" : null)">All Events</a>
+            <a asp-action="Homepage" asp-controller="Home" asp-route-tab="pending"
+               asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
+               class="event-tab @(currentTab == "pending" ? "active" : "")">Pending</a>
+            <a asp-action="Homepage" asp-controller="Home" asp-route-tab="joined"
+               asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
+               class="event-tab @(currentTab == "joined" ? "active" : "")">Joined</a>
+            <a asp-action="Homepage" asp-controller="Home" asp-route-tab="closed"
+               asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
+               class="event-tab @(currentTab == "closed" ? "active" : "")">Closed</a>
+        </div>
+
+        <div id="ajaxEventList" class="home-main-content" data-uid="@uid">
+            @if (eventsToRender.Any())
             {
-                <div class="timeline-date">@currentDateText</div>
-                lastDate = currentDateText;
-            }
+                @foreach (var item in eventsToRender)
+                {
+                    var eventDate     = ApplyTimezone(item.StartAt, item.TimeZone);
+                    var eventEnd      = ApplyTimezone(item.EndAt ?? item.StartAt?.AddHours(12), item.TimeZone);
+                    var isExpired     = eventEnd < now || item.EventStatus == EnumEventStatus.Closed;
+                    var isOwner       = uid != 0 && item.Owner?.Id == uid;
+                    var isPending     = uid != 0 && (item.UserEvents?.Any(ue => ue.UserId == uid && ue.RequestStatus == EnumRequestStatus.Pending) ?? false);
+                    var isAccepted    = uid != 0 && (item.UserEvents?.Any(ue => ue.UserId == uid && ue.RequestStatus == EnumRequestStatus.Accepted) ?? false);
+                    var acceptedCount = item.UserEvents?.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted) ?? 0;
+                    var spotsLeft     = Math.Max(0, item.Capacity - acceptedCount);
 
-            <div class="event-card">
-                <div class="event-info">
-                    @* 2. แสดงเวลาเริ่มกิจกรรม *@
-                    <div class="event-time">@eventDate.ToString("HH:mm")</div>
-                    
-                    <div class="event-title">@item.Title</div>
-                    
-                    <div class="event-organizer">
-                         👤 โดย @(item.Owner?.Username ?? "ไม่ระบุ")
-                    </div>
-                    
-                    <div class="event-location">📍 @item.Location</div>
-                    
-                    <div class="event-tags">
-                        @if (item.EventStatus == EnumEventStatus.Open)
-                        {
-                            <span class="tag-status">เปิดรับสมัคร</span>
-                        }
-                        else
-                        {
-                            <span class="tag-status closed">ปิดรับสมัคร</span>
-                        }
+                    var infoRaw = item.Info ?? "";
+                    var descPart = "";
+                    var pipeIdx = infoRaw.IndexOf("| Description:");
+                    if (pipeIdx >= 0)
+                        descPart = infoRaw.Substring(pipeIdx + "| Description:".Length).Trim();
+                    else if (infoRaw.StartsWith("Description:"))
+                        descPart = infoRaw.Substring("Description:".Length).Trim();
+                    else
+                        descPart = infoRaw.Trim();
+                    var infoPreview = descPart.Length > 100 ? descPart.Substring(0, 100).TrimEnd() + "…" : descPart;
 
-                        <span class="tag-count">
-                            <div class="tag-avatars">
-                                <div class="tag-avatar"></div>
-                                <div class="tag-avatar"></div>
-                                <div class="tag-avatar"></div>
+                    string cardClass = isExpired ? "is-expired" : (isOwner ? "is-owner" : "");
+
+                    string dateText = eventDate.ToString("dd MMM", new System.Globalization.CultureInfo("en-US"));
+                    if (dateText != lastDate)
+                    {
+                        <div class="timeline-date">@dateText</div>
+                        lastDate = dateText;
+                    }
+
+                    <a href="/event/view/@item.Id" class="card-link">
+                        <div class="event-card @cardClass">
+
+                            @if (item.JointType == EnumJointType.Private)
+                            {
+                                <span class="joint-type-badge joint-private">Private</span>
+                            }
+                            else
+                            {
+                                <span class="joint-type-badge joint-public">Public</span>
+                            }
+
+                            <div class="event-info">
+                                <div class="event-time-row">
+                                    <span class="event-time">@eventDate.ToString("HH:mm")</span>
+                                </div>
+                                <div class="event-title">@item.Title</div>
+                                @if (!string.IsNullOrWhiteSpace(infoPreview))
+                                {
+                                    <div class="event-desc-preview">@infoPreview</div>
+                                }
+                                <div class="event-organizer">👤 By @(item.Owner?.Username ?? "Unknown")</div>
+                                <div class="event-location">📍 @item.Location</div>
+
+                                <div class="event-tags">
+                                    @if (item.Categories != null) {
+                                        @foreach (var cat in item.Categories) {
+                                            <span class="tag-category">@cat.CategoryName</span>
+                                        }
+                                    }
+                                    <span class="tag-count @(spotsLeft <= 3 && !isExpired ? "spots-critical" : "")">
+                                        👥 @acceptedCount / @item.Capacity
+                                        @if (!isExpired){ <span>(@spotsLeft left)</span> }
+                                    </span>
+                                </div>
+
+                                <div class="event-status-row">
+                                    @if (isExpired)
+                                    {
+                                        <span class="status-badge status-expired">Closed</span>
+                                    }
+                                    else if (isOwner)
+                                    {
+                                        <span class="status-badge status-manage">Manage Event →</span>
+                                    }
+                                    else if (isPending)
+                                    {
+                                        <span class="status-badge status-pending">Pending Approval</span>
+                                    }
+                                    else if (isAccepted)
+                                    {
+                                        <span class="status-badge status-joined">Joined</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-open">Open</span>
+                                    }
+                                </div>
                             </div>
-                            @* 3. นับจำนวนคนจาก List UserEvents *@
-                            +@(item.UserEvents?.Count ?? 0)
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="event-image">
-                    @* 4. เปลี่ยนจาก ImageUrl เป็น PosterUrl ตาม Model *@
-                    <img src="@(string.IsNullOrEmpty(item.PosterUrl) ? "https://placehold.co/140x140?text=No+Image" : item.PosterUrl)" alt="@item.Title">
-                </div>
-            </div>
-        }
+
+                            <div class="event-image">
+                                <img src="@(string.IsNullOrEmpty(item.PosterUrl) ? "https://placehold.co/100x100?text=No+Image" : item.PosterUrl)" alt="Poster">
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+            else
+            {
+                <div class="empty-state">No events available at the moment.</div>
+            }
+        </div>
     }
     else
     {
-        <div style="text-align:center; padding: 60px; color:#999;">
-            ไม่มีกิจกรรมในขณะนี้
-        </div>
+        <section class="events-empty-state">
+            <div class="events-empty-card">
+                <div class="events-empty-icon">
+                    <div class="events-empty-illustration">
+                        <span class="events-empty-emoji">🗓️</span>
+                    </div>
+                    <span class="events-empty-badge">0</span>
+                </div>
+                <h2 class="events-empty-title">No Upcoming Events</h2>
+                <p class="events-empty-sub">
+                    You do not have any upcoming activities right now. Why not create one?
+                </p>
+                <button type="button" class="of-btn of-btn-neutral events-empty-btn"
+                        onclick="window.location.href='@Url.Action("Create", "Event")'">
+                    + Create Activity
+                </button>
+            </div>
+        </section>
     }
-
 </div>
+
+@if (!(User?.Identity?.IsAuthenticated ?? false))
+{
+    <div class="register-modal-backdrop" id="authRequiredModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+        <div class="register-modal" style="background:#fff; border-radius:14px; padding:24px; max-width:360px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+            <div style="font-size:1.2rem; font-weight:700; margin-bottom:10px;">Please sign in</div>
+            <div style="color:#555; margin-bottom:20px;">You need to sign in first to view details or join events.</div>
+            <button onclick="window.location.href='/login'" style="background:#111; color:#fff; border:none; padding:10px 20px; border-radius:99px; cursor:pointer;">Go to Login</button>
+            <button onclick="document.getElementById('authRequiredModal').style.display='none'; document.body.style.overflow='auto';" style="background:#fff; color:#111; border:1px solid #ddd; padding:10px 20px; border-radius:99px; cursor:pointer; margin-left:10px;">Close</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const triggerAuth = (e) => {
+                e.preventDefault();
+                document.getElementById('authRequiredModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+            document.querySelectorAll('a.card-link').forEach(el => el.addEventListener('click', triggerAuth));
+            document.querySelectorAll('.events-empty-btn').forEach(el => el.addEventListener('click', triggerAuth));
+        });
+    </script>
+}

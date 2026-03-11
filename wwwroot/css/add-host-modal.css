@@ -1,0 +1,166 @@
+/* =============================================
+   add-host-modal.css
+   วางไว้ที่: wwwroot/css/add-host-modal.css
+   ============================================= */
+
+/* ── Overlay ── */
+.addhost-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.30);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+}
+.addhost-overlay.open { opacity: 1; pointer-events: all; }
+
+/* ── Modal Box ── */
+.addhost-modal {
+    background: #fff; border-radius: 18px;
+    width: 480px; max-width: 95vw;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.15);
+    transform: translateY(14px);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+}
+.addhost-overlay.open .addhost-modal { transform: translateY(0); }
+
+/* ════ STEP 1 ════ */
+.addhost-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 24px 24px 0;
+}
+.addhost-close {
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer; color: var(--text-secondary);
+    transition: all 0.15s; flex-shrink: 0;
+}
+.addhost-close:hover { background: var(--bg); color: var(--text-primary); }
+.addhost-icon {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--text-secondary); margin-bottom: 14px;
+}
+.addhost-content { padding: 0 24px 24px; }
+.addhost-title  { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px; }
+.addhost-desc   { font-size: 13.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; }
+.addhost-label  { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+
+.addhost-input {
+    width: 100%; font-family: var(--font); font-size: 14px;
+    color: var(--text-primary); background: #fff;
+    border: 1.5px solid var(--text-primary);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    outline: none; transition: border-color 0.15s; margin-bottom: 14px;
+}
+.addhost-input:focus { border-color: var(--accent); }
+
+.addhost-results {
+    display: flex; flex-direction: column; gap: 4px;
+    max-height: 240px; overflow-y: auto;
+}
+.addhost-result-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: var(--radius-md);
+    cursor: pointer; transition: background 0.12s;
+}
+.addhost-result-item:hover { background: var(--surface2); }
+
+.addhost-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    object-fit: cover; flex-shrink: 0; background: var(--border);
+}
+.addhost-avatar-fallback {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.addhost-user-name  { font-size: 14px; font-weight: 600; }
+.addhost-user-email { font-size: 12.5px; color: var(--text-secondary); margin-top: 1px; }
+.addhost-empty {
+    text-align: center; padding: 20px 0;
+    font-size: 13px; color: var(--text-muted);
+}
+
+/* ════ STEP 2 ════ */
+.confighost-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
+}
+.confighost-header-left { display: flex; align-items: center; gap: 10px; }
+.confighost-back {
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; cursor: pointer; color: var(--text-secondary); transition: all 0.15s;
+}
+.confighost-back:hover { background: var(--bg); color: var(--text-primary); }
+.confighost-title { font-size: 15px; font-weight: 700; }
+
+.confighost-user {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.confighost-user-avatar {
+    width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+}
+.confighost-user-avatar-fallback {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.confighost-user-name  { font-size: 14px; font-weight: 700; }
+.confighost-user-email { font-size: 12.5px; color: var(--text-secondary); margin-top: 1px; }
+
+.confighost-body { padding: 20px; }
+.confighost-toggle {
+    width: 44px; height: 24px; border-radius: 12px;
+    background: var(--border2); cursor: pointer; position: relative;
+    transition: background 0.2s; flex-shrink: 0;
+}
+.confighost-toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 18px; height: 18px; border-radius: 50%; background: #fff;
+    transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.confighost-toggle.on::after { left: 23px; }
+
+.confighost-section-label {
+    font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;
+}
+.confighost-options { display: flex; flex-direction: column; gap: 8px; }
+.confighost-option {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; border-radius: var(--radius-md);
+    border: 1.5px solid var(--border); cursor: pointer; transition: all 0.15s;
+}
+.confighost-option:hover { border-color: var(--border2); background: var(--surface2); }
+.confighost-option.selected { border-color: var(--text-primary); }
+.confighost-option-left { display: flex; align-items: center; gap: 12px; }
+.confighost-option-icon { font-size: 16px; color: var(--text-secondary); width: 20px; text-align: center; }
+.confighost-option-name { font-size: 13.5px; font-weight: 600; }
+.confighost-option-desc { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.confighost-option-check {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--text-primary); color: #fff;
+    display: none; align-items: center; justify-content: center; font-size: 11px;
+}
+.confighost-option.selected .confighost-option-check { display: flex; }
+
+.confighost-footer { padding: 0 20px 20px; }
+.confighost-send-btn {
+    width: 100%; padding: 13px;
+    background: var(--text-primary); color: #fff;
+    font-family: var(--font); font-size: 15px; font-weight: 700;
+    border: none; border-radius: var(--radius-md); cursor: pointer; transition: all 0.15s;
+}
+.confighost-send-btn:hover { background: #333; transform: translateY(-1px); }
+.confighost-send-btn:active { transform: translateY(0); }
+
+/* ── Responsive ── */
+@media (max-width: 520px) {
+    .addhost-modal  { width: 100%; border-radius: 18px 18px 0 0; }
+    .addhost-overlay { align-items: flex-end; }
+}

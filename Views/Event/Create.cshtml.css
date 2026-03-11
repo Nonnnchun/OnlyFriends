@@ -1,0 +1,354 @@
+:root {
+    --text-muted: #6c757d;
+}
+
+/* เปลี่ยนชื่อ class เป็น create-container */
+.create-container {
+    display: flex;
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.left-col {
+    flex: 1;
+    min-width: 300px;
+}
+
+.right-col {
+    flex: 2;
+    min-width: 300px;
+}
+
+.poster-preview {
+    background-color: #e9ecef;
+    height: 350px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #ced4da;
+    transition: 0.3s;
+}
+
+.poster-preview:hover {
+    border-color: #0d6efd;
+    background-color: #f1f5f9;
+}
+
+.upload-btn {
+    font-size: 3rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.title-input {
+    width: 100%;
+    font-size: 2rem;
+    font-weight: bold;
+    border: none;
+    border-bottom: 2px solid #ced4da;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    outline: none;
+    background: transparent;
+    color: #495057; /* เปลี่ยนเป็นสีเทาเข้ม ให้ดูนุ่มนวลขึ้น */
+}
+
+.title-input:focus {
+    border-bottom-color: #0d6efd;
+}
+
+/* ================= กล่องสีเทา (สถานที่, คำอธิบาย) ================= */
+.input-group {
+    background-color: #f1f3f4; 
+    border-radius: 12px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    border: none;
+}
+
+.input-group input[type="text"] {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 1.05rem;
+    color: #495057 !important; /* ข้อความที่พิมพ์เป็นสีเทาเข้ม */
+    padding: 0;
+}
+
+.input-group input::placeholder {
+    color: #80868b; /* สี Placeholder เป็นเทาอ่อน */
+}
+
+/* ================= ส่วนวันที่และเวลา ================= */
+.schedule-wrapper {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.datetime-block {
+    background-color: #f1f3f4; 
+    border-radius: 12px;
+    padding: 15px;
+    flex: 1; 
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+}
+
+.timeline-line {
+    position: absolute;
+    left: 21px; 
+    top: 30px; 
+    bottom: 30px;
+    border-left: 2px dashed #bdc1c6;
+    z-index: 1;
+}
+
+.dt-row {
+    display: flex;
+    align-items: center;
+    z-index: 2; 
+}
+
+.dt-label {
+    display: flex;
+    align-items: center;
+    width: 80px; 
+    font-weight: bold;
+    color: #5f6368;
+    font-size: 1.1rem;
+    gap: 15px;
+}
+
+.dot-solid {
+    width: 12px;
+    height: 12px;
+    background-color: #bdc1c6;
+    border-radius: 50%;
+}
+
+.dot-outline {
+    width: 12px;
+    height: 12px;
+    border: 2px solid #bdc1c6;
+    background-color: #f1f3f4;
+    border-radius: 50%;
+    box-sizing: border-box; 
+}
+
+.dt-input-group {
+    display: flex;
+    flex: 1;
+    background-color: #e8eaed; 
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dt-input-group input {
+    border: none;
+    background: transparent;
+    padding: 12px 15px;
+    font-size: 1.1rem;
+    color: #495057; /* เปลี่ยนเป็นสีเทาเข้ม */
+    outline: none;
+    cursor: pointer;
+}
+
+.dt-input-group input[type="date"] {
+    flex: 2;
+    border-right: 1px solid #dadce0; 
+}
+
+.dt-input-group input[type="time"] {
+    flex: 1;
+}
+
+.timezone-block {
+    background-color: #f1f3f4;
+    border-radius: 12px;
+    padding: 15px;
+    width: 150px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.timezone-text {
+    font-size: 1.1rem;
+    color: #3c4043;
+    margin-bottom: 2px;
+}
+
+.timezone-subtext {
+    font-size: 0.9rem;
+    color: #5f6368;
+}
+
+input[type="date"], input[type="time"], input[type="number"], select {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    outline: none;
+    color: #495057; /* เปลี่ยนเป็นสีเทาเข้ม */
+}
+
+/* ================= ส่วนตัวเลือกกิจกรรม ================= */
+.section-title {
+    font-size: 1.1rem;
+    color: #5f6368;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    border: none; 
+    font-weight: normal;
+}
+
+.form-section {
+    background-color: #f1f3f4;
+    border-radius: 12px;
+    padding: 0 15px;
+    margin-bottom: 20px;
+}
+
+.option-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #dadce0; 
+}
+
+.option-row:last-child {
+    border-bottom: none;
+}
+
+.option-row input[type="number"] {
+    border: none;
+    background: transparent;
+    text-align: right;
+    outline: none;
+    font-size: 1rem;
+    color: #495057;
+    padding: 0;
+}
+
+.option-row select {
+    color: #5f6368 !important; 
+}
+
+/* ================= ปุ่มค้นหา (ปรับใหม่ให้เป็นสีเทาและดูสวยมีมิติ) ================= */
+.btn-search-loc {
+    background-color: #6c757d !important; /* สีเทาสวยๆ */
+    color: #ffffff !important; 
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px; /* ขอบโค้งมน */
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2); /* เพิ่มเงาบางๆ */
+}
+
+.btn-search-loc:hover {
+    background-color: #5a6268 !important; /* เข้มขึ้นตอนชี้เมาส์ */
+    box-shadow: 0 4px 6px rgba(108, 117, 125, 0.3); /* เงาชัดขึ้น */
+    transform: translateY(-1px); /* เด้งขึ้นนิดนึงตอนชี้ */
+}
+
+/* ================= ปุ่มสร้างกิจกรรม (ย้อนกลับไปใช้ดีไซน์สวยๆ แบบแรกสุด) ================= */
+.submit-btn {
+    width: 100%;
+    background-color: #0d6efd !important; /* สีน้ำเงินสว่าง */
+    color: #ffffff !important; 
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 15px; /* ความหนาของปุ่มแบบดั้งเดิม */
+    border: none;
+    border-radius: 8px; /* โค้งมนเข้ากับฟอร์ม */
+    cursor: pointer;
+    margin-top: 30px;
+    transition: background-color 0.3s ease, transform 0.1s;
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2); /* เพิ่มเงาให้ปุ่มดูลอยเด่น */
+}
+
+.submit-btn:hover {
+    background-color: #0b5ed7 !important; /* สีเข้มขึ้นตอนชี้ */
+    box-shadow: 0 6px 12px rgba(13, 110, 253, 0.3);
+}
+
+#mapContainer {
+    position: relative;
+    z-index: 1; 
+}
+
+/* ─── Category Pill Tags (Create page) ─── */
+.category-pills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0 2px;
+}
+
+.create-category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 99px;
+    border: 1.5px solid #e2e5ea;
+    background: #ffffff;
+    color: #444;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.create-category-pill:hover {
+    background: #eef1f5;
+    border-color: #c5cad4;
+    color: #111;
+}
+.create-category-pill.selected {
+    background: var(--primary-color, #00AFF0);
+    border-color: var(--primary-color, #00AFF0);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(0, 175, 240, 0.25);
+}
+.create-category-pill.selected:hover {
+    background: var(--primary-hover, #0099D6);
+    border-color: var(--primary-hover, #0099D6);
+}
+
+/* Checkmark — only visible when selected */
+.create-pill-check {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    width: 0;
+    overflow: hidden;
+    opacity: 0;
+    display: inline-block;
+    transition: width 0.15s ease, opacity 0.15s ease;
+}
+.create-category-pill.selected .create-pill-check {
+    width: 12px;
+    opacity: 1;
+}

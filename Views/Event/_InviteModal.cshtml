@@ -1,0 +1,127 @@
+@model OnlyFriends.Models.DTOS.EventDTOS.GetEventDTO
+@using OnlyFriends.Models.DTOS.EventDTOS
+@using OnlyFriends.Models.DTOS.UserDTOS
+@{
+    var friends = (ViewData["Friends"] as IEnumerable<GetUserDTO>)?.ToList() ?? new List<GetUserDTO>();
+    var defaultAvatar = "/images/avatar-placeholder.svg";
+    var allFriends = friends
+        .GroupBy(f => f.Id)
+        .Select(g => g.First())
+        .Where(f => f.Id != Model.Owner.Id)
+        .OrderBy(f => f.FirstName)
+        .ThenBy(f => f.LastName)
+        .ToList();
+    var blockedInviteIds = Model.UserEvents
+        .Where(ue => ue.RequestStatus == EnumRequestStatus.Accepted || ue.RequestStatus == EnumRequestStatus.Pending)
+        .Select(ue => ue.UserId)
+        .ToHashSet();
+}
+
+@* ── OVERLAY ── *@
+<div class="modal-overlay" id="inviteOverlay" onclick="closeInviteModal(event)">
+    <div class="invite-modal" id="inviteModal">
+
+        @* ── HEADER ── *@
+        <div class="invite-header">
+            <h2 class="invite-title">Invite Guests</h2>
+            <div style="display:flex;align-items:center;gap:10px">
+                @* แสดงจำนวน slot ที่เหลือ *@
+                <div class="slots-badge" id="slotsBadge">
+                    <i class="fa-solid fa-rotate" style="font-size:11px"></i>
+                    <span id="slotsLeft">@(Model.Capacity - Model.UserEvents.Count(ue => ue.RequestStatus == EnumRequestStatus.Accepted))</span> LEFT
+                </div>
+                <button class="modal-close" onclick="closeInviteModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        @* ── BODY ── *@
+        <div class="invite-body">
+
+            @* ════ STEP 1: เลือก Guest ════ *@
+            <div id="inviteStep1">
+
+                @* Sidebar *@
+                <div class="invite-sidebar">
+                    <div class="sidebar-section-label">CALENDAR CONTACTS</div>
+                    <div class="sidebar-item active" onclick="switchSideTab(this,'everyone')">
+                        <span class="sidebar-dot"></span> Everyone
+                        <span class="sidebar-count">@allFriends.Count</span>
+                    </div>
+                </div>
+
+                @* Main Panel *@
+                <div class="invite-main">
+
+                    @* TAB: Everyone *@
+                    <div id="tab-everyone" style="display:block">
+                        <div class="invite-section-label">Everyone in Calendar</div>
+                        @if (allFriends.Count == 0)
+                        {
+                            <div class="invite-empty-state">
+                                <div class="invite-empty-icon"><i class="fa-regular fa-user"></i></div>
+                                <div>
+                                    <div class="invite-empty-title">No friends available to invite</div>
+                                    <div class="invite-empty-sub">Add friends first, then invite them to this event.</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="guest-list">
+                                @foreach (var user in allFriends)
+                                {
+                                    var relation = Model.UserEvents.FirstOrDefault(ue => ue.UserId == user.Id);
+                                    var isBlockedInvite = blockedInviteIds.Contains(user.Id);
+                                    var fullName = $"{user.FirstName} {user.LastName}".Trim();
+                                    var displayName = string.IsNullOrWhiteSpace(fullName) ? user.Username : fullName;
+                                    var emailText = string.IsNullOrWhiteSpace(user.Email) ? $"@@{user.Username}" : user.Email;
+                                    var avatarUrl = string.IsNullOrWhiteSpace(user.ProfilePictureUrl) ? defaultAvatar : user.ProfilePictureUrl;
+                                    var avatarIsDefault = string.IsNullOrWhiteSpace(user.ProfilePictureUrl);
+
+                                    <div class="guest-item @(isBlockedInvite ? "is-disabled" : "")"
+                                         data-id="@user.Id"
+                                         data-invitable="@(!isBlockedInvite).ToString().ToLower()"
+                                         onclick="@(isBlockedInvite ? "" : "toggleGuest(this)")">
+                                        <img class="guest-avatar @(avatarIsDefault ? "is-default-avatar" : "")"
+                                             src="@avatarUrl"
+                                             alt="@displayName"
+                                             onerror="this.onerror=null;this.src='@defaultAvatar';this.classList.add('is-default-avatar');" />
+                                        <div class="guest-info">
+                                            <div class="guest-name">@displayName</div>
+                                            <div class="guest-email">@emailText</div>
+                                            @if (isBlockedInvite)
+                                            {
+                                                <div class="guest-note">@(relation?.RequestStatus == EnumRequestStatus.Pending ? "Pending request" : "Already joined")</div>
+                                            }
+                                            else if (relation?.RequestStatus == EnumRequestStatus.Rejected)
+                                            {
+                                                <div class="guest-note is-rejected">Previously rejected</div>
+                                            }
+                                        </div>
+                                        <div class="guest-check">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        @* ── FOOTER ── *@
+        <div class="invite-footer">
+            <div class="invite-footer-actions">
+                <div class="selected-count" id="selectedCount">0 Selected</div>
+                <button class="btn-send" id="btnSendNow" onclick="sendInvites()" disabled>
+                    <i class="fa-solid fa-paper-plane"></i> Send Invites
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
