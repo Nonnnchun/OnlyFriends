@@ -77,7 +77,7 @@
 
     @@media (max-width: 800px) {
         .page-grid { grid-template-columns: 1fr; }
-        .profile-sidebar { order: -1; }
+        .profile-sidebar { order: 2; }
     }
 
     /* ── Profile Header ── */
@@ -425,6 +425,121 @@
         text-align: center;
         padding: 16px 0;
         font-style: italic;
+    }
+
+    @@media (max-width: 1024px) {
+        .profile-page {
+            margin: 32px auto;
+            padding: 0 20px;
+        }
+
+        .profile-header {
+            padding: 30px 24px;
+            gap: 20px;
+        }
+    }
+
+    @@media (max-width: 860px) {
+        .profile-header {
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 24px 20px;
+            gap: 16px;
+        }
+
+        .profile-avatar {
+            width: 88px;
+            height: 88px;
+        }
+
+        .profile-stats {
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .stat-divider {
+            display: none;
+        }
+
+        .btn {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .profile-page {
+            margin: 20px auto;
+            padding: 0 12px;
+        }
+
+        .profile-header {
+            padding: 18px 14px;
+            gap: 14px;
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            line-height: 1.3;
+            overflow-wrap: anywhere;
+        }
+
+        .profile-handle,
+        .profile-bio {
+            overflow-wrap: anywhere;
+        }
+
+        .section-header {
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .section-title {
+            white-space: normal;
+            line-height: 1.35;
+        }
+
+        .event-card {
+            flex-direction: column;
+        }
+
+        .event-card-img {
+            width: 100%;
+            height: 170px;
+        }
+
+        .event-card-body {
+            padding: 14px;
+        }
+
+        .event-title {
+            overflow-wrap: anywhere;
+        }
+
+        .event-meta {
+            flex-wrap: wrap;
+            gap: 8px 12px;
+        }
+
+        .event-meta span {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .sidebar-card {
+            padding: 18px 14px;
+        }
+
+        .friend-item {
+            padding: 10px 6px;
+        }
+
+        .friend-name,
+        .friend-handle {
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
     }
 </style>
 

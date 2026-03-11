@@ -57,10 +57,10 @@
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            width: 132px !important;
-            min-width: 132px !important;
-            height: 40px !important;
-            padding: 0 12px !important;
+            width: auto !important;
+            min-width: 0 !important;
+            height: 36px !important;
+            padding: 0 10px !important;
             border: none !important;
             border-radius: 0 !important;
             background: transparent !important;
@@ -68,6 +68,11 @@
             text-decoration: none !important;
             box-sizing: border-box !important;
             transform: none !important;
+            white-space: nowrap !important;
+        }
+
+        .app-header .custom-navbar .create-label-short {
+            display: none;
         }
 
         /* Prevent FOUC (Flash of Unstyled Content) and add smooth page transition */
@@ -78,6 +83,109 @@
         }
         body.page-loaded {
             opacity: 1;
+        }
+
+        @@media (max-width: 980px) {
+            .app-header .custom-navbar {
+                height: auto !important;
+                min-height: 64px !important;
+                padding: 8px 12px !important;
+                flex-wrap: wrap !important;
+                row-gap: 8px !important;
+            }
+
+            .app-header .custom-navbar .nav-left,
+            .app-header .custom-navbar .nav-right {
+                height: auto !important;
+                flex-wrap: nowrap !important;
+                gap: 8px !important;
+                min-width: 0 !important;
+            }
+
+            .app-header .custom-navbar .nav-left {
+                flex: 1 1 auto !important;
+                justify-content: flex-start !important;
+            }
+
+            .app-header .custom-navbar .nav-right {
+                flex: 0 0 auto !important;
+                justify-content: flex-end !important;
+            }
+
+            .app-header .custom-navbar .nav-primary-link,
+            .app-header .custom-navbar .nav-left > .nav-primary-link,
+            .app-header .custom-navbar .nav-right > .nav-primary-link {
+                width: auto !important;
+                min-width: 0 !important;
+                padding: 0 8px !important;
+            }
+        }
+
+        @@media (max-width: 700px) {
+            .app-header .custom-navbar .of-logo-text {
+                font-size: 20px !important;
+            }
+
+            .app-header .custom-navbar .nav-primary-link,
+            .app-header .custom-navbar .nav-left > .nav-primary-link,
+            .app-header .custom-navbar .nav-right > .nav-primary-link {
+                height: 34px !important;
+                padding: 0 6px !important;
+                font-size: 13px !important;
+            }
+
+            .app-header .custom-navbar .filter-btn span {
+                display: none;
+            }
+        }
+
+        @@media (max-width: 430px) {
+            .app-header .custom-navbar {
+                padding: 8px 10px !important;
+            }
+
+            .app-header .custom-navbar .of-logo-icon {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 13px !important;
+            }
+
+            .app-header .custom-navbar .of-logo-text {
+                font-size: 18px !important;
+            }
+
+            .app-header .custom-navbar .nav-primary-link,
+            .app-header .custom-navbar .nav-left > .nav-primary-link,
+            .app-header .custom-navbar .nav-right > .nav-primary-link {
+                padding: 0 4px !important;
+                font-size: 12px !important;
+            }
+        }
+
+        @@media (max-width: 560px) {
+            .app-header .custom-navbar {
+                flex-wrap: nowrap !important;
+                row-gap: 0 !important;
+            }
+
+            .app-header .custom-navbar .nav-left,
+            .app-header .custom-navbar .nav-right {
+                gap: 6px !important;
+            }
+
+            .app-header .custom-navbar .create-label-full {
+                display: none;
+            }
+
+            .app-header .custom-navbar .create-label-short {
+                display: inline;
+            }
+
+            .app-header .custom-navbar .nav-primary-link,
+            .app-header .custom-navbar .nav-left > .nav-primary-link,
+            .app-header .custom-navbar .nav-right > .nav-primary-link {
+                padding: 0 4px !important;
+            }
         }
     </style>
     <script>
@@ -136,7 +244,10 @@
             <div class="nav-right">
                 @if (User?.Identity?.IsAuthenticated ?? false)
                 {
-                    <a asp-controller="Event" asp-action="Create" class="nav-link nav-primary-link">Create Activity</a>
+                    <a asp-controller="Event" asp-action="Create" class="nav-link nav-primary-link">
+                        <span class="create-label-full">Create Activity</span>
+                        <span class="create-label-short">Create</span>
+                    </a>
                     @if (isHomePage)
                     {
                         <div class="dropdown" id="filterDropdown">

@@ -317,7 +317,7 @@ async function loadFilterCategories() {
     const categories = await res.json();
 
     if (!Array.isArray(categories) || categories.length === 0) {
-      container.innerHTML = '<div class="filter-item" style="padding:8px 0; color:#6c757d;">No categories found</div>';
+      container.innerHTML = '<div class="filter-item filter-status">No categories found</div>';
       return;
     }
 
@@ -365,7 +365,7 @@ async function loadFilterCategories() {
       container.appendChild(pill);
     });
   } catch {
-    container.innerHTML = '<div class="filter-item" style="padding:8px 0; color:#dc3545;">Failed to load categories</div>';
+    container.innerHTML = '<div class="filter-item filter-status filter-status-error">Failed to load categories</div>';
   }
 
   if (document.querySelector(".home-page")) {
@@ -426,7 +426,7 @@ async function fetchAndRenderEvents(selectedIds) {
     renderEventList(listEl, events, activeTab, uid);
   } catch (err) {
     if (err.name !== 'AbortError') {
-      listEl.innerHTML = '<div style="padding:24px; color:#dc3545;">Could not load events.</div>';
+      listEl.innerHTML = '<div class="home-ajax-error">Could not load events.</div>';
     }
   } finally {
     listEl.style.opacity = '';
@@ -447,7 +447,7 @@ function renderEventList(container, events, activeTab, uid) {
   }
 
   if (!eventsToShow.length) {
-    container.innerHTML = `<div class="empty-state" style="min-height:280px;display:flex;align-items:center;justify-content:center;text-align:center;color:#666;">${
+    container.innerHTML = `<div class="empty-state home-ajax-empty-state">${
       activeTab === 'my' ? 'You have not joined any events yet.' : 'No events with this category now. Try another category or check back later.'
     }</div>`;
     return;
@@ -468,13 +468,13 @@ function renderEventList(container, events, activeTab, uid) {
     const posterUrl = item.posterUrl || 'https://placehold.co/140x140?text=No+Image';
     const owner = item.owner || {};
     const cats = (item.categories || []).map(c =>
-      `<span class="tag-category" style="background:#f1f3f5;color:#495057;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600;">${c.categoryName}</span>`
+      `<span class="tag-category ajax-tag-category">${c.categoryName}</span>`
     ).join('');
 
     // Status tag
     let statusTag = '';
     if (owner.id === currentUserId) {
-      statusTag = `<a href="/event/manage/${item.id}" style="text-decoration:none !important;"><span class="tag-status manage-btn" style="background:#f1f3f5;color:#495057;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;">Manage Event <span>→</span></span></a>`;
+      statusTag = `<a href="/event/manage/${item.id}" class="ajax-manage-link"><span class="tag-status manage-btn ajax-manage-badge">Manage Event <span>→</span></span></a>`;
     } else if ((item.eventStatus ?? item.EventStatus) === 0) {
       statusTag = `<span class="tag-status">Registration Open</span>`;
     } else {
@@ -491,15 +491,13 @@ function renderEventList(container, events, activeTab, uid) {
     let myStatusBadge = '';
     if (activeTab === 'my') {
       if (owner.id === currentUserId) {
-        myStatusBadge = `<span style="background:#0d6efd15;color:#0d6efd;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;">Host</span>`;
+        myStatusBadge = `<span class="ajax-my-status ajax-my-status-host">Host</span>`;
       } else {
         const ue = (item.userEvents || []).find(ue => ue.userId === currentUserId);
         if (ue) {
-          const colorMap = { 0: '#fd7e14', 1: '#198754', 2: '#dc3545' };
           const textMap = { 0: 'Pending Approval', 1: 'Joined', 2: 'Rejected' };
-          const color = colorMap[ue.requestStatus] || '#888';
           const text = textMap[ue.requestStatus] || '';
-          myStatusBadge = `<span style="background:${color}15;color:${color};padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;">${text}</span>`;
+          myStatusBadge = `<span class="ajax-my-status ajax-my-status-${text.toLowerCase().replace(/\s+/g, '-')}">${text}</span>`;
         }
       }
     }
@@ -512,7 +510,7 @@ function renderEventList(container, events, activeTab, uid) {
             <div class="event-title">${item.title}</div>
             <div class="event-organizer">👤 By ${owner.username || 'Unknown'}</div>
             <div class="event-location">📍 ${item.location || ''}</div>
-            <div class="event-tags" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;">
+            <div class="event-tags">
               ${cats}${statusTag}
               <span class="tag-count">
                 <div class="tag-avatars">${avatars}</div>+${participantCount}
