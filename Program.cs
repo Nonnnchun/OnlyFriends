@@ -77,27 +77,19 @@ builder.Services.AddAuthorization(options =>
 // Create app
 var app = builder.Build();
 
-await using (var scope = app.Services.CreateAsyncScope())
+using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DbInit");
 
     try
     {
-        await dbContext.Database.MigrateAsync();
+        dbContext.Database.Migrate();
     }
-    catch (Exception ex)  // ลบ when (app.Environment.IsDevelopment()) ออก
+    catch (Exception ex) when (app.Environment.IsDevelopment())
     {
-        logger.LogError(ex, "Database migration failed.");
-        // ลองใช้ EnsureCreated แทน
-        try
-        {
-            dbContext.Database.EnsureCreated();
-        }
-        catch (Exception ex2)
-        {
-            logger.LogError(ex2, "EnsureCreated also failed.");
-        }
+        logger.LogWarning(ex, "Database migration failed in Development. Falling back to EnsureCreated.");
+        dbContext.Database.EnsureCreated();
     }
 
     if (app.Environment.IsDevelopment() && !TableExists(dbContext, "\"Events\""))
