@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.addEventListener('notifications:changed', loadBellNotifications);
   loadBellNotifications();
-  setInterval(loadBellNotifications, 1000);
+  setInterval(loadBellNotifications, 10000);
   window.NotifAPI = {
     getNotifications,
     createNotification,
