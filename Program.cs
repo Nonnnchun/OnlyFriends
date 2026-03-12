@@ -26,7 +26,8 @@ builder.Services.AddHostedService<EventReminderBackgroundService>();
 // Register Postgresql
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("DefaultConnection not found in configuration");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString).UseExceptionProcessor());
+    options.UseNpgsql(connectionString).UseExceptionProcessor().EnableSensitiveDataLogging().EnableDetailedErrors());       // Provides better stack traces);
+
 
 var issuer = builder.Configuration["Jwt:Issuer"] ?? "OnlyFriends";
 var audience = builder.Configuration["Jwt:Audience"] ?? "OnlyFriends";

@@ -96,18 +96,16 @@ function sendInvites() {
         return;
     }
 
-    fetch('/Event/SendInvites', {
+    $.ajax({
+        url: '/Event/SendInvites',
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'RequestVerificationToken': getInviteAntiForgeryToken()
+        contentType: 'application/json',
+        headers: { 'RequestVerificationToken': getInviteAntiForgeryToken() },
+        data: JSON.stringify({ eventId, userIds: selected, message: '' }),
+        success: () => {
+            closeInviteModal();
+            notifyInvite('Invite sent.');
         },
-        body: JSON.stringify({ eventId, userIds: selected, message: '' })
-    })
-    .then(r => { if (!r.ok) throw new Error('Server error'); return r.json(); })
-    .then(() => {
-        closeInviteModal();
-        notifyInvite('Invite sent.');
-    })
-    .catch(() => notifyInvite('Failed to send invite. Please try again.'));
+        error: () => notifyInvite('Failed to send invite. Please try again.')
+    });
 }
