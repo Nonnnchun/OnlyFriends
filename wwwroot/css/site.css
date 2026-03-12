@@ -1404,8 +1404,12 @@ video {
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    white-space: nowrap;
+    touch-action: pan-x;
     padding: 3px;
     gap: 2px;
   }
@@ -1415,12 +1419,17 @@ video {
   }
 
   .home-page .event-tabs .event-tab {
-    flex: 1 1 0;
-    min-width: 0;
-    padding: 8px 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 98px;
+    min-height: 44px;
+    padding: 8px 12px;
     font-size: 13px;
     line-height: 1.2;
     white-space: nowrap;
+    scroll-snap-align: start;
   }
 
   .home-page .event-card {
@@ -1454,7 +1463,9 @@ video {
   }
 
   .home-page .event-tabs .event-tab {
-    padding: 8px 6px;
+    min-width: 90px;
+    min-height: 42px;
+    padding: 8px 10px;
     font-size: 12px;
   }
 
