@@ -52,6 +52,18 @@
             text-decoration: none; transition: background 0.15s, color 0.15s;
         }
         .auth-nav-cta:hover { background: #0f1523; color: #fff; }
+        .auth-nav-toggle {
+            display: none;
+            align-items: center; justify-content: center;
+            width: 38px; height: 38px;
+            border: 1px solid #d9dde4; border-radius: 10px;
+            background: #fff; color: #374151;
+            cursor: pointer; padding: 0; margin: 0;
+            font-size: 18px; flex: 0 0 auto;
+        }
+        .auth-nav-toggle .fa-xmark { display: none; }
+        .auth-nav.mobile-open .auth-nav-toggle .fa-bars { display: none; }
+        .auth-nav.mobile-open .auth-nav-toggle .fa-xmark { display: inline-block; }
 
         /* ── Split layout ── */
         .auth-shell {
@@ -199,6 +211,43 @@
             .auth-form-panel { padding: 40px 28px; }
         }
 
+        @@media (max-width: 640px) {
+            .auth-nav {
+                height: auto;
+                min-height: 64px;
+                flex-wrap: wrap;
+                row-gap: 0;
+                padding: 10px 16px;
+            }
+            .auth-nav-toggle {
+                display: inline-flex;
+            }
+            .auth-nav-right {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid #e8edf5;
+            }
+            .auth-nav.mobile-open .auth-nav-right {
+                display: flex;
+            }
+            .auth-nav-right .auth-nav-explore,
+            .auth-nav-right .auth-nav-cta {
+                width: 100%;
+                min-height: 40px;
+                display: inline-flex;
+                align-items: center;
+                padding: 0 8px;
+            }
+            .auth-nav-right .auth-nav-cta {
+                justify-content: center;
+            }
+        }
+
         /* ── Success modal ── */
         .register-modal-backdrop {
             position: fixed; inset: 0; background: rgba(0,0,0,0.45);
@@ -230,12 +279,21 @@
 <body class="auth-page">
 
     <!-- Navbar -->
-    <nav class="auth-nav">
+    <nav class="auth-nav" id="authNav">
         <a href="/" class="of-brand-logo">
             <div class="of-logo-icon">OF</div>
             <div class="of-logo-text">Only<span>Friends</span></div>
         </a>
-        <div class="auth-nav-right">
+        <button type="button"
+                class="auth-nav-toggle"
+                id="authNavToggle"
+                aria-label="Toggle navigation"
+                aria-expanded="false"
+                aria-controls="authNavMenu">
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+        <div class="auth-nav-right" id="authNavMenu">
             <a href="/Home/Homepage" class="auth-nav-explore">
                 Explore Events <i class="fa-solid fa-arrow-up-right-from-square"></i>
             </a>
@@ -366,6 +424,44 @@
         document.getElementById('registerGoLogin')?.addEventListener('click', function () {
             navigateWithTransition('/login');
         });
+
+        (function () {
+            const nav = document.getElementById('authNav');
+            const toggleBtn = document.getElementById('authNavToggle');
+            const menu = document.getElementById('authNavMenu');
+            if (!nav || !toggleBtn || !menu) return;
+
+            const mobileQuery = window.matchMedia('(max-width: 640px)');
+
+            function setOpen(open) {
+                nav.classList.toggle('mobile-open', open);
+                toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+
+            toggleBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (!mobileQuery.matches) return;
+                setOpen(!nav.classList.contains('mobile-open'));
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!mobileQuery.matches) return;
+                if (!nav.classList.contains('mobile-open')) return;
+                if (!nav.contains(e.target)) {
+                    setOpen(false);
+                }
+            });
+
+            menu.querySelectorAll('a').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (mobileQuery.matches) setOpen(false);
+                });
+            });
+
+            mobileQuery.addEventListener('change', function (e) {
+                if (!e.matches) setOpen(false);
+            });
+        })();
     </script>
 </body>
 </html>

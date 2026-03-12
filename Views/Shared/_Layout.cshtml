@@ -75,6 +75,39 @@
             display: none;
         }
 
+        .app-header .custom-navbar .mobile-home-link {
+            display: none !important;
+        }
+
+        .app-header .custom-navbar .nav-mobile-toggle {
+            display: none !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 38px !important;
+            height: 38px !important;
+            border: 1px solid #d9dde4 !important;
+            border-radius: 10px !important;
+            background: #ffffff !important;
+            color: #374151 !important;
+            cursor: pointer !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            flex: 0 0 auto !important;
+            font-size: 18px !important;
+        }
+
+        .app-header .custom-navbar .nav-mobile-toggle .fa-xmark {
+            display: none !important;
+        }
+
+        .app-header .custom-navbar.mobile-open .nav-mobile-toggle .fa-bars {
+            display: none !important;
+        }
+
+        .app-header .custom-navbar.mobile-open .nav-mobile-toggle .fa-xmark {
+            display: inline-block !important;
+        }
+
         /* Prevent FOUC (Flash of Unstyled Content) and add smooth page transition */
         html { background-color: #F8F9FA; }
         body {
@@ -167,24 +200,89 @@
                 height: auto !important;
                 min-height: 64px !important;
                 flex-wrap: wrap !important;
-                row-gap: 8px !important;
-            }
-
-            .app-header .custom-navbar .nav-left,
-            .app-header .custom-navbar .nav-right {
-                flex: 1 1 100% !important;
-                width: 100% !important;
-                min-width: 0 !important;
-                gap: 6px !important;
+                align-items: center !important;
+                row-gap: 0 !important;
+                padding: 8px 10px !important;
             }
 
             .app-header .custom-navbar .nav-left {
-                justify-content: flex-start !important;
+                flex: 1 1 auto !important;
+                width: auto !important;
+                min-width: 0 !important;
+                gap: 8px !important;
+            }
+
+            .app-header .custom-navbar .nav-left .desktop-home-link {
+                display: none !important;
+            }
+
+            .app-header .custom-navbar .nav-mobile-toggle {
+                display: inline-flex !important;
             }
 
             .app-header .custom-navbar .nav-right {
-                flex-wrap: wrap !important;
-                justify-content: flex-end !important;
+                display: none !important;
+                flex: 1 1 100% !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                margin-top: 10px !important;
+                padding-top: 10px !important;
+                border-top: 1px solid #e5e7eb !important;
+            }
+
+            .app-header .custom-navbar.mobile-open .nav-right {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                justify-content: flex-start !important;
+                gap: 8px !important;
+            }
+
+            .app-header .custom-navbar.mobile-open .nav-right > * {
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .app-header .custom-navbar .mobile-home-link {
+                display: inline-flex !important;
+            }
+
+            .app-header .custom-navbar.mobile-open .nav-right > a,
+            .app-header .custom-navbar.mobile-open .nav-right .nav-primary-link,
+            .app-header .custom-navbar.mobile-open .nav-right .filter-btn,
+            .app-header .custom-navbar.mobile-open .nav-right .guest-explore-link,
+            .app-header .custom-navbar.mobile-open .nav-right .sign-in-link {
+                width: 100% !important;
+                min-width: 0 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                min-height: 38px !important;
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+            }
+
+            .app-header .custom-navbar.mobile-open .nav-right .sign-in-link {
+                justify-content: center !important;
+            }
+
+            .app-header .custom-navbar.mobile-open .nav-right .notif-shell {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                min-height: 38px !important;
+            }
+
+            .app-header .custom-navbar.mobile-open .nav-right .dropdown {
+                width: 100% !important;
+            }
+
+            .app-header .custom-navbar.mobile-open .nav-right .filter-btn span {
+                display: inline !important;
+            }
+
+            .app-header .custom-navbar.mobile-open .nav-right .profile-btn {
+                width: 36px !important;
             }
 
             .app-header .custom-navbar .create-label-full {
@@ -256,14 +354,20 @@
                     <div class="of-logo-icon">OF</div>
                     <div class="of-logo-text">Only<span>Friends</span></div>
                 </a>
-                @if (User?.Identity?.IsAuthenticated ?? false)
-                {
-                    <a asp-controller="Home" asp-action="Homepage" class="nav-link nav-primary-link">Home</a>
-                }
             </div>
-            <div class="nav-right">
+            <button type="button"
+                    class="nav-mobile-toggle"
+                    id="mobileNavToggle"
+                    aria-label="Toggle navigation"
+                    aria-expanded="false"
+                    aria-controls="mainNavMenu">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+            <div class="nav-right" id="mainNavMenu">
                 @if (User?.Identity?.IsAuthenticated ?? false)
                 {
+                    <a asp-controller="Home" asp-action="Homepage" class="nav-link nav-primary-link mobile-home-link">Home</a>
                     <a asp-controller="Event" asp-action="Create" class="nav-link nav-primary-link">
                         <span class="create-label-full">Create Activity</span>
                         <span class="create-label-short">Create</span>
@@ -383,6 +487,61 @@
                     e.preventDefault();
                     window.location.href = '/login';
                 });
+            });
+        })();
+
+        (function () {
+            const navbar = document.querySelector('.app-header .custom-navbar');
+            const toggleBtn = document.getElementById('mobileNavToggle');
+            const navMenu = document.getElementById('mainNavMenu');
+            if (!navbar || !toggleBtn || !navMenu) return;
+
+            const mobileQuery = window.matchMedia('(max-width: 560px)');
+
+            function setMobileOpen(open) {
+                navbar.classList.toggle('mobile-open', open);
+                toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+
+            function closeMobileMenu() {
+                setMobileOpen(false);
+            }
+
+            toggleBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (!mobileQuery.matches) return;
+                const willOpen = !navbar.classList.contains('mobile-open');
+                setMobileOpen(willOpen);
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!mobileQuery.matches) return;
+                if (!navbar.classList.contains('mobile-open')) return;
+                if (!navbar.contains(e.target)) {
+                    closeMobileMenu();
+                }
+            });
+
+            navMenu.querySelectorAll('a').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (mobileQuery.matches) {
+                        closeMobileMenu();
+                    }
+                });
+            });
+
+            navMenu.querySelectorAll('form').forEach(function (form) {
+                form.addEventListener('submit', function () {
+                    if (mobileQuery.matches) {
+                        closeMobileMenu();
+                    }
+                });
+            });
+
+            mobileQuery.addEventListener('change', function (event) {
+                if (!event.matches) {
+                    closeMobileMenu();
+                }
             });
         })();
     </script>
