@@ -255,7 +255,8 @@ var userId = Int32.Parse(userIdClaim);
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to create event");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    ex.InnerException?.Message ?? ex.Message);
             }
         }
 
