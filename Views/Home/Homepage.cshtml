@@ -318,20 +318,31 @@
 
     @if (hasAnyEvents)
     {
-        <div class="event-tabs">
+        <div class="event-tabs" role="tablist" aria-label="Activity filters">
             <a asp-action="Homepage" asp-controller="Home" asp-route-tab="all"
                asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
                class="event-tab all-tab @(currentTab == "all" ? "active" : "")"
+               role="tab"
+               aria-selected="@(currentTab == "all" ? "true" : "false")"
                aria-current="@(currentTab == "all" ? "page" : null)">All Events</a>
             <a asp-action="Homepage" asp-controller="Home" asp-route-tab="pending"
                asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
-               class="event-tab @(currentTab == "pending" ? "active" : "")">Pending</a>
+               class="event-tab @(currentTab == "pending" ? "active" : "")"
+               role="tab"
+               aria-selected="@(currentTab == "pending" ? "true" : "false")"
+               aria-current="@(currentTab == "pending" ? "page" : null)">Pending</a>
             <a asp-action="Homepage" asp-controller="Home" asp-route-tab="joined"
                asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
-               class="event-tab @(currentTab == "joined" ? "active" : "")">Joined</a>
+               class="event-tab @(currentTab == "joined" ? "active" : "")"
+               role="tab"
+               aria-selected="@(currentTab == "joined" ? "true" : "false")"
+               aria-current="@(currentTab == "joined" ? "page" : null)">Joined</a>
             <a asp-action="Homepage" asp-controller="Home" asp-route-tab="closed"
                asp-route-categoryIds="@Model.SelectedCategoryIdsQuery"
-               class="event-tab @(currentTab == "closed" ? "active" : "")">Closed</a>
+               class="event-tab @(currentTab == "closed" ? "active" : "")"
+               role="tab"
+               aria-selected="@(currentTab == "closed" ? "true" : "false")"
+               aria-current="@(currentTab == "closed" ? "page" : null)">Closed</a>
         </div>
 
         <div id="ajaxEventList" class="home-main-content" data-uid="@uid">

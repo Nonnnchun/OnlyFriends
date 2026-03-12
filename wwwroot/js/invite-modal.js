@@ -1,8 +1,3 @@
-// =============================================
-// invite-modal.js
-// วางไว้ที่: wwwroot/js/invite-modal.js
-// =============================================
-
 function getInviteOverlay() {
     return document.getElementById('inviteOverlay');
 }
