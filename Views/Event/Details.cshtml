@@ -40,9 +40,9 @@
         .Where(ue => ue.RequestStatus == EnumRequestStatus.Accepted)
         .Select(ue => ue.UserId)
         .ToHashSet() ?? new HashSet<int>();
-    var visibleParticipants = Model?.JointType == EnumJointType.Private
-        ? allParticipants.Where(u => acceptedParticipantIds.Contains(u.Id)).ToList()
-        : allParticipants;
+    var visibleParticipants = allParticipants
+        .Where(u => acceptedParticipantIds.Contains(u.Id))
+        .ToList();
     int going = visibleParticipants.Count;
     var participantPreview = visibleParticipants.Take(6).ToList();
     int moreParticipantCount = Math.Max(0, going - participantPreview.Count);
