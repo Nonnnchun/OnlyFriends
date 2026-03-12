@@ -243,6 +243,11 @@ namespace OnlyFriends.Controllers
 
                 return View("Homepage", "Home");
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create event");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         [Authorize]
