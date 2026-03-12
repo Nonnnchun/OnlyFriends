@@ -1,4 +1,4 @@
-﻿@using System.Security.Claims
+@using System.Security.Claims
 
 <!DOCTYPE html>
 <html lang="en">
@@ -57,10 +57,10 @@
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            width: 132px !important;
-            min-width: 132px !important;
-            height: 40px !important;
-            padding: 0 12px !important;
+            width: auto !important;
+            min-width: 0 !important;
+            height: 36px !important;
+            padding: 0 10px !important;
             border: none !important;
             border-radius: 0 !important;
             background: transparent !important;
@@ -68,8 +68,146 @@
             text-decoration: none !important;
             box-sizing: border-box !important;
             transform: none !important;
+            white-space: nowrap !important;
+        }
+
+        .app-header .custom-navbar .create-label-short {
+            display: none;
+        }
+
+        /* Prevent FOUC (Flash of Unstyled Content) and add smooth page transition */
+        html { background-color: #F8F9FA; }
+        body {
+            opacity: 0.5;
+            transition: opacity 0.3s ease-out;
+        }
+        body.page-loaded {
+            opacity: 1;
+        }
+
+        @@media (max-width: 980px) {
+            .app-header .custom-navbar {
+                height: auto !important;
+                min-height: 64px !important;
+                padding: 8px 12px !important;
+                flex-wrap: wrap !important;
+                row-gap: 8px !important;
+            }
+
+            .app-header .custom-navbar .nav-left,
+            .app-header .custom-navbar .nav-right {
+                height: auto !important;
+                flex-wrap: nowrap !important;
+                gap: 8px !important;
+                min-width: 0 !important;
+            }
+
+            .app-header .custom-navbar .nav-left {
+                flex: 1 1 auto !important;
+                justify-content: flex-start !important;
+            }
+
+            .app-header .custom-navbar .nav-right {
+                flex: 0 0 auto !important;
+                justify-content: flex-end !important;
+            }
+
+            .app-header .custom-navbar .nav-primary-link,
+            .app-header .custom-navbar .nav-left > .nav-primary-link,
+            .app-header .custom-navbar .nav-right > .nav-primary-link {
+                width: auto !important;
+                min-width: 0 !important;
+                padding: 0 8px !important;
+            }
+        }
+
+        @@media (max-width: 700px) {
+            .app-header .custom-navbar .of-logo-text {
+                font-size: 20px !important;
+            }
+
+            .app-header .custom-navbar .nav-primary-link,
+            .app-header .custom-navbar .nav-left > .nav-primary-link,
+            .app-header .custom-navbar .nav-right > .nav-primary-link {
+                height: 34px !important;
+                padding: 0 6px !important;
+                font-size: 13px !important;
+            }
+
+            .app-header .custom-navbar .filter-btn span {
+                display: none;
+            }
+        }
+
+        @@media (max-width: 430px) {
+            .app-header .custom-navbar {
+                padding: 8px 10px !important;
+            }
+
+            .app-header .custom-navbar .of-logo-icon {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 13px !important;
+            }
+
+            .app-header .custom-navbar .of-logo-text {
+                font-size: 18px !important;
+            }
+
+            .app-header .custom-navbar .nav-primary-link,
+            .app-header .custom-navbar .nav-left > .nav-primary-link,
+            .app-header .custom-navbar .nav-right > .nav-primary-link {
+                padding: 0 4px !important;
+                font-size: 12px !important;
+            }
+        }
+
+        @@media (max-width: 560px) {
+            .app-header .custom-navbar {
+                flex-wrap: nowrap !important;
+                row-gap: 0 !important;
+            }
+
+            .app-header .custom-navbar .nav-left,
+            .app-header .custom-navbar .nav-right {
+                gap: 6px !important;
+            }
+
+            .app-header .custom-navbar .create-label-full {
+                display: none;
+            }
+
+            .app-header .custom-navbar .create-label-short {
+                display: inline;
+            }
+
+            .app-header .custom-navbar .nav-primary-link,
+            .app-header .custom-navbar .nav-left > .nav-primary-link,
+            .app-header .custom-navbar .nav-right > .nav-primary-link {
+                padding: 0 4px !important;
+            }
         }
     </style>
+    <script>
+        // Add class to fade in when DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+            document.body.classList.add("page-loaded");
+        });
+        // Handle back/forward cache
+        window.addEventListener("pageshow", function (e) {
+            if (e.persisted) {
+                document.body.classList.add("page-loaded");
+            }
+        });
+        // Fade out on page unload
+        window.addEventListener("beforeunload", function () {
+            document.body.classList.remove("page-loaded");
+        });
+        // Fallback in case JS is blocked or slow
+        setTimeout(function () {
+            document.body.classList.add("page-loaded");
+        }, 1500);
+    </script>
 </head>
 
 <body>
@@ -106,20 +244,25 @@
             <div class="nav-right">
                 @if (User?.Identity?.IsAuthenticated ?? false)
                 {
-                    <a asp-controller="Event" asp-action="Create" class="nav-link nav-primary-link">Create Activity</a>
+                    <a asp-controller="Event" asp-action="Create" class="nav-link nav-primary-link">
+                        <span class="create-label-full">Create Activity</span>
+                        <span class="create-label-short">Create</span>
+                    </a>
                     @if (isHomePage)
                     {
                         <div class="dropdown" id="filterDropdown">
-                            <button class="nav-btn" onclick="toggleFilter()" style="display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #ced4da; padding:6px 16px; border-radius:99px; color:#212529; font-weight:600; cursor:pointer; font-size:0.95rem; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
-                                <i class="fa-solid fa-filter"></i> Filter Content
+                            <button class="filter-btn" onclick="toggleFilter()">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Filter</span>
                             </button>
-                            <div class="dropdown-content" id="filterMenu" style="width:280px; padding:15px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); border:1px solid #eee;">
-                                <div style="font-weight:700; margin-bottom:12px; font-size:1.1rem;">Activity Categories</div>
-                                <div id="filterCategoryList">
-                                    <div class="filter-item" style="padding:8px 0; color:#6c757d;">Loading categories...</div>
+                            <div class="dropdown-content filter-menu-panel" id="filterMenu">
+                                <div class="filter-menu-header">
+                                    <span class="filter-menu-title">Activity Categories</span>
+                                    <button class="filter-reset-inline" onclick="resetFilter()">Reset</button>
                                 </div>
-                                <button class="btn-apply" onclick="applyFilter()" style="width:100%; margin-top:15px; background:#111; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">Apply</button>
-                                <button class="btn-apply" onclick="resetFilter()" style="width:100%; margin-top:8px; background:#fff; color:#111; border:1px solid #ced4da; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">Reset Filter</button>
+                                <div id="filterCategoryList">
+                                    <div class="filter-item filter-loading">Loading categories...</div>
+                                </div>
                             </div>
                         </div>
                     }
@@ -176,16 +319,17 @@
                         @if (((User?.Identity?.IsAuthenticated) ?? false) && !string.IsNullOrEmpty(uname))
                         {
                             <a href="/user/@profileSlug">View Profile</a>
+                            <a href="/setting">Settings</a>
                         }
                         else
                         {
                             <a href="/login">Sign In</a>
+                            <a href="/register">Sign Up</a>
                         }
-                        <a href="/setting">Settings</a>
                     </div>
                     <div class="app-footer-column">
                         <div class="app-footer-title">Info</div>
-                        <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <a asp-controller="Home" asp-action="About">About us</a>
                         <span class="app-footer-badge">Sample Project</span>
                     </div>
                 </div>
@@ -196,8 +340,32 @@
             </div>
         </footer>
     </div>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js"></script>
+    <script>
+        (function () {
+            const guardedLinks = document.querySelectorAll('a.requires-auth');
+            if (!guardedLinks.length) return;
+
+            guardedLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const heroLoginModal = document.getElementById('heroLoginPrompt');
+                    if (heroLoginModal) {
+                        e.preventDefault();
+                        const action = link.getAttribute('data-auth-action') || 'default';
+                        if (typeof window.showHeroLoginPrompt === 'function') {
+                            window.showHeroLoginPrompt(action);
+                        } else {
+                            heroLoginModal.classList.remove('is-hidden');
+                        }
+                        return;
+                    }
+                    // Fallback for pages without hero modal
+                    e.preventDefault();
+                    window.location.href = '/login';
+                });
+            });
+        })();
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 

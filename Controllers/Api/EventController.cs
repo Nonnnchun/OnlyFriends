@@ -101,7 +101,7 @@ namespace OnlyFriends.ApiControllers
                     // Notify the event owner about the join request
                     var requesterUsername = User.Identity?.Name ?? $"User#{userId}";
                     await _notificationService.AddJoinRequestNotificationAsync(
-                        eventDto.Owner.Id, userId, requesterUsername, eventDto.Title);
+                        eventDto.Owner.Id, userId, requesterUsername, eventDto.Title, eventId);
 
                     return Ok(new { message = "Join request sent. Waiting for owner approval." });
                 }
@@ -167,11 +167,12 @@ namespace OnlyFriends.ApiControllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetEventsAsync()
+        public async Task<IActionResult> GetEventsAsync([FromQuery] string? categoryIds = null)
         {
             try
             {
-                IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync();
+                var ids = ParseCategoryIds(categoryIds);
+                IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync(ids.Count > 0 ? ids : null);
                 return Ok(activities);
             }
             catch (Exception ex)
@@ -179,6 +180,18 @@ namespace OnlyFriends.ApiControllers
                 _logger.LogError(ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
+        }
+
+        private static List<int> ParseCategoryIds(string? categoryIds)
+        {
+            if (string.IsNullOrWhiteSpace(categoryIds)) return new List<int>();
+            return categoryIds
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(s => int.TryParse(s, out int id) ? id : (int?)null)
+                .Where(id => id.HasValue)
+                .Select(id => id!.Value)
+                .Distinct()
+                .ToList();
         }
 
         [Authorize]

@@ -1,0 +1,29 @@
+Mini Project  
+                                                                   
+           
+Requirements  
+1.                     
+2.                  (                              )  
+3.                               
+4.                                                 3.                          3.  
+                                     3. (                                
+                 3/4                      5  ) 
+5.                       
+6.                                                         
+                         
+7.                                             
+8.              feature(s)          1-7        1  feature    feature(s)       
+                                                        
+ 
+        
+1.       Frontend (HTML/CSS/JS)   
+2.         framework    Lib                     icons  framework    Lib        
+3.      Backend        ASP .Net MVC           M, V (cshtml)   C (cs)  
+a.               DB        framework (   entity framework)    Lib     
+         DB      
+b.         ASP .Net Identity        Authentication/Session    
+c.         Service    (   firebase)         Authentication/Session           DB    
+4.     Ajax       1      
+5.   Frontend               2 viewports (portrait, landscape )  
+6.                             (        DB             )  
+ 

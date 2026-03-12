@@ -1,5 +1,6 @@
 ﻿@model OnlyFriends.Models.DTOS.EventDTOS.GetEventDTO
 @using OnlyFriends.Models.DTOS.EventDTOS
+@using System.Globalization
 
 @{
     ViewData["Title"] = Model.Title?? "Manage Details";
@@ -95,11 +96,11 @@
                                       </div>
                                       <div class="event-card-meta-row">
                                           <i class="fa-solid fa-location-dot"></i>
-                                          <span>@(Model.Location?.Length > 35 ? Model.Location.Substring(0, 35) + "..." : Model.Location)</span>
+                                          <span id="cardLocation">@(Model.Location?.Length > 35 ? Model.Location.Substring(0, 35) + "..." : Model.Location)</span>
                                       </div>
                                       <div class="event-card-meta-row">
                                           <i class="fa-solid fa-users"></i>
-                                          <span id="cardCapacity">Capacity: @Model.Capacity </span>
+                                          <span id="cardCapacity">@(Model.Capacity > 0 ? $"Capacity: {Model.Capacity}" : "Capacity: Unlimited")</span>
                                       </div>
                                   </div>
                               </div>
@@ -118,7 +119,7 @@
                           </div>
   
                            @* Share & Edit *@
-                          <div class="share-row" style="margin-top:12px">
+                          <div class="share-row share-row-spaced">
                               <span class="share-label">Share Event</span>
                               <div class="share-icons">
                                   <button type="button" class="share-icon-btn" onclick="shareEvent('facebook')" aria-label="Share on Facebook">
@@ -146,7 +147,7 @@
                                   <div class="date-badge-day">@Model.StartAt?.Day</div>
                               </div>
                               <div>
-                                  <div class="when-title">
+                                  <div class="when-title" id="whenDateLabel">
                                       @(Model.StartAt?.Date == DateTime.Today ? "Today" : Model.StartAt?.ToString("dddd dd, MMMM "))
                                   </div>
                                   <div class="when-sub" id="whenTime">
@@ -164,8 +165,8 @@
                                 </svg>
                               </div>
                               <div>
-                                  <div class="loc-name">@(Model.Location?.Length > 30 ? Model.Location.Substring(0, 30) + "..." : Model.Location)</div>
-                                  <div class="loc-sub">@Model.Location</div>
+                                  <div class="loc-name" id="whenLocationName">@(Model.Location?.Length > 30 ? Model.Location.Substring(0, 30) + "..." : Model.Location)</div>
+                                  <div class="loc-sub" id="whenLocationSub">@Model.Location</div>
                                   <div class="loc-note">The address is shown publicly on the event page.</div>
                               </div>
                           </div>
@@ -173,7 +174,7 @@
                           <button class="btn-outline" onclick="openPanel()"><i class="fa-solid fa-pen"></i> Edit Event</button>
                           <button class="btn-outline" onclick="openCoverPicker()"><i class="fa-solid fa-image"></i><span> Change Photo</span></button>
                       </div>
-                        <div class="edit-btns" style="margin-top:8px">
+                        <div class="edit-btns edit-btns-spaced">
                             <button class= "btn-outline" onclick="updateEvent()"><i class="fa-solid fa-save"></i><span> Update Event</span></button>
                         </div>
                       </div>
@@ -191,7 +192,7 @@
                       <div class="stat-label">Selected</div>
                   </div>
                   <div class="stat-card">
-                      <div class="stat-value" id="statCapacity">@Model.Capacity</div>
+                      <div class="stat-value" id="statCapacity">@(Model.Capacity > 0 ? Model.Capacity.ToString() : "Unlimited")</div>
                       <div class="stat-label">Total Capacity</div>
                   </div>
               </div>
@@ -216,7 +217,7 @@
                                     <span class="reg-Email">@reg.Email</span>
                                 </div>
                             </div>
-                            <div class="reg-time" style="margin-left:auto; white-space:nowrap;">
+                            <div class="reg-time reg-time-fixed">
                                 <span class="reg-status">@{UserEvent? userEvent = Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id);}@userEvent?.RequestStatus</span>
                                 @Model.UserEvents.FirstOrDefault(u => u.UserId == reg.Id)?.RegisteredAt.ToString("dd MMM yyyy ,HH:mm")
                             </div>
@@ -239,7 +240,7 @@
                   <div class="section-header">
                       <div class="section-title">Hosts</div>
                   </div>
-                  <div style="margin-top:8px">
+                  <div class="host-block">
                       <div class="host-row">
                           <img class="host-avatar @(hostAvatarIsDefault ? "is-default-avatar" : "")" src="@hostAvatar" alt="host avatar" />
                           <div>
@@ -252,7 +253,7 @@
               </div>
               @* Visibility & Discovery *@
               <div class="section">
-                <div class="section-title" style="margin-bottom:4px">Visibility &amp; Discovery</div>
+                <div class="section-title section-title-tight">Visibility &amp; Discovery</div>
                 <p class="section-sub">Control how people can find your event.</p>
 
                 <div class="visibility-card">
@@ -281,7 +282,7 @@
                     </div>
                 </div>
 
-                <div class="visibility-btns" style="margin-top:12px">
+                <div class="visibility-btns visibility-btns-spaced">
                     <button class="btn-outline sm" onclick="openVisibilityModal()"><i class="fa-solid fa-eye"></i> Change Visibility</button>
                 </div>
 
@@ -295,7 +296,7 @@
           </div>
 
           <div class="modal-overlay" id="visibilityOverlay" onclick="closeVisibilityModal(event)">
-            <div class="invite-modal" style="width:420px;height:auto">
+            <div class="invite-modal visibility-modal">
             
                 <div class="invite-header">
                     <div class="invite-title">Change Visibility</div>
@@ -304,7 +305,7 @@
                     </button>
                 </div>
         
-                <div style="padding:20px;display:flex;flex-direction:column;gap:10px">
+                <div class="visibility-modal-body">
                 
                     <div class="confighost-option @(Model.JointType == EnumJointType.Public ? "selected" : "")" data-role="public" onclick="selectVisibility(this)">
                         <div class="confighost-option-left">
@@ -338,7 +339,7 @@
         
                 </div>
         
-                <div style="padding:0 20px 20px">
+                <div class="visibility-modal-actions">
                     <button class="confighost-send-btn" onclick="saveVisibility()">Save</button>
                 </div>
         
@@ -356,7 +357,7 @@
                     <div class="search-input-wrap">
                       <input class="form-input" id="participantSearch" placeholder="Search..." oninput="filterParticipants(this.value)" />
                   </div> 
-                        <div class="filter-tabs" style="display:flex;gap:8px;margin-bottom:16px">
+                        <div class="filter-tabs">
                             <button class="filter-btn active" onclick="filterByStatus(this, '')">All</button>
                             <button class="filter-btn" onclick="filterByStatus(this, 'Accepted')">Accepted</button>
                             <button class="filter-btn" data-private-only="true" onclick="filterByStatus(this, 'Pending')">Pending</button>
@@ -456,11 +457,15 @@
       </main>
   
       @* ══ EDIT PANEL ══ *@
-      <aside class="edit-panel"
-             id="editPanel"
-             data-event-id="@Model.Id"
-             data-reg-open="@((Model.EventStatus == EnumEventStatus.Open).ToString().ToLower())"
-             data-joint-type="@Model.JointType.ToString().ToLower()">
+       <aside class="edit-panel"
+              id="editPanel"
+              data-event-id="@Model.Id"
+              data-reg-open="@((Model.EventStatus == EnumEventStatus.Open).ToString().ToLower())"
+              data-joint-type="@Model.JointType.ToString().ToLower()"
+              data-event-type="@Model.EventType.ToString().ToLower()"
+              data-time-zone="@(Model.TimeZone ?? "GMT+07:00")"
+              data-latitude="@((Model.Latitude ?? 13.7563).ToString(CultureInfo.InvariantCulture))"
+              data-longitude="@((Model.Longitude ?? 100.5018).ToString(CultureInfo.InvariantCulture))">
   
           <div class="panel-header">
               <div class="panel-title">Edit Event</div>
@@ -479,60 +484,131 @@
                   <label class="form-label">DESCRIPTION</label>
                   <textarea class="form-textarea" id="inputDesc">@Model.Info</textarea>
               </div>
-  
-
 
               <div class="form-group">
                   <label class="form-label">CATEGORIES</label>
-                  <select class="form-select" id="inputCategory" data-selected-id="@string.Join(",", Model.Categories.Select(c => c.Id))">
-                      @foreach (var cat in Model.Categories) {
-                          <option value="@cat.Id">@cat.CategoryName</option>
-                      }
+                  <div id="categoryRows" class="category-rows" data-selected-ids="@string.Join(",", Model.Categories.Select(c => c.Id))"></div>
+              </div>
+
+              <hr class="divider">
+
+              <div class="form-group">
+                  <label class="form-label">START DATE &amp; TIME</label>
+                  <div class="date-time-grid">
+                      <input class="form-input" type="date" id="inputStartDate"
+                             value="@Model.StartAt?.ToString("yyyy-MM-dd")"
+                             oninput="previewSchedule()" />
+                      <input class="form-input" type="time" id="inputStartTime"
+                             value="@Model.StartAt?.ToString("HH:mm")"
+                             oninput="previewSchedule()" />
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <label class="form-label">END DATE &amp; TIME</label>
+                  <div class="date-time-grid">
+                      <input class="form-input" type="date" id="inputEndDate"
+                             value="@Model.EndAt?.ToString("yyyy-MM-dd")"
+                             oninput="previewSchedule()" />
+                      <input class="form-input" type="time" id="inputEndTime"
+                             value="@Model.EndAt?.ToString("HH:mm")"
+                             oninput="previewSchedule()" />
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <label class="form-label">TIME ZONE</label>
+                  <select class="form-select" id="inputTimeZone">
+                      <option value="GMT-12:00">(GMT-12:00) International Date Line West</option>
+                      <option value="GMT-11:00">(GMT-11:00) Midway Island, Samoa</option>
+                      <option value="GMT-10:00">(GMT-10:00) Hawaii</option>
+                      <option value="GMT-09:00">(GMT-09:00) Alaska</option>
+                      <option value="GMT-08:00">(GMT-08:00) Pacific Time</option>
+                      <option value="GMT-07:00">(GMT-07:00) Mountain Time</option>
+                      <option value="GMT-06:00">(GMT-06:00) Central Time</option>
+                      <option value="GMT-05:00">(GMT-05:00) Eastern Time</option>
+                      <option value="GMT-04:00">(GMT-04:00) Atlantic Time</option>
+                      <option value="GMT-03:00">(GMT-03:00) Buenos Aires</option>
+                      <option value="GMT-02:00">(GMT-02:00) Mid-Atlantic</option>
+                      <option value="GMT-01:00">(GMT-01:00) Azores</option>
+                      <option value="GMT+00:00">(GMT+00:00) London</option>
+                      <option value="GMT+01:00">(GMT+01:00) Paris, Berlin</option>
+                      <option value="GMT+02:00">(GMT+02:00) Athens</option>
+                      <option value="GMT+03:00">(GMT+03:00) Moscow</option>
+                      <option value="GMT+04:00">(GMT+04:00) Abu Dhabi</option>
+                      <option value="GMT+05:00">(GMT+05:00) Islamabad</option>
+                      <option value="GMT+05:30">(GMT+05:30) New Delhi</option>
+                      <option value="GMT+06:00">(GMT+06:00) Almaty</option>
+                      <option value="GMT+07:00">(GMT+07:00) Bangkok</option>
+                      <option value="GMT+08:00">(GMT+08:00) Beijing</option>
+                      <option value="GMT+09:00">(GMT+09:00) Tokyo</option>
+                      <option value="GMT+10:00">(GMT+10:00) Sydney</option>
+                      <option value="GMT+11:00">(GMT+11:00) Solomon Is.</option>
+                      <option value="GMT+12:00">(GMT+12:00) Auckland</option>
                   </select>
               </div>
-  
-              <hr class="divider">
-  
-              @* Time *@
+
               <div class="form-group">
-                  <label class="form-label">DATE &amp; TIME</label>
-                  <input class="form-input" type="date" id="inputDate"
-                         value="@Model.StartAt?.ToString("yyyy-MM-dd")"
-                         style="margin-bottom:8px"
-                         oninput="previewDate(this.value)" />
-                  <div class="time-row">
-                      <input class="form-input" type="time" id="inputStart"
-                             value="@Model.StartAt?.ToString("HH:mm")"
-                             oninput="previewTime()" />
-                       <span class="time-separator">-&gt;</span>
-                      <input class="form-input" type="time" id="inputEnd"
-                             value="@Model.EndAt?.ToString("HH:mm")"
-                             oninput="previewTime()" />
+                  <label class="form-label">REGISTRATION DEADLINE</label>
+                  <div class="date-time-grid">
+                      <input class="form-input" type="date" id="inputDeadlineDate"
+                             value="@Model.RegistrationDeadline?.ToString("yyyy-MM-dd")" />
+                      <input class="form-input" type="time" id="inputDeadlineTime"
+                             value="@Model.RegistrationDeadline?.ToString("HH:mm")" />
+                  </div>
+                  <div class="form-hint">Leave blank to keep registration open until event start.</div>
+              </div>
+
+              <hr class="divider">
+
+              <div class="form-group">
+                  <label class="form-label">EVENT FORMAT</label>
+                  <select class="form-select" id="inputEventType" onchange="updateEditLocationMode()">
+                      <option value="offline">Offline (On-site)</option>
+                      <option value="online">Online (Virtual)</option>
+                  </select>
+              </div>
+
+              <div class="form-group">
+                  <label class="form-label" id="inputLocationLabel">LOCATION</label>
+                  <div class="location-input-wrap">
+                      <input class="form-input" id="inputLocation" value="@Model.Location" oninput="onEditLocationInput()" autocomplete="off" />
+                      <div id="locationSearchDropdown" class="location-search-dropdown"></div>
+                  </div>
+                  <div class="form-hint" id="locationHintText">Search and pin an exact place for offline events.</div>
+                  <input type="hidden" id="inputLatitude" value="@((Model.Latitude ?? 13.7563).ToString(CultureInfo.InvariantCulture))" />
+                  <input type="hidden" id="inputLongitude" value="@((Model.Longitude ?? 100.5018).ToString(CultureInfo.InvariantCulture))" />
+                  <div id="editMapWrap" class="edit-map-wrap">
+                      <iframe
+                          id="editLocationMapFrame"
+                          title="Edit event location map"
+                          width="100%"
+                          height="100%"
+                          style="border:0; border-radius:12px;"
+                          loading="lazy"
+                          referrerpolicy="no-referrer-when-downgrade"
+                          src="">
+                      </iframe>
                   </div>
               </div>
-  
+
               <hr class="divider">
-  
-              @* Location *@
+
               <div class="form-group">
-                  <label class="form-label">LOCATION</label>
-                  <input class="form-input" id="inputLocation" value="@Model.Location" />
-              </div>
-  
-              <hr class="divider">
-  
-              @* Capacity *@
-              <div class="form-group">
-                   <label class="form-label">CAPACITY</label>
+                  <label class="form-label">CAPACITY</label>
+                  <label class="capacity-unlimited-row">
+                      <input type="checkbox" id="inputCapacityUnlimited" onchange="onCapacityModeChange()" @(Model.Capacity <= 0 ? "checked" : null) />
+                      <span>Unlimited</span>
+                  </label>
                   <div class="capacity-row">
-                       <button class="capacity-adj" onclick="adjustCapacity(-1)">-</button>
+                      <button type="button" class="capacity-adj" onclick="adjustCapacity(-1)">-</button>
                       <input class="form-input capacity-input" id="inputCapacity"
-                             type="number" value="@Model.Capacity" min="1"
+                             type="number" value="@(Model.Capacity > 0 ? Model.Capacity : 1)" min="1"
                              oninput="previewCapacity(this.value)" />
-                      <button class="capacity-adj" onclick="adjustCapacity(1)">+</button>
+                      <button type="button" class="capacity-adj" onclick="adjustCapacity(1)">+</button>
                   </div>
-              </div>  
-          </div>
+              </div>
+           </div>
   
           <div class="panel-footer">
               <button class="btn-update" onclick="updateEvent()">
@@ -549,4 +625,3 @@
       <i class="fa-solid fa-circle-check"></i>
       <span id="toastMsg">Saved!</span>
   </div>
-

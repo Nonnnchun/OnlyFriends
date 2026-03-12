@@ -77,9 +77,41 @@ document.addEventListener('DOMContentLoaded', () => {
     else alert('Could not decline friend request.');
   }
 
+  async function acceptJoinRequest(eventId, fromUserId, notifId) {
+    const res = await fetch('/Event/UpdateParticipantStatus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventId, userId: fromUserId, status: 'Accepted' })
+    });
+    if (res.ok) {
+      await fetch(`/api/notifications/${notifId}`, { method: 'DELETE', credentials: 'include' });
+      removeNotifCard(notifId);
+    } else {
+      alert('Could not accept join request.');
+    }
+  }
+
+  async function rejectJoinRequest(eventId, fromUserId, notifId) {
+    const res = await fetch('/Event/UpdateParticipantStatus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventId, userId: fromUserId, status: 'Rejected' })
+    });
+    if (res.ok) {
+      await fetch(`/api/notifications/${notifId}`, { method: 'DELETE', credentials: 'include' });
+      removeNotifCard(notifId);
+    } else {
+      alert('Could not reject join request.');
+    }
+  }
+
   // Expose accept/decline globally so inline onclick attributes can call them
   window.acceptFriendRequest = acceptFriendRequest;
   window.declineFriendRequest = declineFriendRequest;
+  window.acceptJoinRequest = acceptJoinRequest;
+  window.rejectJoinRequest = rejectJoinRequest;
 
   function populateBell(result) {
     const unauthorized = !!result?.unauthorized;
@@ -118,6 +150,18 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="notif-btn notif-btn-accept" onclick="acceptFriendRequest(${n.fromUserId}, ${n.id})">Accept</button>
             <button class="notif-btn notif-btn-decline" onclick="declineFriendRequest(${n.fromUserId}, ${n.id})">Decline</button>
           </div>`;
+      } else if (n.type === 'JoinRequest') {
+        const hasEventId = n.eventId != null;
+        const actionsHtml = hasEventId ? `
+          <div class="notif-actions">
+            <button class="notif-btn notif-btn-accept" onclick="acceptJoinRequest(${n.eventId}, ${n.fromUserId}, ${n.id})">Accept</button>
+            <button class="notif-btn notif-btn-decline" onclick="rejectJoinRequest(${n.eventId}, ${n.fromUserId}, ${n.id})">Reject</button>
+          </div>` : '';
+        const msgHtml = hasEventId
+          ? `<a href="/event/manage/${n.eventId}" style="text-decoration:none; color:inherit; display:block;"><div class="notif-msg">🎟️ ${escapeHtml(n.message)}</div></a>`
+          : `<div class="notif-msg">🎟️ ${escapeHtml(n.message)}</div>`;
+        li.innerHTML = msgHtml + actionsHtml;
+        li.style.cursor = 'default';
       } else {
         const linkHtml = n.eventId ? `<a href="/event/view/${n.eventId}" style="text-decoration:none; color:inherit; display:block;">` : `<div style="display:block;">`;
         const endLinkHtml = n.eventId ? `</a>` : `</div>`;
@@ -242,6 +286,8 @@ function setSelectedCategoryIdsToMenu(ids) {
   const set = new Set(ids);
   document.querySelectorAll('#filterCategoryList input[data-filter-category]').forEach(el => {
     el.checked = set.has(parseInt(el.value, 10));
+    const pill = el.closest('.filter-tag-pill');
+    if (pill) pill.classList.toggle('selected', el.checked);
   });
 }
 
@@ -271,7 +317,7 @@ async function loadFilterCategories() {
     const categories = await res.json();
 
     if (!Array.isArray(categories) || categories.length === 0) {
-      container.innerHTML = '<div class="filter-item" style="padding:8px 0; color:#6c757d;">No categories found</div>';
+      container.innerHTML = '<div class="filter-item filter-status">No categories found</div>';
       return;
     }
 
@@ -284,25 +330,42 @@ async function loadFilterCategories() {
       const rawName = category?.categoryName ?? category?.CategoryName;
       const id = parseInt(rawId, 10);
       if (!Number.isInteger(id)) return;
-      const row = document.createElement("div");
-      row.className = "filter-item";
-      row.style.cssText = "padding:8px 0; border-bottom:1px solid #f1f3f5;";
-      const label = document.createElement("label");
-      label.style.cssText = "display:flex; align-items:center; cursor:pointer; gap:10px; margin:0; width:100%;";
+      const isSelected = selectedSet.has(id);
+
+      // Hidden real checkbox (keeps existing filter logic working)
       const input = document.createElement("input");
       input.type = "checkbox";
       input.value = String(id);
       input.setAttribute("data-filter-category", "true");
-      input.style.cssText = "width:16px; height:16px;";
-      input.checked = selectedSet.has(id);
-      const textNode = document.createTextNode(String(rawName || ""));
-      label.appendChild(input);
-      label.appendChild(textNode);
-      row.appendChild(label);
-      container.appendChild(row);
+      input.style.cssText = "position:absolute; opacity:0; pointer-events:none; width:0; height:0;";
+      input.checked = isSelected;
+
+      // Pill button
+      const pill = document.createElement("label");
+      pill.className = "filter-tag-pill" + (isSelected ? " selected" : "");
+      pill.appendChild(input);
+
+      const checkIcon = document.createElement("span");
+      checkIcon.className = "filter-pill-check";
+      checkIcon.innerHTML = "&#10003;";
+      pill.appendChild(checkIcon);
+
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = String(rawName || "");
+      pill.appendChild(nameSpan);
+
+      pill.addEventListener("click", () => {
+        input.checked = !input.checked;
+        pill.classList.toggle("selected", input.checked);
+        // ── Instant AJAX filter ──
+        const selectedIds = getSelectedCategoryIdsFromMenu();
+        fetchAndRenderEvents(selectedIds);
+      });
+
+      container.appendChild(pill);
     });
   } catch {
-    container.innerHTML = '<div class="filter-item" style="padding:8px 0; color:#dc3545;">Failed to load categories</div>';
+    container.innerHTML = '<div class="filter-item filter-status filter-status-error">Failed to load categories</div>';
   }
 
   if (document.querySelector(".home-page")) {
@@ -313,30 +376,155 @@ async function loadFilterCategories() {
 }
 
 function applyFilter() {
+  // Keep for legacy compatibility — instant AJAX now handles filtering
   const selectedIds = getSelectedCategoryIdsFromMenu();
-  const currentUrl = new URL(window.location.href);
-  const target = new URL("/Home/Homepage", window.location.origin);
-
-  const tab = currentUrl.searchParams.get("tab");
-  if (tab === "my" || tab === "all") {
-    target.searchParams.set("tab", tab);
-  }
-
-  if (selectedIds.length > 0) {
-    target.searchParams.set("categoryIds", selectedIds.join(","));
-  }
-
-  window.location.href = target.pathname + target.search;
+  fetchAndRenderEvents(selectedIds);
 }
 
 function resetFilter() {
-  const currentUrl = new URL(window.location.href);
-  const target = new URL("/Home/Homepage", window.location.origin);
-  const tab = currentUrl.searchParams.get("tab");
-  if (tab === "my" || tab === "all") {
-    target.searchParams.set("tab", tab);
+  // Uncheck all pills
+  document.querySelectorAll('#filterCategoryList input[data-filter-category]').forEach(el => {
+    el.checked = false;
+    const pill = el.closest('.filter-tag-pill');
+    if (pill) pill.classList.remove('selected');
+  });
+  fetchAndRenderEvents([]);
+}
+
+// ── AJAX: fetch events and re-render the homepage event list ──
+let _ajaxAbort = null;
+async function fetchAndRenderEvents(selectedIds) {
+  const listEl = document.getElementById('ajaxEventList');
+  if (!listEl) return; // not on homepage
+
+  // Update URL silently
+  const url = new URL(window.location.href);
+  if (selectedIds.length > 0) {
+    url.searchParams.set('categoryIds', selectedIds.join(','));
+  } else {
+    url.searchParams.delete('categoryIds');
   }
-  window.location.href = target.pathname + target.search;
+  history.replaceState(null, '', url.pathname + url.search);
+
+  // Cancel in-flight request
+  if (_ajaxAbort) _ajaxAbort.abort();
+  _ajaxAbort = new AbortController();
+
+  // Show loading state
+  listEl.style.opacity = '0.4';
+  listEl.style.pointerEvents = 'none';
+
+  try {
+    const qs = selectedIds.length > 0 ? `?categoryIds=${selectedIds.join(',')}` : '';
+    const activeTab = new URLSearchParams(window.location.search).get('tab') || 'all';
+    const res = await fetch(`/api/event${qs}`, { credentials: 'include', signal: _ajaxAbort.signal });
+    if (!res.ok) throw new Error('Failed');
+    const events = await res.json();
+
+    // Get current user id from a data attribute set by the page
+    const uid = parseInt(document.getElementById('ajaxEventList')?.dataset.uid || '0', 10);
+    renderEventList(listEl, events, activeTab, uid);
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      listEl.innerHTML = '<div class="home-ajax-error">Could not load events.</div>';
+    }
+  } finally {
+    listEl.style.opacity = '';
+    listEl.style.pointerEvents = '';
+  }
+}
+
+function renderEventList(container, events, activeTab, uid) {
+  const currentUserId = uid;
+
+  // Filter for joined tab
+  let eventsToShow = events;
+  if (activeTab === 'my') {
+    eventsToShow = events.filter(e =>
+      (e.userEvents || []).some(ue => ue.userId === currentUserId && ue.requestStatus !== 2 /* Rejected */) ||
+      e.owner?.id === currentUserId
+    );
+  }
+
+  if (!eventsToShow.length) {
+    container.innerHTML = `<div class="empty-state home-ajax-empty-state">${
+      activeTab === 'my' ? 'You have not joined any events yet.' : 'No events with this category now. Try another category or check back later.'
+    }</div>`;
+    return;
+  }
+
+  let html = '';
+  let lastDate = '';
+  eventsToShow.forEach(item => {
+    const startAt = item.startAt ? new Date(item.startAt) : new Date();
+    const dateText = startAt.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
+    const timeText = startAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+    if (dateText !== lastDate) {
+      html += `<div class="timeline-date">${dateText}</div>`;
+      lastDate = dateText;
+    }
+
+    const posterUrl = item.posterUrl || 'https://placehold.co/140x140?text=No+Image';
+    const owner = item.owner || {};
+    const cats = (item.categories || []).map(c =>
+      `<span class="tag-category ajax-tag-category">${c.categoryName}</span>`
+    ).join('');
+
+    // Status tag
+    let statusTag = '';
+    if (owner.id === currentUserId) {
+      statusTag = `<a href="/event/manage/${item.id}" class="ajax-manage-link"><span class="tag-status manage-btn ajax-manage-badge">Manage Event <span>→</span></span></a>`;
+    } else if ((item.eventStatus ?? item.EventStatus) === 0) {
+      statusTag = `<span class="tag-status">Registration Open</span>`;
+    } else {
+      statusTag = `<span class="tag-status closed">Registration Closed</span>`;
+    }
+
+    // Avatars
+    const avatars = (item.users || []).slice(0, 3)
+      .map(u => `<img class="tag-avatar" src="${u.profilePictureUrl || '/images/avatar-placeholder.svg'}" alt="${u.username}" loading="lazy" />`)
+      .join('');
+    const participantCount = (item.userEvents || []).filter(ue => ue.requestStatus !== 2).length;
+
+    // My-tab status badge
+    let myStatusBadge = '';
+    if (activeTab === 'my') {
+      if (owner.id === currentUserId) {
+        myStatusBadge = `<span class="ajax-my-status ajax-my-status-host">Host</span>`;
+      } else {
+        const ue = (item.userEvents || []).find(ue => ue.userId === currentUserId);
+        if (ue) {
+          const textMap = { 0: 'Pending Approval', 1: 'Joined', 2: 'Rejected' };
+          const text = textMap[ue.requestStatus] || '';
+          myStatusBadge = `<span class="ajax-my-status ajax-my-status-${text.toLowerCase().replace(/\s+/g, '-')}">${text}</span>`;
+        }
+      }
+    }
+
+    html += `
+      <a href="/event/view/${item.id}" class="card-link text-decoration-none">
+        <div class="event-card">
+          <div class="event-info">
+            <div class="event-time">${timeText}</div>
+            <div class="event-title">${item.title}</div>
+            <div class="event-organizer">👤 By ${owner.username || 'Unknown'}</div>
+            <div class="event-location">📍 ${item.location || ''}</div>
+            <div class="event-tags">
+              ${cats}${statusTag}
+              <span class="tag-count">
+                <div class="tag-avatars">${avatars}</div>+${participantCount}
+              </span>
+              ${myStatusBadge}
+            </div>
+          </div>
+          <div class="event-image">
+            <img src="${posterUrl}" alt="${item.title}">
+          </div>
+        </div>
+      </a>`;
+  });
+  container.innerHTML = html;
 }
 
 // ถ้าคลิกพื้นที่ว่างๆ นอกเมนู ให้ปิด Dropdown ทั้งหมด

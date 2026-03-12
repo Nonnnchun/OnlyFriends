@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using OnlyFriends.Models;
-using Microsoft.AspNetCore.Authorization;
 using OnlyFriends.Services;
 using OnlyFriends.Models.DTOS.EventDTOS;
 using System.Diagnostics;
@@ -18,32 +17,19 @@ namespace OnlyFriends.Controllers
             _activityService = activityService;
         }
 
-        public IActionResult CreateActivity()
-        {
-            return RedirectToAction("Create", "Event");
-        }
-
         public async Task<IActionResult> Homepage(string tab = "all", string? categoryIds = null)
         {
             List<int> selectedCategoryIds = ParseCategoryIds(categoryIds);
-            IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync(selectedCategoryIds);
+            IEnumerable<GetEventDTO> activities = await _activityService.GetEventsAsync(selectedCategoryIds)
+                                                 ?? Enumerable.Empty<GetEventDTO>();
 
             int? currentUserId = GetCurrentUserId();
-            string activeTab = tab.Equals("my", StringComparison.OrdinalIgnoreCase) ? "my" : "all";
-
-            IEnumerable<GetEventDTO> joinedEvents = [];
-            if (currentUserId.HasValue)
-            {
-                joinedEvents = activities.Where(e => e.UserEvents.Any(ue =>
-                    ue.UserId == currentUserId.Value &&
-                    ue.RequestStatus != EnumRequestStatus.Rejected)
-                    || e.Owner.Id == currentUserId.Value);
-            }
+            string activeTab = string.IsNullOrWhiteSpace(tab) ? "all" : tab.ToLower();
 
             var vm = new HomepageViewModel
             {
                 AllEvents = activities,
-                JoinedEvents = joinedEvents,
+                JoinedEvents = activities, // let the view filter by uid + status
                 ActiveTab = activeTab,
                 SelectedCategoryIds = selectedCategoryIds
             };
@@ -51,39 +37,25 @@ namespace OnlyFriends.Controllers
             return View(vm);
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
         private int? GetCurrentUserId()
         {
             string? claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                                 ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-            if (int.TryParse(claimValue, out int userId))
-            {
-                return userId;
-            }
-
+                                 ?? User.FindFirstValue("sub");
+            if (int.TryParse(claimValue, out int userId)) return userId;
             return null;
         }
 
         private static List<int> ParseCategoryIds(string? categoryIds)
         {
-            if (string.IsNullOrWhiteSpace(categoryIds))
-            {
-                return [];
-            }
-
-            return categoryIds
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            if (string.IsNullOrWhiteSpace(categoryIds)) return new List<int>();
+            return categoryIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(idText => int.TryParse(idText, out int id) ? id : (int?)null)
-                .Where(id => id.HasValue)
-                .Select(id => id!.Value)
-                .Distinct()
-                .ToList();
+                .Where(id => id.HasValue).Select(id => id!.Value).Distinct().ToList();
         }
 
+        public IActionResult About()
+        {
+            return View();
+        }
     }
 }

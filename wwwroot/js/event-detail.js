@@ -115,8 +115,10 @@ document.addEventListener('DOMContentLoaded', function () {
         setJoinState(currentJoinState);
     }
 
+    const pageRoot = document.querySelector('.ev-page');
+    const isOnlineEvent = pageRoot?.dataset?.eventType === 'online';
     const locBox = document.querySelector('.ev-meta-item:last-child');
-    if (locBox) {
+    if (locBox && !isOnlineEvent) {
         locBox.style.cursor = 'pointer';
         locBox.addEventListener('click', () => {
             const label = locBox.querySelector('.ev-strong')?.innerText || '';

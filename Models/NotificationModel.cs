@@ -10,7 +10,7 @@ namespace Notifications.Models
       [Key]
       public int Id { get; set; }
 
-      [Column(TypeName = "varchar(20)")]
+      [Column(TypeName = "varchar(255)")]
       public string EventName { get; set; } = string.Empty;
 
       // The ID of the event this notification is related to

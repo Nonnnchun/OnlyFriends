@@ -1,26 +1,12 @@
 @using OnlyFriends.Models.DTOS.EventDTOS
+@using OnlyFriends.Models.DTOS.CategoryDTOS
 @model CreateEventDTO
 @{
     ViewData["Title"] = "Create Activity";
-    var presetCategories = new[]
-    {
-        "Sports",
-        "Games",
-        "Travel",
-        "Music",
-        "Learning",
-        "Technology",
-        "Food",
-        "Movies",
-        "Hobbies",
-        "Volunteering"
-    };
+    var categories = (ViewData["Categories"] as IEnumerable<GetCategoryDTO>)?.ToList() ?? new List<GetCategoryDTO>();
 }
 
 @section Styles {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <style>
         .custom-confirm-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -38,6 +24,17 @@
         .confirm-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .confirm-yes { background: #111; color: white; }
         .confirm-no { background: #f1f3f5; color: #111; }
+
+        @@media (max-width: 640px) {
+            .custom-confirm-box {
+                width: min(94vw, 320px);
+                padding: 18px;
+            }
+
+            .confirm-btn-group {
+                flex-direction: column-reverse;
+            }
+        }
     </style>
 }
 
@@ -55,23 +52,24 @@
     }
     <div class="left-col">
         <div class="poster-upload-box">
-            <div class="poster-preview" id="posterPreviewBox" style="text-align: center; color: #888; width: 320px; height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa;">
-                <i class="fa-regular fa-image" style="font-size: 3.5rem; color: #adb5bd; margin-bottom: 12px;"></i>
-                <div style="font-size: 0.95rem; font-weight: 500; color: #6c757d;">Click to upload an image</div>
-                <div style="font-size: 0.75rem; color: #adb5bd; margin-top: 4px;">Supports JPG, PNG (1:1 ratio)</div>
+            <div class="poster-preview" id="posterPreviewBox">
+                <i class="fa-regular fa-image poster-preview-icon"></i>
+                <div class="poster-preview-title">Click to upload an image</div>
+                <div class="poster-preview-subtitle">Supports JPG, PNG (1:1 ratio)</div>
             </div>
             <input type="file" id="posterInput" style="display: none;" accept="image/*">
             <button type="button"
                     id="removePosterBtn"
                     onclick="removePoster(event)"
-                    style="display:none; margin-top:10px; width:320px; padding:10px 12px; border:1px solid #ced4da; border-radius:8px; background:#fff; color:#dc3545; font-weight:600; cursor:pointer;">
+                    class="remove-poster-btn"
+                    style="display:none;">
                 Remove uploaded image
             </button>
         </div>
     </div>
 
     <div class="right-col">
-        <div class="top-actions" style="text-align: right; margin-bottom: 10px;">
+        <div class="top-actions">
             <select class="dropdown-badge custom-select" id="eventVisibility">
                 <option value="Public">Public</option>
                 <option value="Private">Private</option>
@@ -90,7 +88,7 @@
                         Start
                     </div>
                     <div class="dt-input-group">
-                        <input type="date" id="startDate" class="flatpickr-date">
+                        <input type="date" id="startDate">
                         <select id="startTime" class="time-select"></select>
                     </div>
                 </div>
@@ -101,7 +99,7 @@
                         End
                     </div>
                     <div class="dt-input-group">
-                        <input type="date" id="endDate" class="flatpickr-date">
+                        <input type="date" id="endDate">
                         <select id="endTime" class="time-select"></select>
                     </div>
                 </div>
@@ -109,8 +107,8 @@
             </div>
 
             <div class="timezone-block">
-                <div style="color: #9aa0a6; font-size: 1.2rem; margin-bottom: 5px;">🌐</div>
-                <select id="eventTimeZone" class="custom-select" style="border:none; outline:none; font-weight:bold; cursor:pointer; background:transparent; width: 100%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 140px;">
+                <div class="timezone-icon">🌐</div>
+                <select id="eventTimeZone" class="custom-select timezone-select">
                     <option value="GMT-12:00">(GMT-12:00) International Date Line West</option>
                     <option value="GMT-11:00">(GMT-11:00) Midway Island, Samoa</option>
                     <option value="GMT-10:00">(GMT-10:00) Hawaii</option>
@@ -141,70 +139,72 @@
             </div>
         </div>
 
-        <div class="input-group" style="display:flex; gap:10px; align-items:center;">
+        <div class="input-group registration-deadline-row">
             <span>⏳</span>
-            <span style="min-width:170px; color:#495057; font-weight:600;">Registration Deadline</span>
-            <div style="display:flex; gap:10px; flex:1;">
-                <input type="date" id="registrationDeadlineDate" class="flatpickr-date" style="flex:1;">
-                <select id="registrationDeadlineTime" class="time-select" style="flex:1;"></select>
+            <span class="registration-deadline-label">Registration Deadline</span>
+            <div class="registration-deadline-fields">
+                <input type="date" id="registrationDeadlineDate" class="registration-date-input">
+                <select id="registrationDeadlineTime" class="time-select registration-time-input"></select>
             </div>
         </div>
 
-        <div class="input-group" style="display: flex; gap: 10px; align-items: center; position: relative;">
+        <div class="input-group location-row">
             <span>📍</span>
-            <input type="text" id="eventLocation" placeholder="Search event location here..." style="flex: 1; border: none; outline: none; background: transparent; padding: 10px 0;" autocomplete="off">
-            <div id="searchDropdown" style="display: none; position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: white; border: 1px solid #ced4da; border-radius: 8px; z-index: 1000; max-height: 250px; overflow-y: auto; box-shadow: 0 8px 16px rgba(0,0,0,0.1);"></div>
+            <input type="text" id="eventLocation" class="location-input" placeholder="Search event location here..." autocomplete="off">
+            <div id="searchDropdown" class="search-dropdown"></div>
         </div>
 
         <input type="hidden" id="Latitude" name="Latitude">
         <input type="hidden" id="Longitude" name="Longitude">
 
-        <div id="mapContainer" style="width: 100%; height: 300px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ced4da; overflow: hidden; display: block; z-index: 1;">
-            <div id="leafletMap" style="width: 100%; height: 100%;"></div>
+        <div id="mapContainer" class="map-container">
+            <iframe
+                id="staticMapPreview"
+                class="static-map-preview"
+                title="Location preview map"
+                width="100%"
+                height="220"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="">
+            </iframe>
         </div>
         <div class="input-group">
             <span>📝</span>
             <input type="text" id="eventInfo" placeholder="Add description">
         </div>
-        <div class="input-group" style="flex-direction: column; align-items: stretch;">
-            <span style="margin-bottom:5px;">🏷️ Activity categories</span>
-    
-            <div id="categoryContainer">
-                <div class="category-row" style="display:flex; gap:10px; margin-bottom:8px;">
-                    <select class="eventCategorySelect"
-                            style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px; height:42px;">
-                        <option value="">Select a category</option>
-                        @foreach (var categoryName in presetCategories)
-                        {
-                            <option value="@categoryName">@categoryName</option>
-                        }
-                    </select>
+        <div class="input-group category-input-group">
+            <span>🏷️ Activity categories</span>
+            <div id="categoryContainer" class="category-pills-wrap">
+                @foreach (var category in categories)
+                {
                     <button type="button"
-                            class="category-row-btn"
-                            onclick="onCategoryRowAction(this)"
-                            style="width:42px; min-width:42px; border:1px solid #ced4da; border-radius:8px; background:#fff; cursor:pointer; font-size:1.1rem; font-weight:700;">
-                        +
+                            class="create-category-pill"
+                            data-cat-name="@category.CategoryName"
+                            onclick="toggleCreateCategoryPill(this)">
+                        <span class="create-pill-check">✓</span>
+                        @category.CategoryName
                     </button>
-                </div>
+                }
             </div>
         </div>
         <div class="section-title">Activity options</div>
         <div class="form-section">
             <div class="option-row">
                 <span>💻 Event format</span>
-                <select id="eventType" onchange="updateLocationPlaceholder()" style="border: none; background: transparent; color: var(--primary-color); font-weight: bold; cursor: pointer; outline: none; text-align: right;">
+                <select id="eventType" onchange="updateLocationPlaceholder()" class="event-type-select">
                     <option value="offline">Offline (On-site)</option>
                     <option value="online">Online (Virtual)</option>
                 </select>
             </div>
 
-            <div class="option-row">
-                <span>👥 Participant limit</span>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="number" id="eventCapacity" placeholder="Unlimited" min="0" style="width: 100px;" 
+            <div class="option-row participant-limit-row">
+                <span class="option-label">👥 Participant limit</span>
+                <div class="capacity-inline-row">
+                    <input type="number" id="eventCapacity" class="capacity-input" placeholder="Unlimited" min="0"
                            onkeydown="if(event.key === '-' || event.key === 'e') event.preventDefault();"
                            oninput="if(this.value < 0) this.value = Math.abs(this.value);" autocomplete="off">
-                    <span style="color: var(--text-muted); cursor: pointer;">✎</span>
+                    <span class="capacity-edit-icon">✎</span>
                 </div>
             </div>
         </div>
@@ -227,8 +227,6 @@
 </div>
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         const EnumEventType = { Online: 0, Offline: 1 };
         const EnumEventStatus = { Open: 0, Closed: 1 };
@@ -237,6 +235,46 @@
         const defaultLng = 100.5018;
 
         let posterDataUrl = null;
+
+        function parseDateTime(dateValue, timeValue) {
+            if (!dateValue || !timeValue) return null;
+            return new Date(`${dateValue}T${timeValue}:00`);
+        }
+
+        function validateRegistrationDeadlineRange(showAlert = false) {
+            const startDate = document.getElementById('startDate')?.value;
+            const startTime = document.getElementById('startTime')?.value;
+            const deadlineDate = document.getElementById('registrationDeadlineDate')?.value;
+            const deadlineTime = document.getElementById('registrationDeadlineTime')?.value;
+            const deadlineDateInput = document.getElementById('registrationDeadlineDate');
+
+            if (deadlineDateInput) {
+                deadlineDateInput.min = new Date().toISOString().split('T')[0];
+                deadlineDateInput.max = startDate || '';
+            }
+
+            if (!deadlineDate || !deadlineTime || !startDate || !startTime) {
+                return true;
+            }
+
+            const now = new Date();
+            const startAt = parseDateTime(startDate, startTime);
+            const deadlineAt = parseDateTime(deadlineDate, deadlineTime);
+
+            if (!startAt || !deadlineAt) return true;
+
+            if (deadlineAt < now) {
+                if (showAlert) alert("❌ Registration deadline must be from now onward");
+                return false;
+            }
+
+            if (deadlineAt > startAt) {
+                if (showAlert) alert("❌ Registration deadline must be before or equal to Start time");
+                return false;
+            }
+
+            return true;
+        }
 
         function setRemovePosterButtonVisible(isVisible) {
             const btn = document.getElementById('removePosterBtn');
@@ -260,13 +298,8 @@
             document.getElementById('endDate').value = today;
             document.getElementById('registrationDeadlineDate').value = today;
 
-            initMap();
+            updateLatLngFields(defaultLat, defaultLng);
             updateLocationPlaceholder();
-
-            flatpickr(".flatpickr-date", {
-                dateFormat: "Y-m-d",
-                minDate: "today",
-            });
 
             // Populate time dropdowns
             function generateTimeOptions() {
@@ -302,6 +335,12 @@
             endSelect.value = "17:30";
             registrationDeadlineSelect.value = "15:30";
 
+            document.getElementById('startDate')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            document.getElementById('startTime')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            document.getElementById('registrationDeadlineDate')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            document.getElementById('registrationDeadlineTime')?.addEventListener('change', () => validateRegistrationDeadlineRange(false));
+            validateRegistrationDeadlineRange(false);
+
             // Bind click to the whole box instead of the small generic button
             document.getElementById('posterPreviewBox').closest('.poster-upload-box').addEventListener('click', () => {
                 document.getElementById('posterInput').click();
@@ -333,43 +372,23 @@
             // function removed
         }
 
-        let map;
-        let marker;
-
-        function initMap() {
-            map = L.map('leafletMap').setView([defaultLat, defaultLng], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-
-            marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
-
-            marker.on('dragend', function(e) {
-                const position = marker.getLatLng();
-                updateLatLngFields(position.lat, position.lng);
-            });
-
-            map.on('click', function(e) {
-                marker.setLatLng(e.latlng);
-                updateLatLngFields(e.latlng.lat, e.latlng.lng);
-            });
-
-            setTimeout(() => { map.invalidateSize(); }, 200);
-            updateLatLngFields(defaultLat, defaultLng);
+        function setMapLocation(lat, lng) {
+            updateLatLngFields(lat, lng);
         }
 
-        function setMapLocation(lat, lng) {
-            if (map && marker) {
-                const newLatLng = new L.LatLng(lat, lng);
-                map.setView(newLatLng, 15);
-                marker.setLatLng(newLatLng);
-            }
+        function updateStaticMapEmbed(lat, lng) {
+            const mapFrame = document.getElementById('staticMapPreview');
+            if (!mapFrame || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return;
+            const latNum = Number(lat);
+            const lngNum = Number(lng);
+            const bbox = `${lngNum - 0.01},${latNum - 0.01},${lngNum + 0.01},${latNum + 0.01}`;
+            mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${encodeURIComponent(`${latNum},${lngNum}`)}`;
         }
 
         function updateLatLngFields(lat, lng) {
             document.getElementById("Latitude").value = lat;
             document.getElementById("Longitude").value = lng;
+            updateStaticMapEmbed(lat, lng);
         }
 
         let searchTimeout;
@@ -409,7 +428,6 @@
                             const lat = parseFloat(item.lat);
                             const lon = parseFloat(item.lon);
                             setMapLocation(lat, lon);
-                            updateLatLngFields(lat, lon);
                             dropdown.style.display = 'none';
                         };
                         dropdown.appendChild(div);
@@ -453,49 +471,14 @@
 
         let eventToSubmit = null;
 
-        function createCategoryRow(optionsHtml) {
-            const row = document.createElement('div');
-            row.className = 'category-row';
-            row.style.cssText = 'display:flex; gap:10px; margin-bottom:8px;';
-            row.innerHTML = `
-                <select class="eventCategorySelect" style="flex:1; border:1px solid #ced4da; border-radius:6px; padding:6px; height:42px;">
-                    ${optionsHtml}
-                </select>
-                <button type="button"
-                        class="category-row-btn"
-                        onclick="onCategoryRowAction(this)"
-                        style="width:42px; min-width:42px; border:1px solid #ced4da; border-radius:8px; background:#fff; cursor:pointer; font-size:1.1rem; font-weight:700;">
-                    +
-                </button>`;
-            return row;
+        function toggleCreateCategoryPill(btn) {
+            btn.classList.toggle('selected');
         }
 
-        function refreshCategoryRowButtons() {
-            const rows = [...document.querySelectorAll('#categoryContainer .category-row')];
-            rows.forEach((row, index) => {
-                const btn = row.querySelector('.category-row-btn');
-                if (!btn) return;
-                btn.textContent = index === rows.length - 1 ? '+' : '-';
-                btn.title = index === rows.length - 1 ? 'Add category' : 'Remove this category';
-            });
-        }
-
-        function onCategoryRowAction(button) {
-            const rows = [...document.querySelectorAll('#categoryContainer .category-row')];
-            const isLastRow = rows.length > 0 && button.closest('.category-row') === rows[rows.length - 1];
-            const container = document.getElementById('categoryContainer');
-            if (!container) return;
-
-            if (isLastRow) {
-                const optionsHtml = rows[0]?.querySelector('.eventCategorySelect')?.innerHTML || '<option value=\"\">Select a category</option>';
-                const newRow = createCategoryRow(optionsHtml);
-                container.appendChild(newRow);
-            } else {
-                button.closest('.category-row')?.remove();
-            }
-
-            refreshCategoryRowButtons();
-        }
+        // Legacy stubs (no longer used)
+        function createCategoryRow() {}
+        function refreshCategoryRowButtons() {}
+        function onCategoryRowAction() {}
 
         function submitEvent() {
             const title = document.getElementById('eventTitle').value;
@@ -535,8 +518,8 @@
             const selectedEventType = document.getElementById('eventType').value;
             const eventTypeEnum = selectedEventType === 'online' ? EnumEventType.Online : EnumEventType.Offline;
 
-            const categoryNames = [...document.querySelectorAll('.eventCategorySelect')]
-                .map(select => String(select.value || '').trim())
+            const categoryNames = [...document.querySelectorAll('#categoryContainer .create-category-pill.selected')]
+                .map(btn => String(btn.dataset.catName || '').trim())
                 .filter(Boolean);
             const uniqueCategoryNames = [...new Set(categoryNames)];
 
@@ -568,7 +551,15 @@
                         alert("❌ Registration deadline cannot be in the past");
                         return;
                     }
+                    if (startAtStr && deadlineFull > new Date(startAtStr)) {
+                        alert("❌ Registration deadline cannot be after the event starts");
+                        return;
+                    }
                 }
+            }
+
+            if (!validateRegistrationDeadlineRange(true)) {
+                return;
             }
 
             eventToSubmit = {
@@ -596,41 +587,51 @@
             document.getElementById('submitConfirmModal').classList.remove('show');
         }
 
-        function executeSubmit() {
+        async function executeSubmit() {
             if (!eventToSubmit) return;
             const btnConfirm = document.getElementById('btnConfirmPublish');
             btnConfirm.disabled = true;
             btnConfirm.innerText = "Creating...";
+            const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
+            try {
+                const response = await fetch('/Event/Create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': csrfToken
+                    },
+                    body: JSON.stringify(eventToSubmit),
+                    credentials: 'same-origin'
+                });
 
-            $.ajax({
-                url: '/Event/Create',
-                type: 'POST',
-                contentType: 'application/json',
-                dataType: "json",
-                data: JSON.stringify(eventToSubmit),
-                headers: {
-                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function (result) {
-                    if (result && result.success) {
-                        alert('✅ Activity created successfully!');
-                        window.location.href = '/Home/Homepage';
-                    } else if (result.redirectUrl) {
-                        window.location.href = result.redirectUrl;
-                    } else {
-                        alert('✅ Activity created successfully!');
-                        window.location.href = '/Home/Homepage';
-                    }
-                },
-                error: function (xhr, status, error) {
-                    alert('❌ Error: ' + (xhr.responseText || error));
-                },
-                complete: function () {
-                    closeConfirmModal();
-                    btnConfirm.disabled = false;
-                    btnConfirm.innerText = "Create now";
+                if (response.redirected && response.url) {
+                    window.location.href = response.url;
+                    return;
                 }
-            });
+
+                const contentType = response.headers.get('content-type') || '';
+                const isJson = contentType.includes('application/json');
+                const payload = isJson ? await response.json() : await response.text();
+
+                if (!response.ok) {
+                    const message = (isJson && payload?.message) ? payload.message : `Request failed (${response.status})`;
+                    throw new Error(message);
+                }
+
+                if (isJson && payload?.redirectUrl) {
+                    window.location.href = payload.redirectUrl;
+                    return;
+                }
+
+                alert('✅ Activity created successfully!');
+                window.location.href = '/Home/Homepage';
+            } catch (error) {
+                alert('❌ Error: ' + (error?.message || 'Unknown error'));
+            } finally {
+                closeConfirmModal();
+                btnConfirm.disabled = false;
+                btnConfirm.innerText = "Create now";
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {

@@ -346,6 +346,31 @@ body {
   font-size: 11px;
 }
 
+@media (max-width: 768px) {
+  .ev-status {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-top: 0;
+  }
+
+  .ev-invite-btn {
+    margin-left: 0;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .ev-title {
+    font-size: 2rem;
+  }
+
+  .ev-invite-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .ev-badge {
   display: inline-flex;
   align-items: center;
@@ -640,6 +665,32 @@ body {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.ev-meeting-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: #111827;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.ev-meeting-btn:hover {
+  background: #1f2937;
+  color: #ffffff;
+}
+
+.ev-meeting-btn:active {
+  transform: translateY(1px);
 }
 
 .ev-map {
