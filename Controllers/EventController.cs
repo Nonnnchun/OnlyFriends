@@ -57,7 +57,10 @@ namespace OnlyFriends.Controllers
                 {
                     return NotFound("Event not found!");
                 }
-                var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+if (string.IsNullOrEmpty(userIdClaim))
+    return Unauthorized("User not authenticated");
+var userId = Int32.Parse(userIdClaim);
                 if (userId != activity.Owner.Id)
                 {
                     return Unauthorized("Only owner can edit this event!");
@@ -85,7 +88,10 @@ namespace OnlyFriends.Controllers
             {
                 return NotFound("Event not found!");
             }
-            var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+if (string.IsNullOrEmpty(userIdClaim))
+    return Unauthorized("User not authenticated");
+var userId = Int32.Parse(userIdClaim);
             if (userId != activity.Owner.Id)
             {
                 return Unauthorized("Only owner can update this event!");
@@ -209,7 +215,10 @@ namespace OnlyFriends.Controllers
         {
             try
             {
-                var userId = Int32.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+if (string.IsNullOrEmpty(userIdClaim))
+    return Unauthorized("User not authenticated");
+var userId = Int32.Parse(userIdClaim);
                 // Normalize incoming datetime values to UTC.
                 // If client sends "unspecified" kind, treat it as local server time first.
                 static DateTime ToUtc(DateTime dt) => dt.Kind switch
