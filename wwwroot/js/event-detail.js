@@ -56,32 +56,29 @@ document.addEventListener('DOMContentLoaded', function () {
         btnJoin.disabled = true;
         btnJoin.innerText = 'Processing...';
 
-        fetch(`/event/join/${eventId}`, { method: 'POST', credentials: 'same-origin' })
-            .then(res => {
-                if (res.ok) {
-                    if (joinMode === 'Private') {
-                        if (initialRejected) {
-                            window.location.reload();
-                            return;
-                        }
-                        setJoinState('pending');
-                    } else {
-                        setJoinState('joined');
-                    }
-                } else if (res.status === 401) {
-                    window.location.href = '/login';
-                } else if (res.status === 409) {
-                    alert('This event is already full.');
-                    window.location.reload();
+        $.ajax({
+            url: `/event/join/${eventId}`,
+            method: 'POST',
+            xhrFields: { withCredentials: true },
+            statusCode: {
+                401: () => { window.location.href = '/login'; },
+                409: () => { alert('This event is already full.'); window.location.reload(); }
+            },
+            success: () => {
+                if (joinMode === 'Private') {
+                    if (initialRejected) { window.location.reload(); return; }
+                    setJoinState('pending');
                 } else {
+                    setJoinState('joined');
+                }
+            },
+            error: (xhr) => {
+                if (xhr.status !== 401 && xhr.status !== 409) {
                     alert('Failed to join. Please try again.');
                     setJoinState(previousState);
                 }
-            })
-            .catch(() => {
-                alert('Network error. Please try again.');
-                setJoinState(previousState);
-            });
+            }
+        });
     }
 
     function handleCancel() {
@@ -90,25 +87,23 @@ document.addEventListener('DOMContentLoaded', function () {
         btnCancel.disabled = true;
         btnCancel.innerText = 'Processing...';
 
-        fetch(`/event/join/${eventId}`, { method: 'DELETE', credentials: 'same-origin' })
-            .then(res => {
-                if (res.ok) {
-                    if (!btnJoin) {
-                        window.location.reload();
-                        return;
-                    }
-                    setJoinState('none');
-                } else if (res.status === 401) {
+        $.ajax({
+            url: `/event/join/${eventId}`,
+            method: 'DELETE',
+            xhrFields: { withCredentials: true },
+            success: () => {
+                if (!btnJoin) { window.location.reload(); return; }
+                setJoinState('none');
+            },
+            error: (xhr) => {
+                if (xhr.status === 401) {
                     window.location.href = '/login';
                 } else {
                     alert('Failed to cancel. Please try again.');
                     setJoinState(previousState);
                 }
-            })
-            .catch(() => {
-                alert('Network error. Please try again.');
-                setJoinState(previousState);
-            });
+            }
+        });
     }
 
     if ((btnJoin || btnCancel) && eventId) {
