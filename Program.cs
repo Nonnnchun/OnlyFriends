@@ -81,23 +81,21 @@ await using (var scope = app.Services.CreateAsyncScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DbInit");
-
     try
     {
-        await dbContext.Database.MigrateAsync();
+        var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+        if (pendingMigrations.Any())
+        {
+            await dbContext.Database.MigrateAsync();
+        }
+        else
+        {
+            logger.LogInformation("No pending migrations.");
+        }
     }
-    catch (Exception ex)  // ลบ when (app.Environment.IsDevelopment()) ออก
+    catch (Exception ex)
     {
         logger.LogError(ex, "Database migration failed.");
-        // ลองใช้ EnsureCreated แทน
-        try
-        {
-            dbContext.Database.EnsureCreated();
-        }
-        catch (Exception ex2)
-        {
-            logger.LogError(ex2, "EnsureCreated also failed.");
-        }
     }
 
     if (app.Environment.IsDevelopment() && !TableExists(dbContext, "\"Events\""))
